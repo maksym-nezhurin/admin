@@ -18,10 +18,10 @@ export function CreateCarAnnouncement() {
     validate: {
       model: (value: string) => (value.length < 2 ? 'Model must have at least 2 letters' : null),
       type: (value: string) => (value.length < 2 ? 'Type must have at least 2 letters' : null),
-      engine: (value: number) => (value <= 0 ? 'Engine is required' : null),
+      engine: (value: number) => (value < 1 ? 'Engine is required' : null),
       price: (value: number) => (value <= 0 ? 'Price must be greater than 0' : null),
       year: (value: number) => (value < 1900 || value > new Date().getFullYear() ? 'Invalid year' : null),
-      mileage: (value: string | number) => (Number(value) < 0 ? 'Mileage cannot be negative' : null),
+      mileage: (value: string | number) => (value < '0' ? 'Mileage cannot be negative' : null),
       complectation: (value: string) => (value.length < 2 ? 'Complectation must have at least 2 letters' : null),
       description: (value: string) => (value.length < 10 ? 'Description must have at least 10 characters' : null),
     },
@@ -40,7 +40,7 @@ export function CreateCarAnnouncement() {
   return (
     <div>
       <Title order={2} mb="md">Create Car Announcement</Title>
-      <form onSubmit={form.onSubmit(async (values) => { await handleSubmit(values); })}>
+      <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
           <TextInput
             required
@@ -106,4 +106,4 @@ export function CreateCarAnnouncement() {
       </form>
     </div>
   );
-}
+} 
