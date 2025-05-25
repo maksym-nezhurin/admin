@@ -6,7 +6,6 @@ import { SimpleGrid, Button, Text, Modal} from  '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { carsService } from '../services/cars';
 import { Loader } from '../components/Loader';
-// import type { ICar } from '../types/general';
 
 const fetchAnnouncements = async () => {
     const response = await carsService.getCars();
@@ -53,6 +52,10 @@ export const Announcements: React.FC = () => {
                 onClose={close}
                 title="Create Car Announcement"
                 size="lg"
+                centered
+                styles={{
+                    inner: { left: 0 }
+                }}
             >
                 <CreateCarAnnouncement />
             </Modal>
