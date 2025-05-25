@@ -1,22 +1,38 @@
 import React from 'react';
-import { IconHome, IconSettings, IconLogout } from '@tabler/icons-react';
-import { Menu, ActionIcon } from '@mantine/core';
+import { IconSettings, IconLogout } from '@tabler/icons-react';
+import { Menu, ActionIcon, Group, Avatar } from '@mantine/core';
+import { Link } from 'react-router-dom';
 
-const DashboardRightMenu: React.FC<{ logout: () => void }> = ({ logout }) => {
+type DashboardRightMenuProps = {
+  name: string;
+  logout: () => void;
+};
+
+const DashboardRightMenu: React.FC<DashboardRightMenuProps> = ({ name, logout }) => {
   return (
     <Menu position="bottom-end">
         <Menu.Target>
           <ActionIcon>
-            <IconHome size={20} />
+            <Group spacing="xs">
+              <Avatar radius="xl" size="sm" color="blue">
+                {name?.charAt(0).toUpperCase()}
+              </Avatar>
+            </Group>
           </ActionIcon>
         </Menu.Target>
         <Menu.Dropdown>
-          <Menu.Item>
-            <IconSettings size={16} />
+          <Menu.Item
+            icon={<IconSettings size={16} />}
+            component={Link}
+            to="settings"
+          >
             Settings
           </Menu.Item>
-          <Menu.Item onClick={logout}>
-            <IconLogout size={16} />
+
+          <Menu.Item
+            icon={<IconLogout size={16} />}
+            onClick={logout}
+          >
             Logout
           </Menu.Item>
         </Menu.Dropdown>

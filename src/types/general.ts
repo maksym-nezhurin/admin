@@ -1,20 +1,12 @@
 export interface ICar {
-  id: string,
+  _id: string,
   ownerId: string,
   complectation: string,
-  engine: string,
+  engine: number,
   model: string,
   type: string,
+  price: number,
+  year: number,
+  mileage: string | number,
+  description: string;
 }
-
-export interface IUser {
-    id: string;
-    name: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    role: string;
-    createdAt: string;
-    updatedAt: string;
-  }

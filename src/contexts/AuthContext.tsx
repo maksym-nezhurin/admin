@@ -1,23 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authService } from '../api/auth';
-import type { IUser } from '../types/general';
-
-interface AuthContextType {
-  user: AuthResponse | null;
-  userInfo: IUser | null;
-  loading: boolean;
-  error: string | null;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
-  isAuthenticated: boolean;
-}
-
-interface AuthResponse {
-  access_token: string;
-  expires_in: number;
-  refresh_token?: string;
-  token_type: string;
-}
+import { authService } from '../services/auth';
+import type { IUser, IRegisterForm, AuthContextType, AuthResponse } from '../types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -47,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       try {
         const userResponse = authService.getCurrentUser();
+
         if (userResponse?.access_token) {          
           const isValid = await verifyAndSetUser(userResponse);
           if (!isValid) {
@@ -80,6 +64,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const register = useCallback(async (credentials: IRegisterForm) => {
+    try {
+      setError(null);
+      setLoading(true);
+      const response = await authService.register(credentials);
+      console.log('reg response', response);
+      // setLogged(response.access_token ? true : false);
+    } catch (err) {
+      setError('Invalid username or password');
+      // setLogged(false);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(() => {
     authService.logout();
     setUser(null);
@@ -93,9 +93,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     error,
     login,
+    register,
     logout,
     isAuthenticated: !!user
-  }), [user, userInfo, loading, error, login, logout]);
+  }), [user, userInfo, loading, error, login, logout, register]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -1,5 +1,5 @@
 import { Button } from "@mantine/core"
-import { carsService } from "../api/cars";
+import { carsService } from "../services/cars";
 
 interface CarNotifyProps {
   carId: string;
@@ -10,7 +10,6 @@ export const CarNotify: React.FC<CarNotifyProps> = (props) => {
     const { carId, ownerId } = props;
 
     const hanldeNotify = async () => {
-        // For example, using a notification library or API
         const res = await carsService.notifyCar({
             carId,
             ownerId,

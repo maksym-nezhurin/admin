@@ -12,10 +12,12 @@ import {
   Text,
   Anchor,
   Stack,
+  rem
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-// import { IconAt, IconLock } from '@tabler/icons-react';
+import { IconAt, IconLock } from '@tabler/icons-react';
+import { Link } from 'react-router-dom';
 
 interface LoginForm {
   username: string;
@@ -72,7 +74,7 @@ export const Login: React.FC = () => {
         </Title>
         <Text c="dimmed" size="sm" ta="center" mt={5}>
           Do not have an account yet?{' '}
-          <Anchor size="sm" component="button">
+          <Anchor size="sm" component={Link} to="/register" underline>
             Create account
           </Anchor>
         </Text>
@@ -84,8 +86,7 @@ export const Login: React.FC = () => {
                 required
                 label="Username"
                 placeholder="Your username"
-                // left={<IconAt style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
-                // leftSection={<IconAt style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                icon={<IconAt style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                 radius="md"
                 {...form.getInputProps('username')}
               />
@@ -94,7 +95,7 @@ export const Login: React.FC = () => {
                 required
                 label="Password"
                 placeholder="Your password"
-                // leftSection={<IconLock style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                icon={<IconLock style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                 radius="md"
                 {...form.getInputProps('password')}
               />

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { authService } from './auth';
+import { authService } from '../services/auth';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_GATEWAY_URL || 'http://localhost:3000',

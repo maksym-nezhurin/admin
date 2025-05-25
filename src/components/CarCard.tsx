@@ -1,45 +1,25 @@
-// import React from 'react';
+import { Card, Image, NavLink } from '@mantine/core';
+import { Link } from 'react-router-dom';
+import { CarInfo } from './CarInfo';
 import { CarNotify } from './CarNotify';
-import { Card, Image, Text, Badge, Button, Group } from '@mantine/core';
+import type { ICar } from '../types/general';
 
-interface CarCardProps {
-  id: string;
-  ownerId: string;
-  model: string;
-  type: string;
-  engine: string;
-  complectation: string;
-}
+export function CarCard(props: ICar) {
+  const { _id, ownerId, ...rest } = props;
 
-export function CarCard({ id, ownerId, model, type, engine, complectation }: CarCardProps) {
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder style={{ maxWidth: 320 }}>
       <Card.Section>
-        <Image src="https://placehold.co/320x160" height={160} alt={`${model} car`} />
+        <Image src="https://placehold.co/320x160" height={160} alt={`${rest.model} car`} />
       </Card.Section>
 
-        <div style={{ position: 'absolute', left: 'auto', right: '10px', top: '10px' }}>
-        <CarNotify carId={id} ownerId={ownerId} />
+       <div style={{ position: 'absolute', left: 'auto', right: '10px', top: '10px' }}>
+          <CarNotify carId={_id} ownerId={ownerId} />
         </div>
 
-
-      <Group position="apart" mt="md" mb="xs">
-        <Text weight={500}>{model}</Text>
-        <Badge color="blue" variant="light">
-          {type}
-        </Badge>
-      </Group>
-
-      <Text size="sm" color="dimmed">
-        Engine: {engine}
-      </Text>
-      <Text size="sm" color="dimmed">
-        Complectation: {complectation}
-      </Text>
-
-      <Button variant="light" color="blue" fullWidth mt="md" radius="md">
-        Details
-      </Button>
+      <CarInfo {...props} />
+      
+      <NavLink variant='light' color='blue' mt="md" radius="md" label="Details" component={Link} to={`/dashboard/announcements/${_id}`} />
     </Card>
   );
 }

@@ -1,29 +1,6 @@
-import apiClient from './apiClient';
-import type { IUser } from '../types/general';
-
-export interface AuthResponse {
-  access_token: string;
-  expires_in: number;
-  refresh_token?: string;
-  token_type: string;
-}
-
-interface LoginCredentials {
-  username: string;
-  password: string;
-}
-
-export interface IUserInfo {
-  valid: boolean;
-  sub?: string;
-  preferred_username?: string;
-  given_name?: string;
-  family_name?: string;
-  name?: string;
-  email?: string;
-  email_verified?: boolean;
-  user: IUser | null;
-}
+import apiClient from '../api/apiClient';
+import type { ISession } from '../types/auth';
+import type { AuthResponse, IUserInfo, LoginCredentials, RegisterResponse, IRegisterForm } from '../types/auth'; 
 
 /**
  * Отримати API токен
@@ -33,7 +10,7 @@ export interface IUserInfo {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const tokenResponse = await apiClient.post<Omit<AuthResponse, 'user'>>('/auth', credentials);
+    const tokenResponse = await apiClient.post<Omit<AuthResponse, 'user'>>('/auth/login', credentials);
     
     if (tokenResponse.data.access_token) {
       const fullResponse: AuthResponse = {
@@ -45,6 +22,14 @@ export const authService = {
     }
     
     throw new Error('No access token received');
+  },
+
+  async register(credentials: IRegisterForm): Promise<RegisterResponse> {
+    const res = await apiClient.post('/auth/register', credentials);
+    
+    return {
+      ...res.data,
+    }
   },
 
   async verifyToken(token: string): Promise<IUserInfo> {
@@ -61,6 +46,16 @@ export const authService = {
         valid: false,
         user: null,
       };
+    }
+  },
+
+  async getUserSessions(userId: string): Promise<ISession[]> {
+    try {
+      const res = await apiClient.get<{ sessions: ISession[] }>(`/auth/sessions/${userId}`);
+      return res.data.sessions || [];
+    } catch (error) {
+      console.error('Failed to fetch user sessions:', error);
+      throw error;
     }
   },
 

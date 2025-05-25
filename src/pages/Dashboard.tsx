@@ -1,98 +1,59 @@
-import React, { useEffect, useState } from 'react';
-import { AppShell, Navbar, Header, Container, Text, Paper, NavLink, SimpleGrid } from '@mantine/core';
-import { useAuth } from '../contexts/AuthContext';
-import DashboardRightMenu from '../components/DashboardRightMenu';
-import { carsService } from '../api/cars';
-import { CarCard } from '../components/CarCard';
-import type { ICar } from '../types/general';
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import {
+  AppShell,
+  Navbar,
+  Paper,
+  Drawer,
+} from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
+import { useUIStore } from '../store/uiStore';
+import { DashboardNav } from '../components/DashboardNav';
+import { Header } from '../components/Header';
 
 export const Dashboard: React.FC = () => {
-  const { userInfo, logout } = useAuth();
-  
-  const [selectedMenu, setSelectedMenu] = useState<string>('home');
-  const [cars, setCars] = useState<ICar[]>([]);
-
-  const handleMenuClick = (menu: string) => {
-    setSelectedMenu(menu);
-  };
-
-  const renderContent = () => {
-    switch (selectedMenu) {
-      case 'home':
-        return <Text>Welcome to the Home page</Text>;
-      case 'settings':
-        return <Text>Here are your settings</Text>;
-      case 'profile':
-        return <Text>Your profile details go here</Text>;
-      default:
-        return <Text>Select a menu item</Text>;
-    }
-  };
-
-  useEffect(() => {
-    const getData = async () => {
-        const cars = await carsService.getCars();
-        
-        setCars(cars);
-    }
-
-    getData();
-  }, [])
+  const sidebarOpen = useUIStore((state) => state.sidebarOpen);
+  const closeSidebar = useUIStore((state) => state.closeSidebar);
+  const isMobile = useMediaQuery('(max-width: 48em)'); // Mantine's 'sm' breakpoint
 
   return (
-    <AppShell
-      padding="md"
-      navbar={<Navbar width={{ base: 300 }} p="xs">
-        <NavLink label="Home" onClick={() => handleMenuClick('home')} />
-        <NavLink label="Settings" onClick={() => handleMenuClick('settings')} />
-        <NavLink label="Profile" onClick={() => handleMenuClick('profile')} />
-      </Navbar>}
-      header={
-        <Header height={60} p="xs" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Text>Header Content 1</Text>
-
-            <DashboardRightMenu logout={logout} />
-        </Header>
-      }
-      styles={(theme) => ({
-        main: { backgroundColor: theme.colors.gray[0] }
-      })}
-    >
-      <Container size="lg" mt="xl">
-        <Text size="xl" weight={700} mb="md">Dashboard:</Text>
-
-        <Paper withBorder shadow="md" p={30} mt={30} radius="md" height={200}>
-            <Text size="md">
-                Admin Dashboard
-            </Text>
-
-            <Text>Welcome, <b>{userInfo ? `${userInfo.name} (${userInfo.email})` : 'Guest'}</b>!</Text>
-        </Paper>
-    
-        {/* Conditional content based on selected menu */}
+    <>
+      {/* Drawer only for mobile */}
+      {isMobile && (
+        <Drawer
+          withinPortal
+          opened={sidebarOpen}
+          onClose={closeSidebar}
+          size={260}
+          padding="md"
+          title="Menu"
+          zIndex={2000}
+          styles={{
+            inner: { left: 0 }
+          }}
+        >
+          <DashboardNav />
+        </Drawer>
+      )}
+      <AppShell
+        padding="md"
+        navbar={
+          // Navbar only for desktop/tablet
+          !isMobile ? (
+            <Navbar width={{ base: 300 }} p="xs">
+              <DashboardNav />
+            </Navbar>
+          ) : undefined
+        }
+        header={<Header />}
+        styles={(theme) => ({
+          main: { backgroundColor: theme.colors.gray[0] }
+        })}
+      >
         <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-            {renderContent()}
+          <Outlet />
         </Paper>
-
-        {/* Cars section */}
-        <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-            <Text size="md">Cars:</Text>
-
-             <SimpleGrid 
-              cols={3} 
-              spacing="lg" 
-              breakpoints={[
-                { maxWidth: 'lg', cols: 3 },
-                { maxWidth: 'md', cols: 2 },
-                { maxWidth: 'sm', cols: 1 },
-              ]}
-            >
-              {cars.map((car, index) => (
-                <CarCard key={index} {...car} />
-              ))}
-            </SimpleGrid>
-        </Paper>
-      </Container>
-    </AppShell>
+      </AppShell>
+    </>
   );
 };
