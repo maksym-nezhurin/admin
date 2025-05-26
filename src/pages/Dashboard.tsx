@@ -46,11 +46,8 @@ export const Dashboard: React.FC = () => {
           ) : undefined
         }
         header={<Header />}
-        styles={(theme) => ({
-          main: { backgroundColor: theme.colors.gray[0] }
-        })}
       >
-        <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        <Paper withBorder shadow="md" p={20} radius="md">
           <Outlet />
         </Paper>
       </AppShell>

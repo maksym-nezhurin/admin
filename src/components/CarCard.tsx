@@ -5,7 +5,7 @@ import { CarNotify } from './CarNotify';
 import type { ICar } from '../types/general';
 
 export function CarCard(props: ICar) {
-  const { _id, ownerId, ...rest } = props;
+  const { id, ownerId, ...rest } = props;
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder style={{ maxWidth: 320 }}>
@@ -14,12 +14,12 @@ export function CarCard(props: ICar) {
       </Card.Section>
 
        <div style={{ position: 'absolute', left: 'auto', right: '10px', top: '10px' }}>
-          <CarNotify carId={_id} ownerId={ownerId} />
+          <CarNotify carId={id} ownerId={ownerId} />
         </div>
 
       <CarInfo {...props} />
       
-      <NavLink variant='light' color='blue' mt="md" radius="md" label="Details" component={Link} to={`/dashboard/announcements/${_id}`} />
+      <NavLink variant='light' color='blue' mt="md" radius="md" label="Details" component={Link} to={`/dashboard/announcements/${id}`} />
     </Card>
   );
 }

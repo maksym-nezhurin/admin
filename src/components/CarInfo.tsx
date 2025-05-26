@@ -2,12 +2,12 @@ import { Group, Text, Badge } from '@mantine/core';
 import type { ICar } from '../types/general';
 
 export const CarInfo = (props: ICar) => {
-    const { model, type, engine, complectation, price, year, mileage, description } = props;
+    const { brand, model, type, engine, complectation, price, year, mileage, description } = props;
 
     return (
         <>
             <Group position="apart" mt="md" mb="xs">
-                <Text weight={500}>{model}</Text>
+                <Text weight={500}>{brand} ({model})</Text>
                 <Badge color="blue" variant="light">
                 {type}
                 </Badge>

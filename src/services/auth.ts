@@ -69,5 +69,24 @@ export const authService = {
     const userStr = localStorage.getItem('user');
     if (userStr) return JSON.parse(userStr);
     return null;
-  }
+  },
+
+  async refreshToken(): Promise<AuthResponse> {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser?.refresh_token) {
+      throw new Error('No refresh token available');
+    }
+    const response = await apiClient.post<AuthResponse>('/auth/refresh', {
+      refresh_token: currentUser.refresh_token,
+    });
+    if (response.data.access_token) {
+      const newTokens: AuthResponse = {
+        ...currentUser,
+        ...response.data,
+      };
+      localStorage.setItem('user', JSON.stringify(newTokens));
+      return newTokens;
+    }
+    throw new Error('Failed to refresh token');
+  },
 };

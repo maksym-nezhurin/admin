@@ -10,11 +10,12 @@ import { Loader } from './components/Loader';
 import { Announcements } from './pages/Announcements';
 import { Announcement } from './pages/Announcement';
 import { Main } from './pages/Main';
+import { Center } from '@mantine/core';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <Loader />;
+  if (loading) return <Center><Loader /></Center>;
   if (!user) return <Navigate to="/login" />;
   return <>{children}</>;
 };

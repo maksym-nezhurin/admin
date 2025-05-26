@@ -1,6 +1,12 @@
 import apiClient from '../api/apiClient';
 import { showNotification } from '@mantine/notifications';
-import type { ICar } from '../types/general';
+import type { ICar, ICarFormModel } from '../types/general';
+import type {
+    ICarModel,
+    IBrand,
+    IModel,
+    IVariant
+ } from '../types/car';
 
 interface NotifyCarParams {
   carId: string;
@@ -9,7 +15,7 @@ interface NotifyCarParams {
 
 export const carsService = {
     async getCars(): Promise<ICar[]> {
-        const response = await apiClient.post('/cars', {
+        const response = await apiClient.get('/cars', {
             withCredentials: true,
         });
 
@@ -32,50 +38,29 @@ export const carsService = {
     },
 
      async getCar(id: string): Promise<ICar> {
-        // const res = await apiClient.get(`/cars/${id}`);
-        return {
-            _id: id,
-            model: 'Toyota',
-            type: 'Sedan',
-            engine: 2,
-            complectation: 'Full',
-            ownerId: '12345',
-            price: 20000,
-            year: 2020,
-            mileage: 15000,
-            description: 'A reliable car with great fuel efficiency.',
-        };
+        const response = await apiClient.get(`/cars/${id}`);
+        return response.data.data;
     },
 
-    async createCar(car: Omit<ICar, '_id' | 'ownerId'>): Promise<ICar> {
-        // const response = await apiClient.post('/cars', car);
-        // if (response.status === 201) {
-        //     showNotification({
-        //         title: 'Success',
-        //         message: `Car ${car.model} created successfully`,
-        //         color: 'green',
-        //     });
-        // } else {
-        //     showNotification({
-        //         title: 'Error',
-        //         message: `Failed to create car ${car.model}`,
-        //         color: 'red',
-        //     });
-        //     throw new Error(`Failed to create car ${car.model}`);
-        // }
-        // return response.data;
-        return {
-            _id: '122332321-1212-12-1',
-            model: car.model,
-            type: car.type,
-            engine: car.engine,
-            complectation: car.complectation,
-            ownerId: '12345', // Placeholder ownerId, replace with actual data from the session or context
-            price: car.price,
-            year: car.year,
-            mileage: car.mileage,
-            description: 'A reliable car with great fuel efficiency.', // Placeholder description, replace with actual data from the
-        };
+    async createCar(car: ICarFormModel): Promise<ICar> {
+        console.log('Creating car:', car);
+        const response = await apiClient.post('/cars', car);
+
+        if (response.status === 201) {
+            showNotification({
+                title: 'Success',
+                message: `Car ${car.model} created successfully`,
+                color: 'green',
+            });
+            } else {
+            showNotification({
+                title: 'Error',
+                message: `Failed to create car ${car.model}`,
+                color: 'red',
+            });
+            throw new Error(`Failed to create car ${car.model}`);
+        }
+        return response.data.data;
     },
 
     async notifyCar({carId, ownerId}: NotifyCarParams): Promise<void> {
@@ -98,5 +83,71 @@ export const carsService = {
             });
         }
         return response.data;
-    }
+    },
+
+    async getBrands(): Promise<{ value: string; label: string }[]> {
+        const response = await apiClient.get('/cars/characteristics/brands');
+        return (response.data.data || response.data).map((b: IBrand) => ({
+            value: b.make_id,
+            label: b.make_display,
+        }));
+    },
+
+  async getModels(brandId: string): Promise<{ value: string; label: string }[]> {
+    const response = await apiClient.get(`/cars/characteristics/brands/${brandId}/models`);
+    return (response.data.data || response.data).map((m: IModel) => ({
+      value: m.model_make_id,
+      label: m.model_name,
+    }));
+  },
+
+  async getVariants(modelId: string): Promise<{ value: string; label: string }[]> {
+    const response = await apiClient.get(`/cars/characteristics/models/${modelId}/variants`);
+    return (response.data.data || response.data).map((v: IVariant) => ({
+      value: v.model_id,
+      label: v.model_name,
+    }));
+  },
+
+  /**
+   * Get car brands (makes) for a specific year
+   */
+  async getBrandsByYear(year: string | number): Promise<{ value: string; label: string }[]> {
+    const response = await apiClient.get(`/cars/characteristics/brands/by-year/${year}`);
+    // CarQuery API returns { Makes: [...] }
+    const makes = response.data.Makes || response.data.makes || response.data.data || response.data;
+    return makes.map((b: IBrand) => ({
+      value: b.make_id,
+      label: b.make_display,
+    }));
+  },
+
+  /**
+   * Get car models for a specific brand and year
+   */
+  async getModelsByBrandAndYear(brandId: string, year: string | number): Promise<{ value: string; label: string }[]> {
+    const response = await apiClient.get(`/cars/characteristics/brands/${brandId}/models/by-year/${year}`);
+    // CarQuery API returns { Models: [...] }
+    const models = response.data.Models || response.data.models || response.data.data || response.data;
+    return models.map((m: IModel) => ({
+      value: m.model_make_id,
+      label: m.model_name,
+    }));
+  },
+
+  async getVariantsByModelAndYear(modelId: string, year: string | number): Promise<ICarModel[]> {
+    const response = await apiClient.get(`/cars/characteristics/models/${modelId}/variants/by-year/${year}`);
+
+    const variants = response.data.Variants || response.data.variants || response.data.data || response.data;
+    return variants.map((v: IVariant) => ({
+      id: v.model_id,
+      value: v.model_trim,
+      engine: v.model_engine_cc,
+      label: v.model_make_display,
+      weight: v.model_weight_kg,
+      transmission: v.model_transmission_type,
+      model: v.model_name,
+      country: v.make_country,
+    }));
+  }
 }

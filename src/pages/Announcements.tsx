@@ -6,6 +6,7 @@ import { SimpleGrid, Button, Text, Modal} from  '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { carsService } from '../services/cars';
 import { Loader } from '../components/Loader';
+import { useAnnouncementsStore } from '../store/uiStore';
 
 const fetchAnnouncements = async () => {
     const response = await carsService.getCars();
@@ -18,6 +19,13 @@ export const Announcements: React.FC = () => {
         queryFn: fetchAnnouncements,
     });
     const [opened, { open, close }] = useDisclosure(false);
+    const announcements = useAnnouncementsStore(state => state.announcements);
+
+    React.useEffect(() => {
+        if (data) {
+            useAnnouncementsStore.getState().setAnnouncements(data);
+        }
+    }, [data]);
 
     if (isLoading) {
         return (
@@ -30,7 +38,6 @@ export const Announcements: React.FC = () => {
         <>            
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <Text size="xl" weight={500}>Announcements:</Text>
-                
                 <Button onClick={open}>Create Car Announcement</Button>
             </div> 
 
@@ -43,8 +50,8 @@ export const Announcements: React.FC = () => {
                     { maxWidth: 'sm', cols: 1 },
                 ]}
             >
-                {(data || []).map((car) => (
-                    <CarCard key={car._id} {...car} />
+                {(announcements || []).map((car) => (
+                    <CarCard key={car.id} {...car} />
                 ))}
             </SimpleGrid>
             <Modal
@@ -57,7 +64,7 @@ export const Announcements: React.FC = () => {
                     inner: { left: 0 }
                 }}
             >
-                <CreateCarAnnouncement />
+                <CreateCarAnnouncement close={close} />
             </Modal>
     </>
     )
