@@ -127,10 +127,10 @@ export const carsService = {
    */
   async getModelsByBrandAndYear(brandId: string, year: string | number): Promise<{ value: string; label: string }[]> {
     const response = await apiClient.get(`/cars/characteristics/brands/${brandId}/models/by-year/${year}`);
-    // CarQuery API returns { Models: [...] }
-    const models = response.data.Models || response.data.models || response.data.data || response.data;
+    const models = response.data.data;
+
     return models.map((m: IModel) => ({
-      value: m.model_make_id,
+      value: m.model_name,
       label: m.model_name,
     }));
   },

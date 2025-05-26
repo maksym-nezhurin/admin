@@ -112,7 +112,7 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
     queryFn: () => (selectedBrand && selectedYear) ? carsService.getModelsByBrandAndYear(selectedBrand, selectedYear) : Promise.resolve([]),
     enabled: !!selectedBrand && !!selectedYear,
   });
-
+  console.log('selectedModel:', selectedModel);
   const { data: variants = [], isLoading: variantsLoading } = useQuery({
     queryKey: ['variants', selectedModel],
     queryFn: () => selectedModel ? carsService.getVariantsByModelAndYear(selectedModel, selectedYear) : Promise.resolve([]),
@@ -211,6 +211,7 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
             data={brands}
             value={selectedBrand}
             onChange={val => {
+              form.setFieldValue('brand', val || '');
               setSelectedBrand(val || '');
               setSelectedModel('');
               form.setFieldValue('model', '');
