@@ -1,9 +1,10 @@
-import { Text, Paper, Table, Title, Stack, Loader } from '@mantine/core';
+import { Text, Paper, Table, Title, Stack } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import { carsService } from '../services/cars';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { Loader } from '../components/Loader';
 import { CarAnalyticsChart } from '../components/CarAnalyticsChart';
 
 export const Main = () => {

@@ -17,11 +17,13 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconAt, IconLock, IconMail } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import type { IRegisterForm } from '../types/auth';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
   const { register, /*user, error */} = useAuth();
+  const { t } = useTranslation();
 
   const form = useForm<IRegisterForm>({
     initialValues: {
@@ -34,17 +36,17 @@ export const Register: React.FC = () => {
     },
     validate: {
       username: (value: string) =>
-        value.length < 2 ? 'Username must have at least 2 letters' : null,
+        value.length < 2 ? t('username_min_length', { count: 2 }) : null,
       firstName: (value: string) =>
         value.length < 2 ? 'FirstName must have at least 2 letters' : null,
       lastName: (value: string) =>
         value.length < 2 ? 'LastName must have at least 2 letters' : null,
       email: (value: string) =>
-        /^\S+@\S+$/.test(value) ? null : 'Invalid email address',
+        /^\S+@\S+$/.test(value) ? null : t('invalid_email'),
       password: (value: string) =>
-        value.length < 4 ? 'Password must have at least 4 characters' : null,
+        value.length < 4 ? t('password_min_length', { count: 4 }) : null,
       confirmPassword: (value: string | undefined, values: IRegisterForm) =>
-        value !== values.password ? 'Passwords do not match' : null,
+        value !== values.password ? t('passwords_do_not_match') : null,
     },
   });
 
@@ -80,13 +82,10 @@ export const Register: React.FC = () => {
     <Flex justify="center" align="center" style={{ height: '100vh', width: '100vw' }}>
       <Container size={420} my={40} mx="lg">
         <Title ta="center" fw={900}>
-          Create an account
+          {t('register')}
         </Title>
         <Text c="dimmed" size="sm" ta="center" mt={5}>
-          Already have an account?{' '}
-          <Anchor size="sm" component={Link} to="/login">
-            Sign in
-          </Anchor>
+          {t('have_account')} <Anchor size="sm" component={Link} to="/login" underline>{t('sign_in')}</Anchor>
         </Text>
 
         <Paper withBorder shadow="md" p={30} mt={30} radius="md">
@@ -94,8 +93,8 @@ export const Register: React.FC = () => {
             <Stack>
               <TextInput
                 required
-                label="Username"
-                placeholder="Your username"
+                label={t('username')}
+                placeholder={t('your_username')}
                 icon={<IconAt style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                 radius="md"
                 {...form.getInputProps('username')}
@@ -121,8 +120,8 @@ export const Register: React.FC = () => {
 
               <TextInput
                 required
-                label="Email"
-                placeholder="you@email.com"
+                label={t('email')}
+                placeholder={t('your_email')}
                 icon={<IconMail style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                 radius="md"
                 {...form.getInputProps('email')}
@@ -130,8 +129,8 @@ export const Register: React.FC = () => {
 
               <PasswordInput
                 required
-                label="Password"
-                placeholder="Your password"
+                label={t('password')}
+                placeholder={t('your_password')}
                 icon={<IconLock style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                 radius="md"
                 {...form.getInputProps('password')}
@@ -139,15 +138,15 @@ export const Register: React.FC = () => {
 
               <PasswordInput
                 required
-                label="Confirm password"
-                placeholder="Repeat password"
+                label={t('confirmPassword')}
+                placeholder={t('confirm_password')}
                 icon={<IconLock style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                 radius="md"
                 {...form.getInputProps('confirmPassword')}
               />
 
               <Button type="submit" radius="md" fullWidth mt="xl">
-                Create account
+                {t('register')}
               </Button>
             </Stack>
           </form>

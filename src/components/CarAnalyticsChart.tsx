@@ -68,7 +68,7 @@ export const CarAnalyticsChart: React.FC<CarAnalyticsChartProps> = ({ cars, user
     tooltip: { enabled: true },
     grid: { borderColor: '#eee' },
     stroke: {
-      curve: 'smooth',
+      curve: 'smooth' as const,
       dashArray: chartDashArray,
     },
     colors: chartColors,

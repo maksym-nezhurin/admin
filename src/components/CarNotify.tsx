@@ -1,5 +1,5 @@
-import { Button } from "@mantine/core"
 import { carsService } from "../services/cars";
+import { ActionIcon } from "@mantine/core";
 
 interface CarNotifyProps {
   carId: string;
@@ -19,6 +19,8 @@ export const CarNotify: React.FC<CarNotifyProps> = (props) => {
 
     
     return (
-        <Button onClick={hanldeNotify}>❤️</Button>
+        <ActionIcon color="blue" variant="light" onClick={() => hanldeNotify?.()}>
+            ❤️
+        </ActionIcon>
     )
 }

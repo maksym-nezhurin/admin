@@ -47,7 +47,7 @@ export const Header = () => {
               <Skeleton height={36} circle />
             </>
           ) : (
-            <DashboardRightMenu name={userInfo.name} logout={logout} />
+            <DashboardRightMenu name={userInfo.firstName} logout={logout} />
           )}
         </Group>
       </Group>

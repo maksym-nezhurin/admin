@@ -14,8 +14,7 @@ export const Settings: React.FC = () => {
   const [lastName, setLastName] = useState(userInfo?.lastName || '');
   const [saving, setSaving] = useState(false);
   const { t, i18n } = useTranslation();
-
-  console.log('t', t('theme'))
+  
 
   // Theme switcher
   const handleThemeChange = (value: string) => {

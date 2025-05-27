@@ -1,4 +1,4 @@
-import { TextInput, NumberInput, Select, Button, Stack, Card, Group, Text, Badge, Divider } from '@mantine/core';
+import { TextInput, NumberInput, Select, Button, Stack, Card, Group, Text, Badge, Divider, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState, useEffect } from 'react';
 import { carsService } from '../services/cars';
@@ -7,6 +7,7 @@ import type { ICar } from '../types/general';
 import type { ICarModel } from '../types/car';
 import { useAnnouncementsStore } from '../store/uiStore';
 import { CAR_TYPE_OPTIONS, countryNameToCode } from '../types/constants';
+import { useTranslation } from 'react-i18next';
 
 // Utility for country flag emoji
 const getFlagEmoji = (country: string) => {
@@ -74,6 +75,7 @@ const CarDetailsCard = ({ variant, selectedVariant, onSelect }: { variant: ICarM
 
 export function CreateCarAnnouncement(props: { close?: () => void }) {
   const { close } = props;
+  const { t } = useTranslation();
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedBrand, setSelectedBrand] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
@@ -96,7 +98,7 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
     queryFn: () => (selectedBrand && selectedYear) ? carsService.getModelsByBrandAndYear(selectedBrand, selectedYear) : Promise.resolve([]),
     enabled: !!selectedBrand && !!selectedYear,
   });
-  console.log('selectedModel:', selectedModel);
+
   const { data: variants = [], isLoading: variantsLoading } = useQuery({
     queryKey: ['variants', selectedModel],
     queryFn: () => selectedModel ? carsService.getVariantsByModelAndYear(selectedModel, selectedYear) : Promise.resolve([]),
@@ -127,13 +129,13 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
       color: '',
     },
     validate: {
-      brand: (value: string) => (value.length < 2 ? 'Brand must have at least 2 letters' : null),
-      model: (value: string) => (value.length < 2 ? 'Model must have at least 2 letters' : null),
-      engine: (value: number) => (value < 1 ? 'Engine is required' : null),
-      price: (value: number) => (value <= 0 ? 'Price must be greater than 0' : null),
-      year: (value: number) => (value < 1900 || value > new Date().getFullYear() ? 'Invalid year' : null),
-      mileage: (value: string | number) => (value < '0' ? 'Mileage cannot be negative' : null),
-      description: (value: string) => (value.length < 10 ? 'Description must have at least 10 characters' : null),
+      brand: (value: string) => (value.length < 2 ? t('brand_min_length', { count: 2 }) : null),
+      model: (value: string) => (value.length < 2 ? t('model_min_length', { count: 2 }) : null),
+      engine: (value: number) => (value < 1 ? t('engine_required') : null),
+      price: (value: number) => (value <= 0 ? t('price_min') : null),
+      year: (value: number) => (value < 1900 || value > new Date().getFullYear() ? t('invalid_year') : null),
+      mileage: (value: string | number) => (value < '0' ? t('mileage_negative') : null),
+      description: (value: string) => (value.length < 10 ? t('description_min_length', { count: 10 }) : null),
     },
   });
 
@@ -181,17 +183,17 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
           <Select
             required
             name='year'
-            label="Year"
-            placeholder="Select year"
+            label={t('year')}
+            placeholder={t('select_year')}
             data={years}
             value={selectedYear}
             onChange={val => setSelectedYear(val || '')}
           />
           <Select
             required
-            label="Brand"
+            label={t('brand')}
             name='brand'
-            placeholder="Select brand"
+            placeholder={t('select_brand')}
             data={brands}
             value={selectedBrand}
             onChange={val => {
@@ -205,9 +207,9 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
           />
           <Select
             required
-            label="Model"
+            label={t('model')}
             name='model'
-            placeholder="Choose model"
+            placeholder={t('choose_model')}
             data={models}
             value={selectedModel}
             onChange={val => {
@@ -217,9 +219,9 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
             disabled={!selectedBrand || modelsLoading}
           />
           {
-            variants.length === 0 && <Text align="center" color="red" size="sm">No variants found for this model.</Text>
+            variants.length === 0 && <Text align="center" color="red" size="sm">{t('no_variants_found')}</Text>
           }
-          {modelsLoading || variantsLoading ? <div> Loading... </div>  : (
+          {modelsLoading || variantsLoading ? <div>{t('loading')}</div>  : (
             <div style={{
               display: 'flex',
               flexDirection: 'row',
@@ -238,49 +240,51 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
           )}
           <Select
             required
-            label="Type"
+            label={t('type')}
             name='type'
-            placeholder="Select car type"
+            placeholder={t('select_car_type')}
             data={CAR_TYPE_OPTIONS}
             {...form.getInputProps('type')}
           />
           <TextInput
             required
-            label="Engine"
+            label={t('engine')}
             name='engine'
             disabled={!!selectedVariant}
-            placeholder="Engine size"
+            placeholder={t('engine_size')}
             {...form.getInputProps('engine')}
           />
           <NumberInput
             required
-            label="Price"
+            label={t('price')}
             name='price'
-            placeholder="Price in USD"
+            placeholder={t('price_usd')}
             min={0}
             {...form.getInputProps('price')}
           />
           <NumberInput
             required
-            label="Mileage"
+            label={t('mileage')}
             name='mileage'
-            placeholder="Mileage in km"
+            placeholder={t('mileage_km')}
             min={0}
             {...form.getInputProps('mileage')}
           />
-          <TextInput
+          <Textarea
             required
-            label="Description"
-            placeholder="Car description"
+            label={t('description')}
+            placeholder={t('car_description')}
+            autosize
+            minRows={3}
             {...form.getInputProps('description')}
           />
-           <TextInput
-            label="Color"
-            placeholder="Car color"
+          <TextInput
+            label={t('color')}
+            placeholder={t('car_color')}
             {...form.getInputProps('color')}
           />
           <Button type="submit" fullWidth mt="xl">
-            Create Announcement
+            {t('create_announcement')}
           </Button>
         </Stack>
       </form>

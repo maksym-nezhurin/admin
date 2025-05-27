@@ -14,7 +14,6 @@ import { Center } from '@mantine/core';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
-  console.log('ProtectedRoute user:', user, 'loading:', loading);
 
   if (loading) return <Center style={{width: '100vw'}}><Loader /></Center>;
   if (!user) return <Navigate to="/login" />;

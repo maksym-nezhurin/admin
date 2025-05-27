@@ -11,6 +11,7 @@ export interface ICar {
   mileage: string | number,
   description: string;
   color?: string;
+  createdAt?: string;
 }
 
 export type ICarFormModel = Omit<ICar, 'id' | 'ownerId'>

@@ -69,10 +69,19 @@ apiClient.interceptors.response.use(
       const retryCount = originalRequest._retryCount || 0;
       try {
         let newTokens;
+        const currentUser = authService.getCurrentUser();
+        const refresh_token = currentUser?.refresh_token;
+        if (!refresh_token) {
+          isRefreshing = false;
+          processQueue('No refresh token', null);
+          authService.logout();
+          window.location.href = '/login';
+          return Promise.reject(new Error('No refresh token available'));
+        }
         if (refreshTokenHandler) {
           newTokens = await refreshTokenHandler();
         } else {
-          newTokens = await authService.refreshToken();
+          newTokens = await authService.refreshTokenApi(refresh_token);
         }
         processQueue(null, newTokens.access_token);
         originalRequest.headers['Authorization'] = 'Bearer ' + newTokens.access_token;
