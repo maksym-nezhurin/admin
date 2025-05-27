@@ -1,15 +1,11 @@
 export interface IUser {
-  id: string;
   sub: string;
-  name: string;
   firstName: string;
   username: string;
   lastName: string;
   email: string;
-  phone: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
+  phone?: string;
+  role?: string;
   email_verified?: boolean;
 }
 
@@ -37,6 +33,7 @@ export interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   register: (credentials: IRegisterForm) => Promise<void>;
+  refreshToken?: () => Promise<AuthResponse | null>;
   isAuthenticated?: boolean;
 }
 

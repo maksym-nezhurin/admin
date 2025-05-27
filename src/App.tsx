@@ -8,7 +8,7 @@ const App: React.FC = () => {
   return (
     <>
       <Notifications />
-       <AppProviders>
+      <AppProviders>
       <Router>
         <AppRoutes />
       </Router>

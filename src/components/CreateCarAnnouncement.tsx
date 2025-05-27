@@ -6,25 +6,9 @@ import { useQuery } from '@tanstack/react-query';
 import type { ICar } from '../types/general';
 import type { ICarModel } from '../types/car';
 import { useAnnouncementsStore } from '../store/uiStore';
+import { CAR_TYPE_OPTIONS, countryNameToCode } from '../types/constants';
 
 // Utility for country flag emoji
-const countryNameToCode: Record<string, string> = {
-  'Ukraine': 'UA',
-  'United States': 'US',
-  'Germany': 'DE',
-  'France': 'FR',
-  'Italy': 'IT',
-  'Japan': 'JP',
-  'United Kingdom': 'GB',
-  'China': 'CN',
-  'South Korea': 'KR',
-  'Spain': 'ES',
-  'Czech Republic': 'CZ',
-  'Poland': 'PL',
-  'Sweden': 'SE',
-  'India': 'IN',
-  // ...додай інші потрібні країни
-};
 const getFlagEmoji = (country: string) => {
   if (!country) return '';
   let code = country;
@@ -257,12 +241,7 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
             label="Type"
             name='type'
             placeholder="Select car type"
-            data={[
-              { value: 'sedan', label: 'Sedan' },
-              { value: 'hatchback', label: 'Hatchback' },
-              { value: 'suv', label: 'SUV' },
-              { value: 'coupe', label: 'Coupe' },
-            ]}
+            data={CAR_TYPE_OPTIONS}
             {...form.getInputProps('type')}
           />
           <TextInput

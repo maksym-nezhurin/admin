@@ -38,6 +38,12 @@ function processQueue(error: unknown, token: string | null = null) {
   failedQueue = [];
 }
 
+let refreshTokenHandler: (() => Promise<{ access_token: string }>) | null = null;
+
+export function setRefreshTokenHandler(fn: () => Promise<{ access_token: string }>) {
+  refreshTokenHandler = fn;
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -62,7 +68,12 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
       const retryCount = originalRequest._retryCount || 0;
       try {
-        const newTokens = await authService.refreshToken();
+        let newTokens;
+        if (refreshTokenHandler) {
+          newTokens = await refreshTokenHandler();
+        } else {
+          newTokens = await authService.refreshToken();
+        }
         processQueue(null, newTokens.access_token);
         originalRequest.headers['Authorization'] = 'Bearer ' + newTokens.access_token;
         isRefreshing = false;

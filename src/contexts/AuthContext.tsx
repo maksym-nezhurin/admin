@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/auth';
+import { setRefreshTokenHandler } from '../api/apiClient';
 import type { IUser, IRegisterForm, AuthContextType, AuthResponse } from '../types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,8 +16,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {      
       const { valid, user } = await authService.verifyToken(userResponse.access_token);
       if (valid) {
-        setUser(userResponse);      // токени
-        setUserInfo(user);          // інформація про користувача
+        setUser(userResponse);
+        setUserInfo(user);
         return true;
       }
       return false;
@@ -30,7 +31,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       try {
         const userResponse = authService.getCurrentUser();
-
         if (userResponse?.access_token) {          
           const isValid = await verifyAndSetUser(userResponse);
           if (!isValid) {
@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initializeAuth();
-  }, [logged]);
+  }, [logged, verifyAndSetUser]);
 
   const login = useCallback(async (username: string, password: string) => {
     try {
@@ -87,6 +87,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null)
   }, []);
 
+  const refreshToken = useCallback(async () => {
+    if (!user?.refresh_token) throw new Error('No refresh token');
+    try {
+      setLoading(true);
+      const newTokens = await authService.refreshTokenApi(user.refresh_token);
+      const updatedUser = { ...user, ...newTokens };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      await verifyAndSetUser(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      logout();
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [user, logout, verifyAndSetUser]);
+
+  useEffect(() => {
+    setRefreshTokenHandler(refreshToken);
+  }, [refreshToken]);
+
   const value = React.useMemo(() => ({
     user,
     userInfo,
@@ -95,8 +117,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     register,
     logout,
-    isAuthenticated: !!user
-  }), [user, userInfo, loading, error, login, logout, register]);
+    isAuthenticated: !!user,
+    refreshToken,
+  }), [user, userInfo, loading, error, login, logout, register, refreshToken]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -18,6 +18,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconAt, IconLock } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface LoginForm {
   username: string;
@@ -27,6 +28,7 @@ interface LoginForm {
 export const Login: React.FC = () => {
   const { login, user, error } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const form = useForm<LoginForm>({
     initialValues: {
@@ -34,8 +36,8 @@ export const Login: React.FC = () => {
       password: '',
     },
     validate: {
-      username: (value) => (value.length < 2 ? 'Username must have at least 2 letters' : null),
-      password: (value) => (value.length < 4 ? 'Password must have at least 4 characters' : null),
+      username: (value) => (value.length < 2 ? t('username_min_length', { count: 2 }) : null),
+      password: (value) => (value.length < 4 ? t('password_min_length', { count: 4 }) : null),
     },
   });
 
@@ -43,8 +45,8 @@ export const Login: React.FC = () => {
     try {
       await login(values.username, values.password);
       notifications.show({
-        title: 'Success',
-        message: 'You have been successfully logged in',
+        title: t('success'),
+        message: t('login_success'),
         color: 'green',
       });
       navigate('/dashboard');
@@ -53,8 +55,8 @@ export const Login: React.FC = () => {
       form.setErrors({ password: error, username: error })
       
       notifications.show({
-        title: 'Error',
-        message: error || 'Invalid credentials',
+        title: t('error'),
+        message: error || t('invalid_credentials'),
         color: 'red',
       });
     }
@@ -70,13 +72,10 @@ export const Login: React.FC = () => {
     <Flex justify="center" align="center" style={{ height: '100vh', width: '100vw' }}>
       <Container size={420} my={40} mx="lg">
         <Title ta="center" fw={900}>
-          Welcome back!
+          {t('welcome_back')}
         </Title>
         <Text c="dimmed" size="sm" ta="center" mt={5}>
-          Do not have an account yet?{' '}
-          <Anchor size="sm" component={Link} to="/register" underline>
-            Create account
-          </Anchor>
+          {t('no_account')} <Anchor size="sm" component={Link} to="/register" underline>{t('create_account')}</Anchor>
         </Text>
 
         <Paper withBorder shadow="md" p={30} mt={30} radius="md">
@@ -84,8 +83,8 @@ export const Login: React.FC = () => {
             <Stack>
               <TextInput
                 required
-                label="Username"
-                placeholder="Your username"
+                label={t('username')}
+                placeholder={t('your_username')}
                 icon={<IconAt style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                 radius="md"
                 {...form.getInputProps('username')}
@@ -93,15 +92,15 @@ export const Login: React.FC = () => {
 
               <PasswordInput
                 required
-                label="Password"
-                placeholder="Your password"
+                label={t('password')}
+                placeholder={t('your_password')}
                 icon={<IconLock style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                 radius="md"
                 {...form.getInputProps('password')}
               />
 
               <Button type="submit" radius="md" fullWidth mt="xl">
-                Sign in
+                {t('sign_in')}
               </Button>
             </Stack>
           </form>

@@ -1,20 +1,21 @@
 import { Link, useLocation } from 'react-router-dom';
 import { NavLink } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 
 export const DashboardNav = () => {
     const location = useLocation();
-    // Function to check if NavLink is active
+    const { t } = useTranslation();
+
     const isActive = (path: string) => {
-        console.log(location.pathname, path, location.pathname === `/${path}`)
         return location.pathname === path || location.pathname === `/${path}`;
     };
 
     return (
         <>
-            <NavLink label="Main" component={Link} to="/" active={isActive('/dashboard')} />
-            <NavLink label="Profile" component={Link} to="profile" active={isActive('/dashboard/profile')} />
-            <NavLink label="Settings" component={Link} to="settings" active={isActive('/dashboard/settings')} />
-            <NavLink label="Announcements" component={Link} to="announcements" active={isActive('/dashboard/announcements')} />
+            <NavLink label={t('dashboard')} component={Link} to="/" active={isActive('/dashboard')} />
+            <NavLink label={t('profile')} component={Link} to="profile" active={isActive('/dashboard/profile')} />
+            <NavLink label={t('settings')} component={Link} to="settings" active={isActive('/dashboard/settings')} />
+            <NavLink label={t('announcements')} component={Link} to="announcements" active={isActive('/dashboard/announcements')} />
       </>
     )
 }

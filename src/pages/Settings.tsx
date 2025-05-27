@@ -2,12 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Button, Group, Select, TextInput, Title, Stack } from '@mantine/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useUIStore } from '../store/uiStore';
-
-const LANGUAGES = [
-  { value: 'en', label: 'English' },
-  { value: 'uk', label: 'Українська' },
-  { value: 'pl', label: 'Polski' },
-];
+import { LANGUAGES } from '../types/constants';
+import { useTranslation } from 'react-i18next';
 
 export const Settings: React.FC = () => {
   const { userInfo } = useAuth();
@@ -17,6 +13,9 @@ export const Settings: React.FC = () => {
   const [firstName, setFirstName] = useState(userInfo?.firstName || '');
   const [lastName, setLastName] = useState(userInfo?.lastName || '');
   const [saving, setSaving] = useState(false);
+  const { t, i18n } = useTranslation();
+
+  console.log('t', t('theme'))
 
   // Theme switcher
   const handleThemeChange = (value: string) => {
@@ -26,6 +25,7 @@ export const Settings: React.FC = () => {
   // Language selector
   const handleLanguageChange = (value: string) => {
     setLanguage(value);
+    i18n.changeLanguage(value);
     localStorage.setItem('lang', value);
     // Here you would trigger i18n change if using i18next
   };
@@ -48,10 +48,10 @@ export const Settings: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 420, margin: '0 0', padding: 24 }}>
-      <Title order={2} mb={24}>Settings</Title>
+      <Title order={2} mb={24}>{t('settings')}</Title>
       <Stack spacing="lg">
         <Group position="apart">
-          <span>Theme</span>
+          <span>{t('theme')}</span>
           <Select
             data={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]}
             value={theme}
@@ -60,7 +60,7 @@ export const Settings: React.FC = () => {
           />
         </Group>
         <Group position="apart">
-          <span>Language</span>
+          <span>{t('language')}</span>
           <Select
             data={LANGUAGES}
             value={language}
@@ -71,19 +71,19 @@ export const Settings: React.FC = () => {
         <form onSubmit={handleProfileSave}>
           <Stack spacing="sm">
             <TextInput
-              label="First Name"
+              label={t('firstName')}
               value={firstName}
               onChange={e => setFirstName(e.target.value)}
               required
             />
             <TextInput
-              label="Last Name"
+              label={t('lastName')}
               value={lastName}
               onChange={e => setLastName(e.target.value)}
               required
             />
             <Button type="submit" loading={saving} mt={8}>
-              Save Profile
+              {t('saveProfile')}
             </Button>
           </Stack>
         </form>

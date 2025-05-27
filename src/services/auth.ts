@@ -71,30 +71,14 @@ export const authService = {
     return null;
   },
 
-  async refreshToken(): Promise<AuthResponse> {
-    const currentUser = this.getCurrentUser();
-    if (!currentUser?.refresh_token) {
-      throw new Error('No refresh token available');
+  /**
+   * Оновлення токена (тільки API-запит, без роботи з localStorage)
+   */
+  async refreshTokenApi(refresh_token: string): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/auth/refresh', { refresh_token });
+    if (response.data.access_token) {
+      return response.data;
     }
-
-    try {
-      const response = await apiClient.post<AuthResponse>('/auth/refresh', {
-        refresh_token: currentUser.refresh_token,
-      });
-
-      if (response.data.access_token) {
-        const newTokens: AuthResponse = {
-          ...currentUser,
-          ...response.data,
-        };
-        localStorage.setItem('user', JSON.stringify(newTokens));
-        return newTokens;
-      }
-    } catch (error) {
-      console.error('Token refresh failed:', error);
-      throw error;
-    }
-    
     throw new Error('Failed to refresh token');
   },
 };

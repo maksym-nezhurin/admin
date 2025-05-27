@@ -15,7 +15,7 @@ interface NotifyCarParams {
 
 export const carsService = {
     async getCars(): Promise<ICar[]> {
-        const response = await apiClient.get('/cars', {
+        const response = await apiClient.get('/cars/my', {
             withCredentials: true,
         });
 
@@ -37,7 +37,14 @@ export const carsService = {
         return response.data.data;
     },
 
-     async getCar(id: string): Promise<ICar> {
+    async getAllCars(): Promise<ICar[]> {
+        const response = await apiClient.get('/cars', {
+            withCredentials: true,
+        });
+        return response.data.data;
+    },
+
+    async getCar(id: string): Promise<ICar> {
         const response = await apiClient.get(`/cars/${id}`);
         return response.data.data;
     },
