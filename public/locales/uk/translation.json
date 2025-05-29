@@ -98,5 +98,6 @@
   "price_label": "Ціна",
   "mileage_label": "Пробіг",
   "year_label": "Рік",
-  "description_label": "Опис"
+  "description_label": "Опис",
+  "cars_published": "Опубліковано авто"
 }

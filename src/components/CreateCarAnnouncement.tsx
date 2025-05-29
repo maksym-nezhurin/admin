@@ -8,6 +8,7 @@ import type { ICarModel } from '../types/car';
 import { useAnnouncementsStore } from '../store/uiStore';
 import { CAR_TYPE_OPTIONS, countryNameToCode } from '../types/constants';
 import { useTranslation } from 'react-i18next';
+import { FilePicker } from './FilePicker';
 
 // Utility for country flag emoji
 const getFlagEmoji = (country: string) => {
@@ -126,6 +127,7 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
       year: new Date().getFullYear(),
       mileage: 0,
       description: '',
+      images: [],
       color: '',
     },
     validate: {
@@ -136,6 +138,7 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
       year: (value: number) => (value < 1900 || value > new Date().getFullYear() ? t('invalid_year') : null),
       mileage: (value: string | number) => (value < '0' ? t('mileage_negative') : null),
       description: (value: string) => (value.length < 10 ? t('description_min_length', { count: 10 }) : null),
+      images: (value: string[]) => (value.length === 0 ? 'At least one image is required' : null),
     },
   });
 
@@ -277,6 +280,10 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
             autosize
             minRows={3}
             {...form.getInputProps('description')}
+          />
+          <FilePicker
+            value={form.values.images}
+            onChange={(files: File[]) => form.setFieldValue('images', files)}
           />
           <TextInput
             label={t('color')}

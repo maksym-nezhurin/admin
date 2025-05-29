@@ -1,17 +1,24 @@
-import { Card, Image, NavLink, ActionIcon, Tooltip, Flex } from '@mantine/core';
+import { Card, NavLink, ActionIcon, Tooltip, Flex, Image } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import { CarInfo } from './CarInfo';
 import { CarNotify } from './CarNotify';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
+
 import type { ICar } from '../types/general';
 
 export function CarCard(props: ICar & { onEdit?: (car: ICar) => void; onDelete?: (id: string) => void }) {
-  const { id, ownerId, onEdit, onDelete, ...rest } = props;
-
+  const { id, ownerId, onEdit, onDelete, images, model } = props;
+  console.log(images);
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder style={{ maxWidth: 320, position: 'relative', display: 'flex', flexDirection: 'column' }}>
       <Card.Section>
-        <Image src="https://placehold.co/320x160" height={160} alt={`${rest.model} car`} />
+        {
+          images && images.length > 0 ? (
+            <Image src={images[0]} height={160} alt={`${model} car`} />
+          ) : (
+            <Image src="https://placehold.co/320x160" height={160} alt={`${model} car`} />
+          )
+        }
 
          <div style={{ position: 'absolute', left: 10, top: 10, display: 'flex', gap: 8, zIndex: 2 }}>
           <CarNotify carId={id} ownerId={ownerId} />

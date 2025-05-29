@@ -98,5 +98,6 @@
   "price_label": "Cena",
   "mileage_label": "Przebieg",
   "year_label": "Rok",
-  "description_label": "Opis"
+  "description_label": "Opis",
+  "cars_published": "Opublikowane samochody"
 }

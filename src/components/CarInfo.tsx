@@ -1,11 +1,37 @@
-import { Group, Text, Badge, Divider } from '@mantine/core';
+import { Group, Text, Badge, Divider, Image } from '@mantine/core';
+import { Carousel } from '@mantine/carousel';
 import type { ICar } from '../types/general';
 
-export const CarInfo = (props: ICar) => {
-    const { brand, model, type, engine, complectation, price, year, mileage, description } = props;
+type ICarInfoProps = ICar & { withGallery: boolean };
 
+export const CarInfo = (props: ICarInfoProps) => {
+    const { withGallery, brand, model, type, engine, complectation, price, year, mileage, description, images } = props;
+    console.log(images);
     return (
         <div>
+            {withGallery && (images && images.length > 0 ? (
+                <Carousel
+                    withIndicators
+                    height={250}
+                    slideSize="100%"
+                    loop
+                    styles={{ indicator: { background: '#228be6' } }}
+                    >
+                    {images.map((img, idx) => (
+                        <Carousel.Slide key={idx}>
+                        <Image
+                            src={img}
+                            height={250}
+                            alt={`${model} car ${idx + 1}`}
+                            fit="cover"
+                            radius={0}
+                        />
+                        </Carousel.Slide>
+                    ))}
+                </Carousel>
+            ) : (
+                <Image src="https://placehold.co/320x160" height={250} alt={`${model} car`} />
+            ))}
             <Group position="apart" mt="md" mb="xs" style={{ width: '100%' }}>
                 <Text weight={500} style={{
                     overflow: 'hidden',

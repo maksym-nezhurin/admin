@@ -98,5 +98,6 @@
   "price_label": "Price",
   "mileage_label": "Mileage",
   "year_label": "Year",
-  "description_label": "Description"
+  "description_label": "Description",
+  "cars_published": "Cars published"
 }

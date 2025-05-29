@@ -35,7 +35,7 @@ export const Announcement: React.FC = () => {
   if (!data) {
     return <p>Announcement not found.</p>;
   }
-
+  console.log('data', data);
   return (
     <Container size="md" py="xl">
       <Group position="apart" mb="md">
@@ -44,7 +44,7 @@ export const Announcement: React.FC = () => {
         </Anchor>
       </Group>
       <div>
-        <CarInfo {...data} />
+        <CarInfo {...data} withGallery={true} />
       </div>
     </Container>
   );

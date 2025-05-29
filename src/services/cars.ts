@@ -51,7 +51,30 @@ export const carsService = {
 
     async createCar(car: ICarFormModel): Promise<ICar> {
         console.log('Creating car:', car);
-        const response = await apiClient.post('/cars', car);
+
+        // Створюємо FormData
+        const formData = new FormData();
+
+        // Додаємо всі текстові поля
+        Object.entries(car).forEach(([key, value]) => {
+            if (key !== 'images') {
+                formData.append(key, value as string);
+            }
+        });
+
+        // Додаємо файли (images)
+        if (car.images && Array.isArray(car.images)) {
+            (car.images as File[]).forEach((file) => {
+                formData.append('images', file); // бекенд має чекати поле images як масив файлів
+            });
+        }
+
+        // Відправляємо multipart/form-data
+        const response = await apiClient.post('/cars', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
 
         if (response.status === 201) {
             showNotification({
@@ -59,7 +82,7 @@ export const carsService = {
                 message: `Car ${car.model} created successfully`,
                 color: 'green',
             });
-            } else {
+        } else {
             showNotification({
                 title: 'Error',
                 message: `Failed to create car ${car.model}`,
