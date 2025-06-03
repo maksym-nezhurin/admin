@@ -1,6 +1,6 @@
 import apiClient from '../api/apiClient';
 import { showNotification } from '@mantine/notifications';
-import type { ICar, ICarFormModel } from '../types/general';
+import type { ICar, ICarFormModel } from '../types/car';
 import type {
     ICarModel,
     IBrand,
@@ -50,26 +50,20 @@ export const carsService = {
     },
 
     async createCar(car: ICarFormModel): Promise<ICar> {
-        console.log('Creating car:', car);
-
-        // Створюємо FormData
         const formData = new FormData();
 
-        // Додаємо всі текстові поля
         Object.entries(car).forEach(([key, value]) => {
             if (key !== 'images') {
                 formData.append(key, value as string);
             }
         });
 
-        // Додаємо файли (images)
         if (car.images && Array.isArray(car.images)) {
-            (car.images as File[]).forEach((file) => {
-                formData.append('images', file); // бекенд має чекати поле images як масив файлів
+            (car.images as unknown as File[]).forEach((file) => {
+                formData.append('images', file);
             });
         }
 
-        // Відправляємо multipart/form-data
         const response = await apiClient.post('/cars', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -91,6 +85,56 @@ export const carsService = {
             throw new Error(`Failed to create car ${car.model}`);
         }
         return response.data.data;
+    },
+
+    async updateCar(carId: string, car: Partial<ICarFormModel>): Promise<ICar> {
+      const formData = new FormData();
+
+      Object.entries(car).forEach(([key, value]) => {
+          if (key !== 'images') {
+              formData.append(key, value as string);
+          }
+      });
+      const response = await apiClient.patch(`/cars/${carId}`, formData, {
+          headers: {
+              'Content-Type': 'multipart/form-data',
+          },
+      });
+
+      if (response.data.success) {
+        showNotification({
+            title: 'Success',
+            message: `Car ${car.model} updated successful!`,
+            color: 'green',
+        });
+      } else {
+        showNotification({
+            title: 'Error',
+            message: `Failed to update car ${car.model}`,
+            color: 'red',
+        });
+        throw new Error(`Failed to update car ${car.model}`);
+      }
+      return response.data.data;
+    },
+
+    async deleteCar(carId: string): Promise<void> {
+      const response = await apiClient.delete(`/cars/${carId}`);
+
+       if (response.data.success) {
+        showNotification({
+            title: 'Success',
+            message: `Car ${carId} deleted successful!`,
+            color: 'green',
+        });
+      } else {
+        showNotification({
+            title: 'Error',
+            message: `Failed to deleted car ${carId}`,
+            color: 'red',
+        });
+        throw new Error(`Failed to delete car ${carId}`);
+      }
     },
 
     async notifyCar({carId, ownerId}: NotifyCarParams): Promise<void> {

@@ -5,14 +5,14 @@ import type { DropzoneProps } from '@mantine/dropzone';
 
 export function FilePicker({
   value = [],
-  onChange,
+  onDrop,
   ...props
-}: Partial<DropzoneProps> & { value?: File[]; onChange?: (files: File[]) => void }) {
+}: Partial<DropzoneProps> & { value?: File[] | undefined; onDrop?: (files: File[]) => void | undefined}) {
   const files = value;
 
   const handleRemove = (index: number) => {
     const updated = files.filter((_, i) => i !== index);
-    onChange?.(updated);
+    onDrop?.(updated);
   };
 
   const previews = files.map((file, index) => {
@@ -41,13 +41,13 @@ export function FilePicker({
   return (
     <>
       <Dropzone
-        onDrop={(files) => onChange?.(files)}
+        onDrop={(files) => onDrop?.(files)}
         onReject={(files) => console.log('rejected files', files)}
         maxSize={5 * 1024 ** 2}
         accept={IMAGE_MIME_TYPE}
         {...props}
       >
-        <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: 'none' }}>
+        <Group mih={220} style={{ pointerEvents: 'none' }}>
           <Dropzone.Accept>
             <IconUpload size={52} color="var(--mantine-color-blue-6)" stroke={1.5} />
           </Dropzone.Accept>

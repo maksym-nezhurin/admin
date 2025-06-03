@@ -13,7 +13,6 @@ export const Profile: React.FC = () => {
   const { data: userSessions, isLoading: sessionsLoading } = useUserSessions(userInfo?.sub);
   const { t } = useTranslation();
 
-  console.log('Profile component rendered', { userSessions, sessionsLoading });
   if (!userInfo) {
     return <Loader />;
   }

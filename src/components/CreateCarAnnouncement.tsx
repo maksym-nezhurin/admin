@@ -1,14 +1,14 @@
-import { TextInput, NumberInput, Select, Button, Stack, Card, Group, Text, Badge, Divider, Textarea } from '@mantine/core';
+import { Switch, TextInput, NumberInput, Select, Button, Stack, Card, Group, Text, Badge, Divider, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { carsService } from '../services/cars';
-import { useQuery } from '@tanstack/react-query';
-import type { ICar } from '../types/general';
-import type { ICarModel } from '../types/car';
 import { useAnnouncementsStore } from '../store/uiStore';
 import { CAR_TYPE_OPTIONS, countryNameToCode } from '../types/constants';
 import { useTranslation } from 'react-i18next';
 import { FilePicker } from './FilePicker';
+import { showNotification } from '@mantine/notifications';
+import type { ICarModel, ICarFormModel, ICarAnnoncement } from '../types/car'
 
 // Utility for country flag emoji
 const getFlagEmoji = (country: string) => {
@@ -26,7 +26,7 @@ const getFlagEmoji = (country: string) => {
 };
 
 const CarDetailsCard = ({ variant, selectedVariant, onSelect }: { variant: ICarModel, selectedVariant: string, onSelect: (id: string) => void }) => {
-  const isSelected = selectedVariant === (variant.value || variant.id);
+  const isSelected = selectedVariant === (variant.value);
 
   return (
     <Card
@@ -41,11 +41,11 @@ const CarDetailsCard = ({ variant, selectedVariant, onSelect }: { variant: ICarM
         background: isSelected ? 'linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%)' : '#fff',
         transition: 'all 0.2s',
       }}
-      onClick={() => onSelect(variant.value || variant.id)}
+      onClick={() => onSelect(variant.value)}
     >
       <Group position="apart" mb="xs">
         <Text weight={700} size="md" color={isSelected ? 'blue' : 'dark'}>
-          {variant.label || variant.model}
+          {variant.label}
         </Text>
         <Group spacing={8} align="center">
           <Badge color={ isSelected ? 'blue' : 'dark' } variant="filled">
@@ -74,36 +74,43 @@ const CarDetailsCard = ({ variant, selectedVariant, onSelect }: { variant: ICarM
   );
 };
 
-export function CreateCarAnnouncement(props: { close?: () => void }) {
-  const { close } = props;
+export function CreateCarAnnouncement(props: ICarAnnoncement) {
+  const {
+    close,
+    selectedYear,
+    setSelectedYear,
+    selectedBrand,
+    setSelectedBrand,
+    selectedModel,
+    setSelectedModel,
+    selectedVariant,
+    setSelectedVariant,
+    years,
+    brands,
+    brandsLoading,
+    models,
+    modelsLoading,
+    variants,
+    variantsLoading,
+  } = props;
+  console.log('years', years)
+  console.log('variants', variants)
   const { t } = useTranslation();
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
-  const [selectedBrand, setSelectedBrand] = useState('');
-  const [selectedModel, setSelectedModel] = useState('');
-  const [selectedVariant, setSelectedVariant] = useState('');
-
-  // Generate years for select (e.g. 1990-2025)
-  const years = Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) => {
-    const y = (1990 + i).toString();
-    return { value: y, label: y };
-  }).reverse();
-
-  const { data: brands = [], isLoading: brandsLoading } = useQuery({
-    queryKey: ['brands', selectedYear],
-    queryFn: () => carsService.getBrandsByYear(selectedYear),
-    enabled: !!selectedYear,
-  });
-
-  const { data: models = [], isLoading: modelsLoading } = useQuery({
-    queryKey: ['models', selectedBrand, selectedYear],
-    queryFn: () => (selectedBrand && selectedYear) ? carsService.getModelsByBrandAndYear(selectedBrand, selectedYear) : Promise.resolve([]),
-    enabled: !!selectedBrand && !!selectedYear,
-  });
-
-  const { data: variants = [], isLoading: variantsLoading } = useQuery({
-    queryKey: ['variants', selectedModel],
-    queryFn: () => selectedModel ? carsService.getVariantsByModelAndYear(selectedModel, selectedYear) : Promise.resolve([]),
-    enabled: !!selectedModel,
+  const mutation = useMutation({
+    mutationFn: (newCar: ICarFormModel) => carsService.createCar(newCar),
+    onSuccess: (data) => {
+      addAnnouncement(data);
+      form.reset();
+      setSelectedVariant('');
+      showNotification({ title: t('success'), message: t('car_created_successfully'), color: 'green' });
+      if (typeof close === 'function') {
+        close();
+      }
+    },
+    onError: (error) => {
+      console.error(error);
+      showNotification({ title: t('error'), message: t('car_creation_failed'), color: 'red' });
+    },
   });
 
   // Reset brand/model when year changes
@@ -116,7 +123,7 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
     setSelectedModel('');
   }, [selectedBrand]);
 
-  const form = useForm<Omit<ICar, 'id' | 'ownerId'>>({
+  const form = useForm<ICarFormModel>({
     initialValues: {
       brand: '',
       model: '',
@@ -129,6 +136,8 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
       description: '',
       images: [],
       color: '',
+      isRentable: false,
+      rentPricePerDay: 0, 
     },
     validate: {
       brand: (value: string) => (value.length < 2 ? t('brand_min_length', { count: 2 }) : null),
@@ -138,21 +147,24 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
       year: (value: number) => (value < 1900 || value > new Date().getFullYear() ? t('invalid_year') : null),
       mileage: (value: string | number) => (value < '0' ? t('mileage_negative') : null),
       description: (value: string) => (value.length < 10 ? t('description_min_length', { count: 10 }) : null),
-      images: (value: string[]) => (value.length === 0 ? 'At least one image is required' : null),
+      images: (value) => (value?.length === 0 ? 'At least one image is required' : null),
+      rentPricePerDay: (value, values) => values.isRentable && (!value || value <= 0) ? 'Enter valid daily rental price': null,
     },
   });
 
   const addAnnouncement = useAnnouncementsStore(state => state.addAnnouncement);
 
-  const handleSubmit = async (values: Omit<ICar, 'id' | 'ownerId'>) => {
+  const handleSubmit = async () => {
     try {
-      const newAnnouncement = await carsService.createCar(values);
-      addAnnouncement(newAnnouncement);
-      form.reset();
-      setSelectedVariant('');
-      if ( typeof close === 'function') {
-         close();
-      }
+      if (!form.validate().hasErrors) {
+        mutation.mutate({
+          ...form.values,
+          brand: selectedBrand,
+          complectation: selectedVariant,
+          model: selectedModel,
+          year: Number(selectedYear),
+        });
+      }  
     } catch (error) {
       console.log(error);
     }
@@ -161,8 +173,9 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
   useEffect(() => {
     if (selectedVariant && variants.length > 0) {
       const found = variants.find(
-        (v: ICarModel) => (v.value || v.id) === selectedVariant
+        (v: ICarModel) => (v.value) === selectedVariant
       );
+      console.log('-- found --', found);
       if (found && found.engine) {
         form.setFieldValue('engine', Number(found.engine));
       }
@@ -174,13 +187,7 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
       <form onSubmit={(e) => {
         e.preventDefault();
       
-        handleSubmit({
-          ...form.values,
-          brand: selectedBrand,
-          complectation: selectedVariant,
-          model: selectedModel,
-          year: Number(selectedYear),
-        });
+        handleSubmit();
       }}>
         <Stack>
           <Select
@@ -189,8 +196,8 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
             label={t('year')}
             placeholder={t('select_year')}
             data={years}
-            value={selectedYear}
-            onChange={val => setSelectedYear(val || '')}
+            value={selectedYear.toString()}
+            onChange={(val) => val && setSelectedYear(parseInt(val, 10))}
           />
           <Select
             required
@@ -237,7 +244,7 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
               WebkitOverflowScrolling: 'touch',
             }}>
               {variants.map((variant) => (
-                <CarDetailsCard key={variant.id} variant={variant} selectedVariant={selectedVariant} onSelect={setSelectedVariant} />
+                <CarDetailsCard key={variant.value} variant={variant} selectedVariant={selectedVariant} onSelect={setSelectedVariant} />
               ))}
             </div>
           )}
@@ -282,9 +289,23 @@ export function CreateCarAnnouncement(props: { close?: () => void }) {
             {...form.getInputProps('description')}
           />
           <FilePicker
-            value={form.values.images}
-            onChange={(files: File[]) => form.setFieldValue('images', files)}
+            value={(form.values.images ?? []).filter((img): img is File => img instanceof File)}
+            onDrop={(files: File[]) => form.setFieldValue('images', files)}
           />
+
+          <Switch
+            label={t('allow_rental')}
+            {...form.getInputProps('isRentable', { type: 'checkbox' })}
+          />
+
+          {form.values.isRentable && (
+            <NumberInput
+              label={t('rent_price_per_day')}
+              placeholder={t('enter_price')}
+              min={1}
+              {...form.getInputProps('rentPricePerDay')}
+            />
+          )}
           <TextInput
             label={t('color')}
             placeholder={t('car_color')}

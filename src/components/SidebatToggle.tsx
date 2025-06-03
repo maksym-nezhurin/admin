@@ -1,5 +1,3 @@
-// Example usage in a component
-import React from 'react';
 import { useUIStore } from '../store/uiStore';
 import { Button } from '@mantine/core';
 

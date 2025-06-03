@@ -9,6 +9,55 @@ export interface ICarModel {
   country: string;
 }
 
+export interface ICar {
+  id: string,
+  ownerId: string,
+  brand: string,
+  complectation: string,
+  engine: number,
+  model: string,
+  type: string,
+  price: number,
+  year: number,
+  mileage: string | number,
+  description: string;
+  color?: string;
+  createdAt?: string;
+  images?: string[];
+  isRentable?: boolean;
+  rentPricePerDay?: number;
+}
+
+export type ICarFormModel = Omit<ICar, 'id' | 'ownerId' | 'images' | 'year'> & {
+  images?: (string | File)[];
+  year: number;
+}
+
+export type IOption = {
+  value: string,
+  label: string,
+};
+
+
+export interface ICarAnnoncement {
+  close?: () => void,
+  selectedYear: number,
+  setSelectedYear: (year: number) => void,
+  selectedBrand: string,
+  setSelectedBrand: (brand: string) => void,
+  selectedModel: string,
+  setSelectedModel: (model: string) => void,
+  selectedVariant: string,
+  setSelectedVariant: (variant: string) => void,
+  years: IOption[],
+  brands: IOption[],
+  brandsLoading: boolean,
+  models: IOption[],
+  modelsLoading: boolean,
+  variants: ICarModel[],
+  variantsLoading: boolean,
+}
+
 export interface IBrand {
   make_id: string;
   make_display: string;

@@ -1,17 +1,11 @@
 import { create } from 'zustand';
-import type { ICar } from '../types/general';
+import type { ICar } from '../types/car';
 
 type AnnouncementsState = {
   announcements: ICar[];
   setAnnouncements: (announcements: ICar[]) => void;
   addAnnouncement: (announcement: ICar) => void;
 }
-
-export const useAnnouncementsStore = create<AnnouncementsState>((set) => ({
-  announcements: [],
-  setAnnouncements: (announcements) => set({ announcements }),
-  addAnnouncement: (announcement) => set((state) => ({ announcements: [announcement, ...state.announcements] })),
-}));
 
 type UIState = {
   sidebarOpen: boolean;
@@ -20,6 +14,12 @@ type UIState = {
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
 };
+
+export const useAnnouncementsStore = create<AnnouncementsState>((set) => ({
+  announcements: [],
+  setAnnouncements: (announcements) => set({ announcements }),
+  addAnnouncement: (announcement) => set((state) => ({ announcements: [announcement, ...state.announcements] })),
+}));
 
 export const useUIStore = create<UIState>((set) => ({
   sidebarOpen: false,

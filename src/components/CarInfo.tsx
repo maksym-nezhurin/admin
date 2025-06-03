@@ -1,12 +1,12 @@
 import { Group, Text, Badge, Divider, Image } from '@mantine/core';
 import { Carousel } from '@mantine/carousel';
-import type { ICar } from '../types/general';
+import type { ICar } from '../types/car';
 
-type ICarInfoProps = ICar & { withGallery: boolean };
+type ICarInfoProps = ICar & { withGallery: boolean, images?: string[] };
 
 export const CarInfo = (props: ICarInfoProps) => {
     const { withGallery, brand, model, type, engine, complectation, price, year, mileage, description, images } = props;
-    console.log(images);
+
     return (
         <div>
             {withGallery && (images && images.length > 0 ? (
@@ -17,7 +17,7 @@ export const CarInfo = (props: ICarInfoProps) => {
                     loop
                     styles={{ indicator: { background: '#228be6' } }}
                     >
-                    {images.map((img, idx) => (
+                    {images.map((img: string, idx: number) => (
                         <Carousel.Slide key={idx}>
                         <Image
                             src={img}
