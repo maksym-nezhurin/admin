@@ -112,7 +112,7 @@ export function UpdateCarAnnouncement(props: IProps) {
 
       if (carData.year) {
         setSelectedYear(carData.year);
-        setSelectedBrand(carData.brand);
+        setSelectedBrand(carData.brand.toLowerCase());
         setSelectedModel(carData.model);
       }
     }
