@@ -1,7 +1,7 @@
 import {CarCard} from '../components/CarCard';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import React, {useEffect, useState} from 'react';
-import {CreateCarAnnouncement} from '../components/Announcement/modals/CreateCarAnnouncement';
+// import {CreateCarAnnouncement} from '../components/Announcement/modals/CreateCarAnnouncement';
 import {UpdateCarAnnouncement} from '../components/Announcement/modals/UpdateCarAnnouncement';
 import {Button, Modal, SimpleGrid, Title} from '@mantine/core';
 import {useDisclosure} from '@mantine/hooks';
@@ -63,13 +63,13 @@ const AnnouncementsPage: React.FC = () => {
         return { value: y, label: y };
     }).reverse();
 
-    const { data: brands = [], isLoading: brandsLoading } = useQuery({
+    const { data: brands = [], /* isLoading: brandsLoading */ } = useQuery({
         queryKey: ['brands', selectedYear],
         queryFn: () => charachteristicsService.getBrandsByYear(selectedYear),
         enabled: !!selectedYear,
     });
 
-    const { data: models = [], isLoading: modelsLoading } = useQuery({
+    const { data: models = [], /*isLoading: modelsLoading */ } = useQuery({
         queryKey: ['models', selectedBrand, selectedYear],
         queryFn: () => (selectedBrand && selectedYear) ? charachteristicsService.getModelsByBrandAndYear(selectedBrand, selectedYear) : Promise.resolve([]),
         enabled: !!selectedBrand && !!selectedYear,
@@ -163,10 +163,11 @@ const AnnouncementsPage: React.FC = () => {
                     inner: { left: 0 }
                 }}
             >
-                <CreateCarAnnouncement
-                    close={closeCreate}
-                    {...modalProps}
-                />
+                create
+                {/*<CreateCarAnnouncement*/}
+                {/*    close={closeCreate}*/}
+                {/*    {...modalProps}*/}
+                {/*/>*/}
             </Modal>
 
             <Modal
@@ -180,6 +181,7 @@ const AnnouncementsPage: React.FC = () => {
                 }}
             >
                 {
+                    // @ts-ignore
                     carToUpdate?.id && <UpdateCarAnnouncement
                         close={closeUpdate}
                         carId={carToUpdate.id}

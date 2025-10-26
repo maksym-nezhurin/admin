@@ -7,8 +7,8 @@ export const ROUTES = {
   CARS: `${API_PREFIX}/cars`,
   CHARACTERISTICS: {
     BRANDS: BRANDS_API_URL, // &year=${year}`,
-    BRANDS_BY_YEAR: (year) => `${BRANDS_API_URL}/${year}`,
-    MODELS_BY_YEAR: (year, brand) => `${BRANDS_API_URL}/${year}/${brand}`,
-    VARIANTS: (year, brand, model) => `${BRANDS_API_URL}/${year}/${brand}/${model}`,
+    BRANDS_BY_YEAR: (year: number) => `${BRANDS_API_URL}/${year}`,
+    MODELS_BY_YEAR: (year: number, brand: string) => `${BRANDS_API_URL}/${year}/${brand}`,
+    VARIANTS: (year: number, brand: string, model: string) => `${BRANDS_API_URL}/${year}/${brand}/${model}`,
   },
 };

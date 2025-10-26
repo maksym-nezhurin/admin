@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, Text, Group, Badge, Divider } from '@mantine/core';
 import type { ICarModel } from '../../types/car';
 import { countryNameToCode } from '../../types/constants';

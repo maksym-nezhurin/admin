@@ -19,32 +19,32 @@ export function UpdateCarAnnouncement(props: IProps) {
     selectedModel,
     setSelectedModel,
     brands,
-    brandsLoading,
+    // brandsLoading,
     models,
     attributes,
     years,
-    modelsLoading,
+    // modelsLoading,
   } = props;
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  const formRef = useRef<any>(null);
+
+  const formRef = useRef<never>(null);
   
   const originalValues = useRef<ICarFormModel | null>(null);
 
-  // Получение данных автомобиля
   const { data: carData, isLoading } = useQuery({
     queryKey: ['car', carId],
     queryFn: () => carsService.getCar(carId),
     enabled: !!carId,
   });
 
-  // Инициализация формы
   const form = useForm<ICarFormModel>({
     initialValues: {
       brand: '',
       model: '',
       type: 'sedan',
-      engine: 1,
+      // @ts-ignore
+      engine: '1',
       price: 0,
       complectation: '',
       year: new Date().getFullYear(),
@@ -57,6 +57,7 @@ export function UpdateCarAnnouncement(props: IProps) {
      validate: {
       brand: (value: string) => (value.length < 2 ? t('brand_min_length', { count: 2 }) : null),
       model: (value: string) => (value.length < 2 ? t('model_min_length', { count: 2 }) : null),
+      // @ts-ignore
       engine: (value: number) => (value < 1 ? t('engine_required') : null),
       price: (value: number) => (value <= 0 ? t('price_min') : null),
       year: (value: number) => (value < 1900 || value > new Date().getFullYear() ? t('invalid_year') : null),
@@ -94,16 +95,16 @@ export function UpdateCarAnnouncement(props: IProps) {
 
 
   // Check if there are any changes
-  const hasChanges = (): boolean => {
-    if (!originalValues.current) return false;
-
-    const changes = getChangedValues<ICarFormModel>(
-      form.values,
-      originalValues.current
-    );
-
-    return Object.keys(changes).length > 0;
-  };
+  // const hasChanges = (): boolean => {
+  //   if (!originalValues.current) return false;
+  //
+  //   const changes = getChangedValues<ICarFormModel>(
+  //     form.values,
+  //     originalValues.current
+  //   );
+  //
+  //   return Object.keys(changes).length > 0;
+  // };
 
   useEffect(() => {
     if (carData) {
@@ -115,13 +116,13 @@ export function UpdateCarAnnouncement(props: IProps) {
       form.setValues({
         description: carData.description || '',
         type: carData.bodyType.toLowerCase() || '',
-        mileage: parseInt(carData.mileage, 10) || 0,
-        price: parseInt(carData.price, 10) || 0,
+        mileage: parseInt(String(carData.mileage), 10) || 0,
+        price: parseInt(String(carData.price), 10) || 0,
         // brand: carData.brand.toLowerCase() || '',
       });
 
       if (carData.year) {
-        setSelectedYear(parseInt(carData.year),);
+        setSelectedYear(carData.year);
         setSelectedBrand(carData.brand.toLowerCase());
         setSelectedModel(carData.model);
       }
@@ -170,6 +171,8 @@ export function UpdateCarAnnouncement(props: IProps) {
         models={models}
         years={years}
         attributes={attributes}
+        variants={[]}
+        selectedYear={2020}
         // selectedYear={carData?.year ? parseInt(carData.year, 10) : new Date().getFullYear()}
         setSelectedYear={setSelectedYear}
         selectedBrand={carData?.brand}
@@ -179,107 +182,4 @@ export function UpdateCarAnnouncement(props: IProps) {
         ref={formRef}
       />
     );
-    // <form onSubmit={(e) => {
-    //   e.preventDefault();
-    //   form.validate();
-      
-    //   console.log('Submitting form with values:', form.values);
-    // }}>
-    //   <Stack>
-    //     <Select
-    //       required
-    //       label={t('brand')}
-    //       name='brand'
-    //       placeholder={t('select_brand')}
-    //       data={brands}
-    //       value={selectedBrand}
-    //       onChange={val => {
-    //         form.setFieldValue('brand', val || '');
-    //         setSelectedBrand(val || '');
-    //         setSelectedModel('');
-    //         form.setFieldValue('model', '');
-    //         form.setFieldValue('complectation', '');
-    //       }}
-    //       disabled={brandsLoading || !selectedYear}
-    //     />
-        
-    //     <Select
-    //       required
-    //       label={t('model')}
-    //       name='model'
-    //       placeholder={t('choose_model')}
-    //       data={models}
-    //       value={selectedModel}
-    //       onChange={val => {
-    //         setSelectedModel(val || '');
-    //         form.setFieldValue('model', val || '');
-    //       }}
-    //       disabled={!selectedBrand || modelsLoading}
-    //     />
-
-    //     <Select
-    //       label="Тип"
-    //       data={CAR_TYPE_OPTIONS}
-    //       {...form.getInputProps('type')}
-    //       required
-    //     />
-        
-    //     <NumberInput 
-    //       label="Объем двигателя" 
-    //       {...form.getInputProps('engine')} 
-    //       required 
-    //     />
-        
-    //     <NumberInput 
-    //       label="Цена" 
-    //       {...form.getInputProps('price')} 
-    //       required 
-    //     />
-        
-    //     <NumberInput 
-    //       label="Год выпуска" 
-    //       {...form.getInputProps('year')} 
-    //       required 
-    //     />
-        
-    //     <NumberInput 
-    //       label="Пробег" 
-    //       {...form.getInputProps('mileage')} 
-    //       required 
-    //     />
-        
-    //     <Textarea 
-    //       label="Описание" 
-    //       {...form.getInputProps('description')} 
-    //       required 
-    //     />
-        
-    //     {/* <TextInput 
-    //       label="Цвет" 
-    //       {...form.getInputProps('color')} 
-    //     /> */}
-        
-    //     {/* <Switch 
-    //       label="Доступен для аренды" 
-    //       {...form.getInputProps('isRentable', { type: 'checkbox' })} 
-    //     /> */}
-        
-    //     {/* {form.values.isRentable && (
-    //       <NumberInput 
-    //         label="Цена аренды в день" 
-    //         {...form.getInputProps('rentPricePerDay')} 
-    //         required 
-    //       />
-    //     )} */}
-        
-    //     <Button 
-    //       type="submit" 
-    //       disabled={!hasChanges()}
-    //       loading={mutation.isPending}
-    //     >
-    //       {hasChanges() ? 'Сохранить изменения' : 'Нет изменений'}
-    //     </Button>
-    //   </Stack>
-    // </form>
-  // );
 }

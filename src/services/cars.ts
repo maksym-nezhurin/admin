@@ -95,16 +95,16 @@ export const carsService = {
         if (response.status === 201) {
             showNotification({
                 title: 'Success',
-                message: `Car ${car.model} created successfully`,
+                message: `Car ${car.title} created successfully`,
                 color: 'green',
             });
         } else {
             showNotification({
                 title: 'Error',
-                message: `Failed to create car ${car.model}`,
+                message: `Failed to create car ${car.title}`,
                 color: 'red',
             });
-            throw new Error(`Failed to create car ${car.model}`);
+            throw new Error(`Failed to create car ${car.title}`);
         }
         return response.data.data;
     },

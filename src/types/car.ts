@@ -42,6 +42,7 @@ export interface ICarModel {
 export interface ICar {
   id: string,
   title: string,
+  bodyType: string,
   description: string;
   ownerId: string,
   brand: string,
@@ -93,7 +94,7 @@ interface IAnnouncementFormData<T> {
 
 export type IAnnouncementCarFormData = IAnnouncementFormData<IAnnouncementAttributes[]>;
 
-interface IAnnouncement extends Omit<IAnnouncementFormData, 'images' | 'attributes'> {
+interface IAnnouncement extends Omit<IAnnouncementFormData<never>, 'images' | 'attributes'> {
   id: string;
   userId: string;
   createdAt: string;
@@ -107,7 +108,7 @@ type TransmissionOptions = 'automatic' | 'manual' | 'cvt' | 'semi-automatic' | '
 type FuelTypeOptions = 'gasoline' | 'diesel' | 'electric' | 'hybrid' | 'hydrogen' | 'other';
 type ConditionOptions = 'new' | 'used' | 'certified pre-owned' | 'damaged';
 
-interface ICarAttributes {
+export interface ICarAttributes {
   brand: string;
   model: string;
   condition: ConditionOptions;
@@ -120,6 +121,19 @@ interface ICarAttributes {
   year: number;
   mileage: string | number;
   color?: string;
+}
+
+export interface ICarAttribute {
+  type: string;
+  id: string;
+  name: string;
+  unit: string;
+  key: string;
+  required: boolean;
+  options: {
+    id: string;
+    value: string;
+  }[]
 }
 
 export interface IAnnouncementCar extends IAnnouncement, ICarAttributes {
@@ -154,7 +168,7 @@ export interface ICarAnnoncement {
   selectedVariant: string,
   setSelectedVariant: (variant: string) => void,
   years: IOption[],
-  attributes : ICarAttributes[],
+  attributes : ICarAttribute[],
   brands: IOption[],
   brandsLoading: boolean,
   models: IOption[],

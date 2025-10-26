@@ -1,24 +1,35 @@
-import React, { forwardRef, useEffect, useState, useImperativeHandle } from 'react';
+import { forwardRef, useEffect, useState, useImperativeHandle } from 'react';
 import { useForm } from '@mantine/form';
 import { FilePicker } from '../../FilePicker';
-import { Stack, Button, Group, Select, TextInput, NumberInput, Textarea, ColorPicker } from '@mantine/core';
+import { Stack, Button, Group, Select, TextInput, NumberInput, Textarea } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { CarVariantCard } from '../CarVariantCard';
 import {
-    CONDITION_OPTIONS,
+    // CONDITION_OPTIONS,
     CAR_TYPE_OPTIONS,
     TRANSMISSION_OPTIONS,
     FUEL_TYPE_OPTIONS,
-    DRIVE_OPTIONS
+    // DRIVE_OPTIONS
 } from '../../../types/constants';
+import type { ICarAttribute, ICarFormModel, ICarModel, IOption } from '../../../types/car';
 
 export interface CarAnnouncementFormProps {
   initialValues?: Partial<ICarFormModel>;
   onSubmit: (values: ICarFormModel) => void;
   loading?: boolean;
   mode?: 'create' | 'update';
-  brands?: string[];
-  models?: string[];
+  brands?: IOption[];
+  models?: IOption[];
+
+    variants: ICarModel[];
+    years: IOption[];
+    attributes: ICarAttribute[];
+    selectedYear: number | string;
+    setSelectedYear: (year: number) => void;
+    selectedBrand?: string;
+    setSelectedBrand: (value: string) => void;
+    selectedModel?: string;
+    setSelectedModel: (value: string) => void;
 }
 
 export const CarAnnouncementForm = forwardRef(({
@@ -37,10 +48,9 @@ export const CarAnnouncementForm = forwardRef(({
   setSelectedBrand,
   selectedModel,
   setSelectedModel,
-//   selectedVariant,
-//   setSelectedVariant,
 }: CarAnnouncementFormProps, ref) => {
     const form = useForm<ICarFormModel>({
+        // @ts-ignore
         initialValues: {
             brand: 'mercedes',
             model: 'gclass',
@@ -51,11 +61,12 @@ export const CarAnnouncementForm = forwardRef(({
             engineVolume: initialValues.engineVolume ? Number(initialValues.engineVolume) : 1,
             mileage: initialValues.mileage ? Number(initialValues.mileage) : 0,
             price: initialValues.price ? Number(initialValues.price) : 0,
-            year: initialValues.year ? parseInt(selectedYear || initialValues.year, 10) : new Date().getFullYear(),
+            year: initialValues.year ? parseInt(String(selectedYear || initialValues.year), 10) : new Date().getFullYear(),
         },
         validate: {
             brand: (value: string) => (value.length < 2 ? t('brand_min_length', { count: 2 }) : null),
             model: (value: string) => (value.length < 2 ? t('model_min_length', { count: 2 }) : null),
+            // @ts-ignore
             engine: (value: number) => (value < 1 ? t('engine_required') : null),
             price: (value: number) => (value <= 0 ? t('price_min') : null),
             year: (value: number) => (value < 1900 || value > new Date().getFullYear() ? t('invalid_year') : null),
@@ -65,42 +76,42 @@ export const CarAnnouncementForm = forwardRef(({
             // add other validations
         },
     });
-    // console.log('Form values:', form.values);
     const { t } = useTranslation();
     const [selectedVariant, setSelectedVariant] = useState('');
-    // console.log('Variants in variants:', variants);
 
     // Expose form instance to parent via ref
     useImperativeHandle(ref, () => form);
-
+    console.log('attributes', attributes);
     const onSelectVariant = (variant: string) => {
         setSelectedVariant(variant);
-        const varintData = variants.find(v => v.id === variant);
-        console.log('Selected variant:', varintData, form.values);
-        const selectedEngineFuel = ['Petrol', 'Gasoline'].includes(varintData?.engineFuel) ? 'Petrol' : varintData?.engineFuel;
-        const selectedTransmission = TRANSMISSION_OPTIONS.find(opt => opt.label === varintData?.transmissionType);
+        const variantData = variants.find((v) => v.id === variant);
+        
+        const selectedEngineFuel = variantData?.engineFuel && ['Petrol', 'Gasoline'].includes(variantData?.engineFuel) ? 'Petrol' : variantData?.engineFuel;
+        const selectedTransmission = TRANSMISSION_OPTIONS.find(opt => opt.label === variantData?.transmissionType);
         const selectedFuelType = FUEL_TYPE_OPTIONS.find(opt => opt.label === selectedEngineFuel);
-        const engineVolume = varintData?.engineCc ? Number(varintData.engineCc) : form.values.engineVolume;
-        const driveType = CAR_TYPE_OPTIONS.find(opt => opt.label === varintData?.body);
-        console.log('Selected driveType:', CAR_TYPE_OPTIONS, varintData?.body, driveType);
+        const engineVolume = variantData?.engineCc ? Number(variantData.engineCc) : form.values.engineVolume;
+        const driveType = CAR_TYPE_OPTIONS.find(opt => opt.label === variantData?.body);
         // form.setFieldValue('bodyType', variant.body);
         // form.setFieldValue('drive', variant.drive);
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         engineVolume && form.setFieldValue('engineVolume', engineVolume);
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         selectedTransmission && form.setFieldValue('transmission', selectedTransmission.value);
         form.setFieldValue('bodyType', driveType?.value || '');
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         selectedFuelType && form.setFieldValue('fuelType', selectedFuelType.value);
     }
 
     useEffect(() => {
-        console.log('year updated!');
         const { year } = form.values;
+
         if (year) {
-            setSelectedYear(parseInt(year, 10));
+            setSelectedYear(parseInt(String(year), 10));
         }
-        
     }, [form.values])
 
     return (
+        // @ts-ignore
         <form onSubmit={form.onSubmit(onSubmit)}>
             <Stack>
                 <Select
@@ -111,9 +122,9 @@ export const CarAnnouncementForm = forwardRef(({
                     data={years}
                     value={selectedYear.toString()}
                     onChange={(val) => {
+                        // @ts-ignore
                         form.setFieldValue('year', val);
                     }}
-                    // onChange={(val) => val && setSelectedYear(parseInt(val, 10))}
                 />
                 <Select
                     required
@@ -160,7 +171,7 @@ export const CarAnnouncementForm = forwardRef(({
                         WebkitOverflowScrolling: 'touch',
                     }}>
                         {variants.map((variant) => (
-                            <CarVariantCard key={variant.value} variant={variant} selectedVariant={selectedVariant} onSelect={onSelectVariant} />
+                            <CarVariantCard key={variant.id} variant={variant} selectedVariant={selectedVariant} onSelect={onSelectVariant} />
                         ))}
                     </div>
                 )}
@@ -201,7 +212,7 @@ export const CarAnnouncementForm = forwardRef(({
                                 label={attr.name + (attr.unit ? ` (${attr.unit})` : '')}
                                 name={attr.key}
                                 placeholder={t(`select_${attr.name.toLowerCase()}`)}
-                                data={attr.options?.map(a => ({ value: a.id, label: a.value })) || []}
+                                data={attr.options?.map((a) => ({ value: a.id, label: a.value })) || []}
                                 {...form.getInputProps(attr.key as keyof ICarFormModel)}
                             />  
                         );
