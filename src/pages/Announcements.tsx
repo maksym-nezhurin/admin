@@ -1,27 +1,50 @@
-import { CarCard } from '../components/CarCard';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import React, { useState } from 'react';
-import { CreateCarAnnouncement } from '../components/CreateCarAnnouncement';
-import { UpdateCarAnnouncement } from '../components/UpdateCarAnnouncement';
-import { SimpleGrid, Button, Modal, Title } from  '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { carsService } from '../services/cars';
-import { Loader } from '../components/Loader';
-import { useAnnouncementsStore } from '../store/uiStore';
-import { useTranslation } from 'react-i18next';
-import type { ICar } from '../types/car';
+import {CarCard} from '../components/CarCard';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import React, {useEffect, useState} from 'react';
+import {CreateCarAnnouncement} from '../components/Announcement/modals/CreateCarAnnouncement';
+import {UpdateCarAnnouncement} from '../components/Announcement/modals/UpdateCarAnnouncement';
+import {Button, Modal, SimpleGrid, Title} from '@mantine/core';
+import {useDisclosure} from '@mantine/hooks';
+import {carsService} from '../services/cars';
+import {charachteristicsService} from '../services/charachteristics';
+import {Loader} from '../components/Loader';
+import {useAnnouncementsStore} from '../store/uiStore';
+import {useTranslation} from 'react-i18next';
+import type {CarVariant, ICar} from '../types/car';
+
+function transformCars(cars: CarVariant[]) {
+  const uniqueModels = Array.from(new Map(
+    cars.map(c => [c.name, { value: c.name, label: c.name }])
+  ).values());
+
+  const groupedByModel = cars.reduce<Record<string, CarVariant[]>>((acc, car) => {
+    if (!acc[car.name]) acc[car.name] = [];
+    acc[car.name].push(car);
+    return acc;
+  }, {});
+
+  return { uniqueModels, groupedByModel };
+}
 
 const fetchAnnouncements = async () => {
-    const response = await carsService.getCars();
-    return response;
+    return await carsService.getCars();
 };
 
-export const Announcements: React.FC = () => {
+const fetchCarAttributes = async () => {
+    return await carsService.getCarAttributes();
+}
+
+const AnnouncementsPage: React.FC = () => {
     const queryClient = useQueryClient();
     const { data, isLoading, error } = useQuery({
         queryKey: ['announcements'],
         queryFn: fetchAnnouncements,
     });
+    const { data: attributes = [] } = useQuery({
+        queryKey: ['attributes'],
+        queryFn: fetchCarAttributes,
+    });
+
     const deleteMutation = useMutation({
         mutationFn: (id: string) => carsService.deleteCar(id),
         onSuccess: () => {
@@ -29,7 +52,7 @@ export const Announcements: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ['announcements'] });
         },
     });
-    const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+    const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear() - 5);
     const [selectedBrand, setSelectedBrand] = useState('');
     const [selectedModel, setSelectedModel] = useState('');
     const [selectedVariant, setSelectedVariant] = useState('');
@@ -42,21 +65,26 @@ export const Announcements: React.FC = () => {
 
     const { data: brands = [], isLoading: brandsLoading } = useQuery({
         queryKey: ['brands', selectedYear],
-        queryFn: () => carsService.getBrandsByYear(selectedYear),
+        queryFn: () => charachteristicsService.getBrandsByYear(selectedYear),
         enabled: !!selectedYear,
     });
 
     const { data: models = [], isLoading: modelsLoading } = useQuery({
         queryKey: ['models', selectedBrand, selectedYear],
-        queryFn: () => (selectedBrand && selectedYear) ? carsService.getModelsByBrandAndYear(selectedBrand, selectedYear) : Promise.resolve([]),
+        queryFn: () => (selectedBrand && selectedYear) ? charachteristicsService.getModelsByBrandAndYear(selectedBrand, selectedYear) : Promise.resolve([]),
         enabled: !!selectedBrand && !!selectedYear,
     });
 
-    const { data: variants = [], isLoading: variantsLoading } = useQuery({
-        queryKey: ['variants', selectedModel],
-        queryFn: () => selectedModel ? carsService.getVariantsByModelAndYear(selectedModel, selectedYear) : Promise.resolve([]),
-        enabled: !!selectedModel,
-    });
+   const { uniqueModels, groupedByModel } = React.useMemo(
+        () => transformCars(models),
+        [models]
+    );
+
+    // const { data: variants = [], isLoading: variantsLoading } = useQuery({
+    //     queryKey: ['variants', selectedModel],
+    //     queryFn: () => selectedModel ? charachteristicsService.getVariantsByModelAndYear(selectedModel, selectedYear) : Promise.resolve([]),
+    //     enabled: !!selectedModel,
+    // });
 
     const modalProps = {
         selectedYear,
@@ -68,12 +96,13 @@ export const Announcements: React.FC = () => {
         selectedVariant,
         setSelectedVariant,
         years,
+        attributes,
         brands,
-        brandsLoading,
-        models,
-        modelsLoading,
-        variants,
-        variantsLoading,
+        brandsLoading: false,
+        models: uniqueModels,
+        modelsLoading: false,
+        variants: groupedByModel[selectedModel] || [],
+        variantsLoading: false,
     };
     const [createOpened, { open: openCreate, close: closeCreate }] = useDisclosure(false);
     const [updateOpened, { open: openUpdate, close: closeUpdate }] = useDisclosure(false);
@@ -91,7 +120,7 @@ export const Announcements: React.FC = () => {
         useAnnouncementsStore.getState().setAnnouncements(current.filter(car => car.id !== id));
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (data) {
             useAnnouncementsStore.getState().setAnnouncements(data);
         }
@@ -99,9 +128,9 @@ export const Announcements: React.FC = () => {
 
     if (isLoading) {
         return (
-          <Loader />
+            <Loader />
         );
-      }
+    }
     if (error instanceof Error) return <p>Error: {error.message}</p>;
 
     return (
@@ -134,7 +163,10 @@ export const Announcements: React.FC = () => {
                     inner: { left: 0 }
                 }}
             >
-                <CreateCarAnnouncement close={closeCreate} {...modalProps} />
+                <CreateCarAnnouncement
+                    close={closeCreate}
+                    {...modalProps}
+                />
             </Modal>
 
             <Modal
@@ -148,9 +180,15 @@ export const Announcements: React.FC = () => {
                 }}
             >
                 {
-                    carToUpdate?.id && <UpdateCarAnnouncement close={closeUpdate} carId={carToUpdate.id} {...modalProps}  />
+                    carToUpdate?.id && <UpdateCarAnnouncement
+                        close={closeUpdate}
+                        carId={carToUpdate.id}
+                        {...modalProps}
+                    />
                 }
             </Modal>
         </>
     )
 }
+
+export default AnnouncementsPage;

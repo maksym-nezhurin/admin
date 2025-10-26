@@ -20,7 +20,7 @@ import { IconAt, IconLock, IconMail } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import type { IRegisterForm } from '../types/auth';
 
-export const Register: React.FC = () => {
+const Register: React.FC = () => {
   const navigate = useNavigate();
   const { register, /*user, error */} = useAuth();
   const { t } = useTranslation();
@@ -155,3 +155,5 @@ export const Register: React.FC = () => {
     </Flex>
   );
 };
+
+export default Register;

@@ -5,7 +5,7 @@ import { useUIStore } from '../store/uiStore';
 import { LANGUAGES } from '../types/constants';
 import { useTranslation } from 'react-i18next';
 
-export const Settings: React.FC = () => {
+const Settings: React.FC = () => {
   const { userInfo } = useAuth();
   const theme = useUIStore((state) => state.theme);
   const setTheme = useUIStore((state) => state.setTheme);
@@ -14,7 +14,6 @@ export const Settings: React.FC = () => {
   const [lastName, setLastName] = useState(userInfo?.lastName || '');
   const [saving, setSaving] = useState(false);
   const { t, i18n } = useTranslation();
-  
 
   // Theme switcher
   const handleThemeChange = (value: string) => {
@@ -90,3 +89,5 @@ export const Settings: React.FC = () => {
     </div>
   );
 };
+
+export default Settings;

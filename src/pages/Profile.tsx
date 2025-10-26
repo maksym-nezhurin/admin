@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import type { ISession } from '../types/auth';
 import { useTranslation } from 'react-i18next';
 
-export const Profile: React.FC = () => {
+const Profile: React.FC = () => {
   const { userInfo } = useAuth();
   const { data: userSessions, isLoading: sessionsLoading } = useUserSessions(userInfo?.sub);
   const { t } = useTranslation();
@@ -99,3 +99,5 @@ export const Profile: React.FC = () => {
     </Grid>
   );
 };
+
+export default Profile;

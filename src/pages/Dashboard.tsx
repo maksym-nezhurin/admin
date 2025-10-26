@@ -11,7 +11,7 @@ import { useUIStore } from '../store/uiStore';
 import { DashboardNav } from '../components/DashboardNav';
 import { Header } from '../components/Header';
 
-export const Dashboard: React.FC = () => {
+const DashboardPage: React.FC = () => {
   const sidebarOpen = useUIStore((state) => state.sidebarOpen);
   const closeSidebar = useUIStore((state) => state.closeSidebar);
   const isMobile = useMediaQuery('(max-width: 48em)'); // Mantine's 'sm' breakpoint
@@ -54,3 +54,5 @@ export const Dashboard: React.FC = () => {
     </>
   );
 };
+
+export default DashboardPage;

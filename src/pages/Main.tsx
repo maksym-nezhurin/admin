@@ -7,9 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { Loader } from '../components/Loader';
 import { CarAnalyticsChart } from '../components/CarAnalyticsChart';
 
-export const Main = () => {
+const Main = () => {
   const { userInfo } = useAuth();
-  console.log('Main userInfo:', userInfo);
   const { t } = useTranslation();
   const { data: cars = [], isLoading } = useQuery({
     queryKey: ['all-announcements'],
@@ -54,3 +53,5 @@ export const Main = () => {
     </div>
   );
 };
+
+export default Main;

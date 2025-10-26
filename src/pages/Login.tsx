@@ -25,7 +25,7 @@ interface LoginForm {
   password: string;
 }
 
-export const Login: React.FC = () => {
+const Login: React.FC = () => {
   const { login, user, error } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -109,3 +109,5 @@ export const Login: React.FC = () => {
     </Flex>
   );
 };
+
+export default Login;

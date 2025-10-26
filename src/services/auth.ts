@@ -1,6 +1,7 @@
 import apiClient from '../api/apiClient';
 import type { ISession } from '../types/auth';
 import type { AuthResponse, IUserInfo, LoginCredentials, RegisterResponse, IRegisterForm } from '../types/auth'; 
+import { ROUTES } from './constant';
 
 /**
  * Отримати API токен
@@ -10,7 +11,7 @@ import type { AuthResponse, IUserInfo, LoginCredentials, RegisterResponse, IRegi
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const tokenResponse = await apiClient.post<Omit<AuthResponse, 'user'>>('/auth/login', credentials);
+    const tokenResponse = await apiClient.post<Omit<AuthResponse, 'user'>>(`/${ROUTES.AUTH}/login`, credentials);
     
     if (tokenResponse.data.access_token) {
       const fullResponse: AuthResponse = {
@@ -25,7 +26,7 @@ export const authService = {
   },
 
   async register(credentials: IRegisterForm): Promise<RegisterResponse> {
-    const res = await apiClient.post('/auth/register', credentials);
+    const res = await apiClient.post('v1/auth/register', credentials);
     
     return {
       ...res.data,
@@ -34,7 +35,7 @@ export const authService = {
 
   async verifyToken(token: string): Promise<IUserInfo> {
     try {
-      const res = await apiClient.get('/verify', {
+      const res = await apiClient.get('v1/auth/me', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -51,7 +52,7 @@ export const authService = {
 
   async getUserSessions(userId: string): Promise<ISession[]> {
     try {
-      const res = await apiClient.get<{ sessions: ISession[] }>(`/auth/sessions/${userId}`);
+      const res = await apiClient.get<{ sessions: ISession[] }>(`${ROUTES.AUTH}/sessions/${userId}`);
       return res.data.sessions || [];
     } catch (error) {
       console.error('Failed to fetch user sessions:', error);
@@ -75,7 +76,7 @@ export const authService = {
    * Оновлення токена (тільки API-запит, без роботи з localStorage)
    */
   async refreshTokenApi(refresh_token: string): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/refresh', { refresh_token });
+    const response = await apiClient.post<AuthResponse>(`${ROUTES.AUTH}/refresh`, { refresh_token });
     if (response.data.access_token) {
       return response.data;
     }

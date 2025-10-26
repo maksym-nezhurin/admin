@@ -6,14 +6,22 @@ import { IconEdit, IconTrash, IconCreditCard } from '@tabler/icons-react';
 import type { ICar } from '../types/car';
 
 export function CarCard(props: ICar & { onEdit?: (car: ICar) => void; onDelete?: (id: string) => void }) {
-  const { id, ownerId, isRentable, onEdit, onDelete, images, model } = props;
+  const {
+    id,
+    ownerId, 
+    isRentable, 
+    onEdit, 
+    onDelete, 
+    media, 
+    model,
+  } = props;
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder style={{ maxWidth: 320, position: 'relative', display: 'flex', flexDirection: 'column' }}>
       <Card.Section>
         {
-          images && images.length > 0 ? (
-            <Image src={images[0]} height={160} alt={`${model} car`} />
+          media && media.length > 0 ? (
+            <Image src={media[0].url} height={160} alt={`${model} car`} />
           ) : (
             <Image src="https://placehold.co/320x160" height={160} alt={`${model} car`} />
           )

@@ -1,31 +1,128 @@
 export interface ICarModel {
   id: string;
-  value: string;
-  engine: string;
-  label: string;
-  weight: string;
-  transmission: string;
-  model: string;
-  country: string;
+  makeId: string;
+  makeDisplay: string;
+  makeCountry: string;
+  name: string; // model name
+  trim: string;
+  year: string;
+  body?: string;
+  co2?: string;
+  doors?: string;
+  drive?: string;
+  engineBoreMm?: string;
+  engineCc?: string;
+  engineCompression?: string;
+  engineCylinders?: string;
+  engineFuel?: string;
+  enginePosition?: string;
+  enginePowerPs?: string;
+  enginePowerRpm?: string;
+  engineStrokeMm?: string;
+  engineTorqueNm?: string;
+  engineTorqueRpm?: string;
+  engineType?: string;
+  engineValvesPerCylinder?: string;
+  fuelCapL?: string;
+  heightMm?: string;
+  lengthMm?: string;
+  lkmCity?: string;
+  lkmHwy?: string;
+  lkmMixed?: string;
+  seats?: string;
+  soldInUs: boolean;
+  topSpeedKph?: string;
+  transmissionType?: string;
+  weightKg?: string;
+  wheelbaseMm?: string;
+  widthMm?: string;
+  zeroTo100Kph?: string;
 }
 
 export interface ICar {
   id: string,
+  title: string,
+  description: string;
   ownerId: string,
   brand: string,
   complectation: string,
-  engine: number,
+  engineVolume: number,
+  transmission: string,
+  drive: string,
   model: string,
   type: string,
   price: number,
   year: number,
   mileage: string | number,
-  description: string;
   color?: string;
   createdAt?: string;
-  images?: string[];
+  media?: {
+    adId: string;
+    id: string;
+    position: number;
+    type: string;
+    url: string;
+  }[];
   isRentable?: boolean;
   rentPricePerDay?: number;
+}
+
+interface IMedia {
+  id: string;
+  url: string;
+  type: string;
+  position: number;
+  adId: string;
+}
+
+export interface IAnnouncementAttributes {
+  attributeId: string;
+  value: string;
+}
+
+type Currency = 'USD' | 'EUR' | 'UAH';
+
+interface IAnnouncementFormData<T> {
+  title: string;
+  description: string;
+  price: number;
+  currency?: Currency;
+  attributes: T;
+  images: File[];
+}
+
+export type IAnnouncementCarFormData = IAnnouncementFormData<IAnnouncementAttributes[]>;
+
+interface IAnnouncement extends Omit<IAnnouncementFormData, 'images' | 'attributes'> {
+  id: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+  media: IMedia[];
+}
+
+type BotyTypeOptions = 'sedan' | 'suv' | 'coupe' | 'hatchback' | 'convertible' | 'wagon' | 'van' | 'pickup';
+type TransmissionOptions = 'automatic' | 'manual' | 'cvt' | 'semi-automatic' | 'dual-clutch';
+type FuelTypeOptions = 'gasoline' | 'diesel' | 'electric' | 'hybrid' | 'hydrogen' | 'other';
+type ConditionOptions = 'new' | 'used' | 'certified pre-owned' | 'damaged';
+
+interface ICarAttributes {
+  brand: string;
+  model: string;
+  condition: ConditionOptions;
+  engineVolume: number;
+  bodyType: BotyTypeOptions;
+  transmission: TransmissionOptions;
+  fuelType: FuelTypeOptions;
+  drive: string;
+  type: string;
+  year: number;
+  mileage: string | number;
+  color?: string;
+}
+
+export interface IAnnouncementCar extends IAnnouncement, ICarAttributes {
 }
 
 export type ICarFormModel = Omit<ICar, 'id' | 'ownerId' | 'images' | 'year'> & {
@@ -38,6 +135,13 @@ export type IOption = {
   label: string,
 };
 
+export type CarVariant = {
+  id: string;
+  makeId: string;
+  name: string; // model name, e.g. "Forte"
+  trim: string;
+  year: string;
+};
 
 export interface ICarAnnoncement {
   close?: () => void,
@@ -50,6 +154,7 @@ export interface ICarAnnoncement {
   selectedVariant: string,
   setSelectedVariant: (variant: string) => void,
   years: IOption[],
+  attributes : ICarAttributes[],
   brands: IOption[],
   brandsLoading: boolean,
   models: IOption[],

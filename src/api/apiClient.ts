@@ -47,12 +47,13 @@ export function setRefreshTokenHandler(fn: () => Promise<{ access_token: string 
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
+    console.log(`API Client Error:`, error);
     const originalRequest = error.config;
     if (!originalRequest || originalRequest._retry) {
       // Prevent infinite loop
       return Promise.reject(error);
     }
-    if (error.response && error.response.status === 401) {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       originalRequest._retry = true;
       if (isRefreshing) {
         // Queue requests while refreshing
@@ -68,6 +69,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
       const retryCount = originalRequest._retryCount || 0;
       try {
+        console.log('Attempting to refresh token...');
         let newTokens;
         const currentUser = authService.getCurrentUser();
         const refresh_token = currentUser?.refresh_token;

@@ -1,15 +1,30 @@
 import { Group, Text, Badge, Divider, Image } from '@mantine/core';
 import { Carousel } from '@mantine/carousel';
+import { formatPrice } from '../utils/convertPrice';
 import type { ICar } from '../types/car';
 
 type ICarInfoProps = ICar & { withGallery: boolean, images?: string[] };
 
 export const CarInfo = (props: ICarInfoProps) => {
-    const { withGallery, brand, model, type, engine, complectation, price, year, mileage, description, images } = props;
+    const {
+        withGallery,
+        media,
+        brand = '',
+        model = '',
+        type,
+        engineVolume,
+        // complectation,
+        drive,
+        transmission,
+        price,
+        year,
+        mileage,
+        description,
+    } = props;
 
     return (
         <div>
-            {withGallery && (images && images.length > 0 ? (
+            {withGallery && (media && media.length > 0 ? (
                 <Carousel
                     withIndicators
                     height={250}
@@ -17,12 +32,12 @@ export const CarInfo = (props: ICarInfoProps) => {
                     loop
                     styles={{ indicator: { background: '#228be6' } }}
                     >
-                    {images.map((img: string, idx: number) => (
-                        <Carousel.Slide key={idx}>
+                    {media.map(({ url, id, position }) => (
+                        <Carousel.Slide key={id}>
                         <Image
-                            src={img}
+                            src={url}
                             height={250}
-                            alt={`${model} car ${idx + 1}`}
+                            alt={`${model} car ${position}`}
                             fit="cover"
                             radius={0}
                         />
@@ -43,16 +58,25 @@ export const CarInfo = (props: ICarInfoProps) => {
                 <Badge color="blue" variant="light" ml={8}>
                     {type}
                 </Badge>
+                <Badge size='xl' color="red" variant="light" ml={8}>
+                    {
+                        formatPrice(price, 'USD')
+                    }
+                </Badge>
             </Group>
     
             <Text size="sm">
-                Complectation: {complectation}
+                Transmission: {transmission}
             </Text>
 
             <Divider my="xs" />
 
             <Text size="sm" color="dimmed">
-                Engine: {engine}
+                Engine: {engineVolume} <sup>ml</sup>
+            </Text>
+
+            <Text size="sm" color="dimmed">
+                Drive: {drive}
             </Text>
             
             <Text size="sm" color="dimmed">
@@ -64,7 +88,10 @@ export const CarInfo = (props: ICarInfoProps) => {
             <Text size="sm" color="dimmed">
                 Mileage: {mileage}
             </Text>
-            <Text size="sm" color="dimmed">
+
+            <Divider my="xs" />
+
+            <Text size="sm">
                 Description: {description}
             </Text>
         </div>
