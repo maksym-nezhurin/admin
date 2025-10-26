@@ -49,6 +49,7 @@ export const carsService = {
                 message: 'Failed to fetch car attributes',
                 color: 'red',
             });
+
             throw new Error('Failed to fetch car attributes');
         }
 
