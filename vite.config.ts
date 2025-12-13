@@ -11,7 +11,7 @@ export default defineConfig({
     include: ['@reelo/ui'],
   },
   ssr: {
-    noExternal: ['@reelo/ui'],
+    noExternal: ['react-apexcharts', 'apexcharts', '@reelo/ui'],
   },
   define: {
     'process.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL),
