@@ -13,7 +13,6 @@ export const ROUTES = {
   SETTINGS: 'settings',
   ANNOUNCEMENTS: 'announcements',
   ANNOUNCEMENT_DETAIL: 'announcements/:id',
-  // PREVIEW_COMPONENTS: 'preview-components',
   MAIN: '', // index route under dashboard
 }
 
@@ -27,6 +26,5 @@ export const PAGES = {
   Settings: loadable(() => import('../pages/Settings')),
   Announcements: loadable(() => import('../pages/Announcements')),
   Announcement: loadable(() => import('../pages/Announcement')),
-  // PreviewComponents: loadable(() => import('../pages/PreviewComponents')),
   Main: loadable(() => import('../pages/Main')),
 }

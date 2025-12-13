@@ -15,7 +15,6 @@ export const CoreRoutes = (
     <Route path={ROUTES.SETTINGS} element={<PAGES.Settings />} />
     <Route path={ROUTES.ANNOUNCEMENTS} element={<PAGES.Announcements />} />
     <Route path={ROUTES.ANNOUNCEMENT_DETAIL} element={<PAGES.Announcement />} />
-    <Route path={ROUTES.PREVIEW_COMPONENTS} element={<PAGES.PreviewComponents />} />
     <Route index element={<PAGES.Main />} />
   </Route>
 )
