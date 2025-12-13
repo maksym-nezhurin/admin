@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 import { useScrapper } from "../../contexts/ScrapperContext";
 
-import { DEFAULT_FILTERS_VALUES } from "../../constants/scrapper";
+import { DEFAULT_FILTERS_VALUES, AVAILABLE_FILTERS } from "../../constants/scrapper";
 
 interface IParsedCarItem {
     title: string;
@@ -78,17 +78,18 @@ export const ScrapperNavigation = () => {
     const getParams = () => {
         const params = {
             ...filters,
-            "market": market,
-            "mileage_from": filters.mileage_from || DEFAULT_FILTERS_VALUES.mileage_from,
-            "mileage_to": filters.mileage_to || DEFAULT_FILTERS_VALUES.mileage_to,
-            "price_from": filters.price_from || DEFAULT_FILTERS_VALUES.price_from,
-            "price_to": filters.price_to || DEFAULT_FILTERS_VALUES.price_to,
-            "year_from": filters.year_from || DEFAULT_FILTERS_VALUES.year_from,
-            "year_to": filters.year_to || DEFAULT_FILTERS_VALUES.year_to,
-            "gearbox": 31393,
-            "fuel_type": filters.fuel_type || DEFAULT_FILTERS_VALUES.fuel_type,
+            market,
+            mileage_from: filters.mileage_from ?? DEFAULT_FILTERS_VALUES.mileage_from,
+            mileage_to: filters.mileage_to ?? DEFAULT_FILTERS_VALUES.mileage_to,
+            price_from: filters.price_from ?? DEFAULT_FILTERS_VALUES.price_from,
+            price_to: filters.price_to ?? DEFAULT_FILTERS_VALUES.price_to,
+            year_from: filters.year_from ?? DEFAULT_FILTERS_VALUES.year_from,
+            year_to: filters.year_to ?? DEFAULT_FILTERS_VALUES.year_to,
+            gearbox: 31393,
+            // filters store fuel under AVAILABLE_FILTERS.FUEL_TYPE (e.g. 'fuel_type_ids'), map it to API param 'fuel_type'
+            fuel_type: (filters as Record<string, any>)[AVAILABLE_FILTERS.FUEL_TYPE] ?? DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.FUEL_TYPE],
             // "location": 100000000,
-            "user_type": 2,
+            user_type: 2,
         };
         return params;
     }
