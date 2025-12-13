@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { Loader } from '../components/Loader';
-import { CarAnalyticsChart } from '../components/CarAnalyticsChart';
+// import { CarAnalyticsChart } from '../components/CarAnalyticsChart';
 
 const Main = () => {
   const { userInfo } = useAuth();
@@ -22,7 +22,7 @@ const Main = () => {
       <Stack spacing="xl">
         <Paper p="md" withBorder shadow="sm">
           <Title order={4} mb={8}>{t('cars_by_date')}</Title>
-          <CarAnalyticsChart cars={cars} userId={userInfo?.sub} />
+          {/* <CarAnalyticsChart cars={cars} userId={userInfo?.sub} /> */}
         </Paper>
         <Paper p="md" withBorder shadow="sm">
           <Title order={4} mb={8}>{t('all_announcements')}</Title>
