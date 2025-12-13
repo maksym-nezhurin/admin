@@ -43,12 +43,14 @@ export const SCRAPPING_SOURCES: TSelectOption[] = [
 
 export const FUEL_TYPES: TSelectOption[] = [
   { value: "", label: "Будь-яке" },
-  { value: "petrol", label: "Бензин" },
-  { value: "diesel", label: "Дизель" },
-  { value: "gas", label: "Газ/Бензин" },
-  { value: "hybrid", label: "Гібрид" },
-  { value: "phev", label: "Plug-In Hybrid" },
-  { value: "electric", label: "Електро" },
+  { value: 1, label: "Бензин" },
+  { value: 2, label: "Дизель" },
+  { value: 3, label: "Газ/Бензин" },
+  { value: 4, label: "Газ propan-butan/Бензин" },
+  { value: 8, label: "Газ Metan/Бензин" },
+  { value: 5, label: "Гібрид" },
+  { value: 10, label: "Plug-In Hybrid" },
+  { value: 6, label: "Електро" },
 ];
 
 const REGION_UA: TSelectOption[] = [
@@ -90,7 +92,7 @@ export const AVAILABLE_FILTERS = {
   MILEAGE_TO: 'mileage_to',
   YEAR_FROM: 'year_from',
   YEAR_TO: 'year_to',
-  FUEL_TYPE: 'fuel_type',
+  FUEL_TYPE: 'fuel_type_ids',
   STATE_IDS: 'state_ids',
 } as const;
 

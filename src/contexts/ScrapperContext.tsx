@@ -51,7 +51,7 @@ export const ScrapperProvider = ({ children }: { children: ReactNode }) => {
         const sources = GET_SCRAPPING_SOURCES_BY_MARKET(permission);
         return acc.concat(sources);
       }, []);
-      console.log('Fetched scrapper permissions:', { permissions, allowed });
+
       const permData = { defaultMarket: allowed[0].value };
       const defaultMarket: string = String(permData.defaultMarket ?? allowed[0].value);
       
