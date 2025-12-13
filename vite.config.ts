@@ -5,11 +5,14 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   resolve: {
-    dedupe: ['react', 'react-dom'], // запобігає дубляжу
+    dedupe: ['react', 'react-dom'],
   },
-  // optimizeDeps: {
-  //   include: ['@reelo/ui-web'],
-  // },
+  optimizeDeps: {
+    include: ['@reelo/ui'],
+  },
+  ssr: {
+    noExternal: ['@reelo/ui'],
+  },
   define: {
     'process.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL),
   },

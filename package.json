@@ -36,7 +36,7 @@
     "react-router-dom": "^7.6.0",
     "apexcharts": "^5.3.6",
     "zustand": "^4.4.0",
-    "@reelo/ui-web": "workspace:*"
+    "@reelo/ui": "git+https://github.com/maksym-nezhurin/reelo-ui"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
