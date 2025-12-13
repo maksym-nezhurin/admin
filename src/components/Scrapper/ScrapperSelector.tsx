@@ -1,11 +1,9 @@
-import React from "react";
 import { Select } from "@mantine/core";
 import { useScrapper } from "../../contexts/ScrapperContext";
 
 export const ScrapperSelector = () => {
     const data = useScrapper();
     const { setMarket, market, allowedMarkets } = data;
-    console.log('ScrapperSelector Props:', data);
 
     return allowedMarkets?.length && <div>
         <h3>Scrapper Selector Component</h3>
@@ -17,7 +15,10 @@ export const ScrapperSelector = () => {
             placeholder="Pick value"
             disabled={allowedMarkets.length <= 1}
             onChange={setMarket}
-            data={allowedMarkets}
+            data={(allowedMarkets || []).map((opt) => ({
+                label: String(opt.label),
+                value: String(opt.value),
+            }))}
         />
     </div>;
 }

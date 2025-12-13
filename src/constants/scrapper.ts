@@ -1,12 +1,21 @@
-export const SCRAPPING_MARKETS = [
-    { label: 'Slovakia', value: 'SK' },
-    { label: 'Ukraine', value: 'UA' },
-];
+import type { TSelectOption } from "../types/common";
 
-enum SCRAPPING_SOURCES_ENUM {
-    AUTOBazar = 'autobazar',
-    AUTORIA = 'autoria',
-}
+export const SCRAPPING_SOURCES_ENUM = {
+  AUTOBazar: 'autobazar',
+  AUTORIA: 'autoria',
+} as const;
+
+export const SCRAPPING_MARKETS_ENUM = {
+  SLOVAKIA: 'SK',
+  UKRAINE: 'UA',
+} as const;
+
+export type SCRAPPING_MARKETS_ENUM = (typeof SCRAPPING_MARKETS_ENUM)[keyof typeof SCRAPPING_MARKETS_ENUM];
+
+export const SCRAPPING_MARKETS = [
+    { label: 'Slovakia', value: SCRAPPING_MARKETS_ENUM.SLOVAKIA },
+    { label: 'Ukraine', value: SCRAPPING_MARKETS_ENUM.UKRAINE },
+];
 
 const SLOVAKIA_SOURCES = [
     { label: 'Auto bazar EU', value: SCRAPPING_SOURCES_ENUM.AUTOBazar },
@@ -16,23 +25,23 @@ const UKRAINE_SOURCES = [
     { label: 'Auto Ria UA', value: SCRAPPING_SOURCES_ENUM.AUTORIA },
 ];
 
-export const GET_SCRAPPING_SOURCES_BY_MARKET = (permission) => {
-    switch (permission) {
-        case 'SK':
-            return SLOVAKIA_SOURCES;
-        case 'UA':
-            return UKRAINE_SOURCES;
-        default:
-            return [];
-    }
-}
+export const GET_SCRAPPING_SOURCES_BY_MARKET = (permission: SCRAPPING_MARKETS_ENUM) => {
+  switch (permission) {
+    case SCRAPPING_MARKETS_ENUM.SLOVAKIA:
+      return SLOVAKIA_SOURCES;
+    case SCRAPPING_MARKETS_ENUM.UKRAINE:
+      return UKRAINE_SOURCES;
+    default:
+      return [];
+  }
+};
 
-export const SCRAPPING_SOURCES = [
+export const SCRAPPING_SOURCES: TSelectOption[] = [
     { label: 'Autobazar EU (SK)', value: SCRAPPING_SOURCES_ENUM.AUTOBazar },
     { label: 'Autoria UA', value: SCRAPPING_SOURCES_ENUM.AUTORIA },
 ];
 
-export const FUEL_TYPES = [
+export const FUEL_TYPES: TSelectOption[] = [
   { value: "", label: "Будь-яке" },
   { value: "petrol", label: "Бензин" },
   { value: "diesel", label: "Дизель" },
@@ -42,7 +51,7 @@ export const FUEL_TYPES = [
   { value: "electric", label: "Електро" },
 ];
 
-const REGION_UA = [
+const REGION_UA: TSelectOption[] = [
     { value: 0, label: "Вся Україна" },
 
     { value: 10, label: "Київська область" },
@@ -74,62 +83,77 @@ const REGION_UA = [
     { value: 23, label: "Херсонська область" }
 ];
 
-export const DEFAULT_FILTERS_VALUES = {
-    price_from: 12000,
-    price_to: 14000,
-    mileage_from: 50000,
-    mileage_to: 70000,
-    year_from: 2019,
-    year_to: 2020,
-    fuel_type: FUEL_TYPES[0].value, // Default fuel type
+export const AVAILABLE_FILTERS = {
+  PRICE_FROM: 'price_from',
+  PRICE_TO: 'price_to',
+  MILEAGE_FROM: 'mileage_from',
+  MILEAGE_TO: 'mileage_to',
+  YEAR_FROM: 'year_from',
+  YEAR_TO: 'year_to',
+  FUEL_TYPE: 'fuel_type',
+  STATE_IDS: 'state_ids',
+} as const;
+
+export type AVAILABLE_FILTERS = (typeof AVAILABLE_FILTERS)[keyof typeof AVAILABLE_FILTERS];
+
+export type Filters = {
+  [AVAILABLE_FILTERS.PRICE_FROM]?: number;
+  [AVAILABLE_FILTERS.PRICE_TO]?: number;
+  [AVAILABLE_FILTERS.MILEAGE_FROM]?: number;
+  [AVAILABLE_FILTERS.MILEAGE_TO]?: number;
+  [AVAILABLE_FILTERS.YEAR_FROM]?: number;
+  [AVAILABLE_FILTERS.YEAR_TO]?: number;
+  [AVAILABLE_FILTERS.FUEL_TYPE]?: string[];
+  [AVAILABLE_FILTERS.STATE_IDS]?: number[];
+}
+
+export const DEFAULT_FILTERS_VALUES: Filters = {
+  [AVAILABLE_FILTERS.PRICE_FROM]: 12000,
+  [AVAILABLE_FILTERS.PRICE_TO]: 14000,
+  [AVAILABLE_FILTERS.MILEAGE_FROM]: 50000,
+  [AVAILABLE_FILTERS.MILEAGE_TO]: 70000,
+  [AVAILABLE_FILTERS.YEAR_FROM]: 2019,
+  [AVAILABLE_FILTERS.YEAR_TO]: 2020,
+  [AVAILABLE_FILTERS.FUEL_TYPE]: [String(FUEL_TYPES[0].value)],
 };
 
-export const DEFAULT_FILTERS_CONFIG = [
-    { type: "number", name: "price_from", label: "Ціна від", placeholder: DEFAULT_FILTERS_VALUES.price_from },
-    { type: "number", name: "price_to", label: "Ціна до", placeholder: DEFAULT_FILTERS_VALUES.price_to },
-    { type: "number", name: "mileage_from", label: "Пробіг від", placeholder: DEFAULT_FILTERS_VALUES.mileage_from },
-    { type: "number", name: "mileage_to", label: "Пробіг до", placeholder: DEFAULT_FILTERS_VALUES.mileage_to },
-    { type: "number", name: "year_from", label: "Рік від", placeholder: DEFAULT_FILTERS_VALUES.year_from },
-    { type: "number", name: "year_to", label: "Рік до", placeholder: DEFAULT_FILTERS_VALUES.year_to },
+export interface FilterConfig {
+    type: "number" | "select" | "multiselect";
+    name: AVAILABLE_FILTERS;
+    label: string;
+    placeholder: string | number;
+    data?: TSelectOption[];
+}
+
+export const DEFAULT_FILTERS_CONFIG: FilterConfig[] = [
+  { type: 'number', name: AVAILABLE_FILTERS.PRICE_FROM, label: 'Ціна від', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.PRICE_FROM] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.PRICE_TO, label: 'Ціна до', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.PRICE_TO] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.MILEAGE_FROM, label: 'Пробіг від', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.MILEAGE_FROM] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.MILEAGE_TO, label: 'Пробіг до', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.MILEAGE_TO] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.YEAR_FROM, label: 'Рік від', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.YEAR_FROM] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.YEAR_TO, label: 'Рік до', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.YEAR_TO] ?? 0 },
 ];
 
-export const ADDITIONAL_FILTERS_CONFIG = {
-    [SCRAPPING_SOURCES_ENUM.AUTORIA]: [
-        {
-            type: "multiselect",
-            name: "state_ids",
-            label: "Регіон",
-            placeholder: "Виберіть регіон",
-            data: REGION_UA,
-        },
-        {
-            type: "multiselect",
-            name: "fuel_type",
-            label: "Тип палива",
-            placeholder: "Виберіть тип палива",
-            data: FUEL_TYPES,
-        }
-    ],
-    [SCRAPPING_SOURCES_ENUM.AUTOBazar]: [
-        // {
-        //     type: "select",
-        //     name: "user_type",
-        //     label: "Тип продавця",
-        //     placeholder: "Виберіть тип",
-        //     data: [
-        //         { value: "1", label: "Приватна особа" },
-        //         { value: "2", label: "Компанія" },
-        //     ],
-        // },
-        // {
-        //     type: "select",
-        //     name: "gearbox",
-        //     label: "КПП",
-        //     placeholder: "Виберіть КПП",
-        //     data: [
-        //         { value: "31393", label: "Automatická" },
-        //         { value: "31392", label: "Manuálna" },
-        //     ],
-        // },
-    ],
+interface AdditionalFiltersConfig {
+    [key: string]: FilterConfig[];
+}
+
+export const ADDITIONAL_FILTERS_CONFIG: AdditionalFiltersConfig = {
+  [SCRAPPING_SOURCES_ENUM.AUTORIA]: [
+    {
+      type: 'multiselect',
+      name: AVAILABLE_FILTERS.STATE_IDS,
+      label: 'Регіон',
+      placeholder: 'Виберіть регіон',
+      data: REGION_UA,
+    },
+    {
+      type: 'multiselect',
+      name: AVAILABLE_FILTERS.FUEL_TYPE,
+      label: 'Тип палива',
+      placeholder: 'Виберіть тип палива',
+      data: FUEL_TYPES,
+    },
+  ],
+  [SCRAPPING_SOURCES_ENUM.AUTOBazar]: [],
 };

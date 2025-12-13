@@ -7,6 +7,36 @@ import { useScrapper } from "../../contexts/ScrapperContext";
 
 import { DEFAULT_FILTERS_VALUES } from "../../constants/scrapper";
 
+interface IParsedCarItem {
+    title: string;
+    price: string;
+    phone: string;
+    url: string;
+}
+
+interface IResponse<T> {
+    items: T[];
+    total: number;
+    limit: number;
+    offset: number;
+    count: number;
+}
+
+interface IRequestStatus {
+    id: string;
+    status: string;
+    processed?: number;
+    total?: number;
+    percent?: number;
+}
+
+interface IEstimateResponse {
+    url_tested: string;
+    total_estimate: number;
+    per_page: number;
+    note: string;
+}
+
 const BASE_URL = 'http://localhost:8000';
 
 const apiClient = axios.create({
@@ -22,18 +52,22 @@ export const ScrapperNavigation = () => {
     const { market, filters } = useScrapper();
     const [resultTitle, setResultTitle] = useState('Items will be shown here');
     const [limit, setLimit] = useState<number>(limits[2]);
-    const [requests, setRequests] = useState([]);
-    const [estimate, setEstimates] = useState({ });
+    const [requests, setRequests] = useState<IRequestStatus[]>([]);
+    const [estimate, setEstimates] = useState<IEstimateResponse>({
+        url_tested: '',
+        total_estimate: 0,
+        per_page: 0,
+        note: '',
+    });
     const [loadingEstimate, setLoadingEstimate] = useState(false);
     const [loadingRequests, setLoadingRequests] = useState(false);
 
     const handleChangeLimit = (value: string) => {
-        console.log('Selected limit:', value);
         const newLimit = parseInt(value, 10);
         setLimit(newLimit);
     }
-    console.log('Current estimate:', estimate?.url_tested);
-    const [data, setItems] = useState({
+
+    const [data, setItems] = useState<IResponse<IParsedCarItem>>({
         items: [],
         total: 0,
         limit: limit,
@@ -56,19 +90,18 @@ export const ScrapperNavigation = () => {
             // "location": 100000000,
             "user_type": 2,
         };
-        console.log('Estimate Params:', params);
         return params;
     }
-    console.log('...  limit:', limit);
+
     const onHandleEstimate = async () => {
         setLoadingEstimate(true);
         const params = getParams();
         const res = await apiClient.post('/estimate', params);
 
-        console.log('Estimate Response:', res.data);
         setEstimates(res.data);
         setLoadingEstimate(false);
     };
+    
     const onCheckProgress = async (taskId: string) => {
         const res = await apiClient.get(`/progress/${taskId}`);
         const { processed, total, percent } = res.data;
@@ -79,12 +112,11 @@ export const ScrapperNavigation = () => {
             }
             return r;
         }));
-        console.log('Progress Response:', res.data);
     }
+    
     const onViewResults = async (taskId: string) => {
         const res = await apiClient.get(`/items/task/${taskId}`);
-        console.log('Results Response:', res.data);
-        setItems(res.data);
+        setItems(res.data as IResponse<IParsedCarItem>);
         setResultTitle(`Found ${res.data.total} items for task ${taskId}.`);
     }
     const onHandleStart = async () => {
@@ -96,7 +128,6 @@ export const ScrapperNavigation = () => {
 
         setRequests([...requests, { id: task_id, status }]);
 
-        console.log('Start Response:', res.data);
         setLoadingRequests(false);
     };
 
@@ -199,7 +230,7 @@ export const ScrapperNavigation = () => {
                             limit: limit,
                         }
                     });
-                    console.log('All Items Response:', res.data);
+
                     setItems(res.data);
                     setResultTitle(`Found ${res.data.total} items in total in DB.`);
                 }}>Fetch All Items</Button>

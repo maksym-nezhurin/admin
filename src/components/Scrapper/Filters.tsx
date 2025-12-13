@@ -1,22 +1,21 @@
 import { Button, NumberInput, Select, Stack, Group, MultiSelect } from "@mantine/core";
 import { useState, useEffect } from "react";
+
+import { prepareOptionsForSelect } from "../../utils/formAdapters";
+import { useScrapper, type IFilters } from "../../contexts/ScrapperContext";
+
 import "./Filters.css";
-import { useScrapper } from "../../contexts/ScrapperContext";
 
 export const Filters = () => {
   const { filters, setFilters, filtersConfig } = useScrapper();
-
   const [isVirgin, setIsVirgin] = useState(true);
-  const [values, setValues] = useState(filters);
-
-  console.log('Filters Component Props:', { filters, values });
+  const [values, setValues] = useState<IFilters>(filters);
   const handleChange = (name: string, value: string[] | null | number | any) => {
     setIsVirgin(false);
-    console.log('handleChange', name, value);
     // normalize incoming value: Mantine MultiSelect returns string[] or null
     if (Array.isArray(value)) {
       // convert back to numbers if original data uses numbers
-      const parsed = value.map((v) => {
+      const parsed = value.map((v: string) => {
         const n = Number(v);
         return Number.isNaN(n) ? v : n;
       });
@@ -45,14 +44,15 @@ export const Filters = () => {
   }
 
   return (
-    <Stack gap="md" p="md" style={{ background: "#f8f9fa", borderRadius: 8 }}>
+    <Stack style={{ background: "#f8f9fa", borderRadius: 8, gap: '16px', padding: '16px' }}>
       {filtersConfig.map((f) => (
         <div key={f.name}>
           {f.type === "number" && (
             <NumberInput
+              type="number"
               label={f.label}
-              placeholder={f.placeholder}
-              value={values[f.name]}
+              placeholder={String(f.placeholder)}
+              value={Number(values[f.name])}
               onChange={(value) => handleChange(f.name, value)}
             />
           )}
@@ -60,10 +60,10 @@ export const Filters = () => {
           {f.type === "select" && (
             <Select
               label={f.label}
-              placeholder={f.placeholder}
-              data={f.data}
-              value={values[f.name]}
-              onChange={(value) => handleChange(f.name, value)}
+              placeholder={String(f.placeholder)}
+              data={prepareOptionsForSelect(f.data)}
+              value={values[f.name] !== undefined && values[f.name] !== null ? String(values[f.name]) : null}
+              onChange={(value: string | null) => handleChange(f.name, value)}
               clearable
             />
           )}
@@ -71,20 +71,17 @@ export const Filters = () => {
           {f.type === "multiselect" && (
             <MultiSelect
               label={f.label}
-              placeholder={f.placeholder}
-              data={(f.data || []).map((opt) => ({
-                label: String(opt.label),
-                value: String(opt.value),
-              }))}
-              value={(values[f.name] || []).map(String)}
-              onChange={(value) => handleChange(f.name, value)}
+              placeholder={String(f.placeholder)}
+              data={prepareOptionsForSelect(f.data)}
+              value={Array.isArray(values[f.name]) ? (values[f.name] as (string | number)[]).map(String) : []}
+              onChange={(value: string[] | null) => handleChange(f.name, value)}
               clearable
             />
           )}
         </div>
       ))}
 
-      <Group justify="flex-end">
+      <Group style={{ justifyContent: 'flex-end' }}>
         <Button onClick={applyFilters} disabled={isVirgin}>
           Застосувати
         </Button>

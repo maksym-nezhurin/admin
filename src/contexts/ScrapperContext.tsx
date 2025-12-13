@@ -1,18 +1,19 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { DEFAULT_FILTERS_CONFIG, ADDITIONAL_FILTERS_CONFIG, GET_SCRAPPING_SOURCES_BY_MARKET } from '../constants/scrapper';
-
-interface Filters {
-  [key: string]: string | number;
+import { DEFAULT_FILTERS_CONFIG, ADDITIONAL_FILTERS_CONFIG, GET_SCRAPPING_SOURCES_BY_MARKET, SCRAPPING_MARKETS_ENUM } from '../constants/scrapper';
+import type { FilterConfig } from '../constants/scrapper';
+import type { TSelectOption } from '../types/common';
+export interface IFilters {
+  [key: string]: string | number | Array<string | number> | undefined;
 }
 
 interface ScrapperContextType {
   market: string;
   setMarket: (m: string) => void;
-  filters: Filters;
-  setFilters: (f: Filters) => void;
-  availableSources: string[];
-  allowedMarkets: string[];
+  filters: IFilters;
+  filtersConfig: FilterConfig[];
+  setFilters: (f: IFilters) => void;
+  allowedMarkets: TSelectOption[];
   loading: boolean;
   error?: string;
   refresh: () => Promise<void>;
@@ -28,9 +29,9 @@ export const useScrapper = (): ScrapperContextType => {
 
 export const ScrapperProvider = ({ children }: { children: ReactNode }) => {
   const [market, setMarket] = useState<string>('');
-  const [filtersConfig, setFiltersConfig] = useState<Filters>([]);
-  const [filters, setFilters] = useState<Filters>({});
-  const [allowedMarkets, setAllowedMarkets] = useState<string[]>([]);
+  const [filtersConfig, setFiltersConfig] = useState<FilterConfig[]>([]);
+  const [filters, setFilters] = useState<IFilters>({});
+  const [allowedMarkets, setAllowedMarkets] = useState<TSelectOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -42,32 +43,27 @@ export const ScrapperProvider = ({ children }: { children: ReactNode }) => {
       // const permRes = await fetch('/api/scrapper/permissions');
       // if (!permRes.ok) throw new Error('permissions fetch failed');
       // const permData = await permRes.json();
-      const permissions = [
+      const permissions: SCRAPPING_MARKETS_ENUM[] = [
         'UA',
         // 'SK', 
       ];
-      const allowed: string[] = permissions.reduce((acc: string[], permission: string) => {
+      const allowed: TSelectOption[] = permissions.reduce((acc: TSelectOption[], permission: SCRAPPING_MARKETS_ENUM) => {
         const sources = GET_SCRAPPING_SOURCES_BY_MARKET(permission);
         return acc.concat(sources);
       }, []);
-      const permData = { defaultMarket: allowed[0].value }; // mock default market
-      const defaultMarket: string = permData.defaultMarket ?? allowed[0].value;
+      console.log('Fetched scrapper permissions:', { permissions, allowed });
+      const permData = { defaultMarket: allowed[0].value };
+      const defaultMarket: string = String(permData.defaultMarket ?? allowed[0].value);
       
       setAllowedMarkets(allowed);
       setMarket(prev => prev || defaultMarket);
-      // fetch sources for default market
-      // const srcRes = await fetch(`/api/scrapper/sources?market=${encodeURIComponent(defaultMarket)}`);
-      // if (!srcRes.ok) throw new Error('sources fetch failed');
-      // const srcData = await srcRes.json();
-      // setAvailableSources(srcData.sources ?? []);
-    } catch (err: any) {
+    } catch (err: Error | any) {
       setError(err?.message ?? 'unknown');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // initial permissions + sources
   useEffect(() => {
     console.log('Fetching scrapper permissions and sources...');
     fetchPermissions();

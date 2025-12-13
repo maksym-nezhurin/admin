@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 import {
   AppShell,
@@ -18,7 +18,7 @@ import { Loader } from '../components/Loader';
 const ScrapperContent: React.FC = () => {
     const isMobile = useMediaQuery('(max-width: 48em)'); // Mantine's 'sm' breakpoint
     const { loading } = useScrapper();
-    console.log('loading', loading);
+
     return loading ?
      <Loader /> :
      (
