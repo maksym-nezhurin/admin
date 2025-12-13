@@ -7,6 +7,7 @@ export const AppRoutes: React.FC = () => (
   <Routes>
     <Route path={ROUTES.LOGIN} element={<PAGES.Login />} />
     <Route path={ROUTES.REGISTER} element={<PAGES.Register />} />
+    <Route path={ROUTES.SCRAPPER} element={<PAGES.Scrapper />} />
 
     {CoreRoutes}
 

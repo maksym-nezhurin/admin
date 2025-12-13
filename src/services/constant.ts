@@ -1,6 +1,6 @@
 const API_PREFIX = `v1`;
 const CHARACTERISTICS_API_URL = import.meta.env.VITE_CHARACTERISTICS_API_URL;
-const BRANDS_API_URL = `${CHARACTERISTICS_API_URL}charachteristics/brands`;
+const BRANDS_API_URL = `${CHARACTERISTICS_API_URL}characteristics/brands`;
 
 export const ROUTES = {
   AUTH: `${API_PREFIX}/auth`,
