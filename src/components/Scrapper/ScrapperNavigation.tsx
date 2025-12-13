@@ -159,7 +159,7 @@ export const ScrapperNavigation = () => {
                                         isFinished ? `🟢` : `🔴`
                                     }
                                 </span>
-                                Request #{request.id} - Status: {request.status}
+                                Request - Status: {request.status === 'enqueued' ? 'In Queue' : request.status}
 
                                 {
                                     request.processed && <span> - Processed: {request.processed} / {request.total}. Percent {request.percent}</span>
