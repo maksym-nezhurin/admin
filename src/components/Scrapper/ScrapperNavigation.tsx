@@ -37,7 +37,7 @@ interface IEstimateResponse {
     note: string;
 }
 
-const BASE_URL = import.meta.env.VITE_SCRAPPER_URL || 'http://localhost:8000/scrapper';
+const BASE_URL = import.meta.env.VITE_SCRAPPER_URL || 'http://localhost:8000';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -104,12 +104,19 @@ export const ScrapperNavigation = () => {
     };
     
     const onCheckProgress = async (taskId: string) => {
+        setRequests(requests.map(r => {
+            if (r.id === taskId) {
+                return { ...r, loading: true };
+            }
+            return r;
+        }));
+
         const res = await apiClient.get(`/progress/${taskId}`);
         const { processed, total, percent } = res.data;
 
         setRequests(requests.map(r => {
             if (r.id === taskId) {
-                return { ...r, status: res.data.status, processed, total, percent };
+                return { ...r, status: res.data.status, processed, total, percent, loading: false };
             }
             return r;
         }));
@@ -201,7 +208,7 @@ export const ScrapperNavigation = () => {
                             <div>
                                 {/* groput 3 button in one */}
                                 <Group spacing="xs" mt={8}>
-                                    <Button onClick={() => onCheckProgress(request.id)} disabled={isFinished}>View Progress</Button>
+                                    <Button onClick={() => onCheckProgress(request.id)} loading={request.loading} disabled={isFinished || request.loading}>View Progress</Button>
                                     <Button onClick={() => onViewResults(request.id)} disabled={!isFinished}>View Results</Button>
                                     {/* <Button onClick={() => generateXlsDoc(request.id)} disabled={!isFinished}>Generate XLS</Button> */}
                                     <Link to={`${BASE_URL}/export/task/${request.id}.xlsx`} download={true}>Generate XLS</Link>
