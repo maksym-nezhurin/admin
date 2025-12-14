@@ -28,6 +28,7 @@ interface IRequestStatus {
     processed?: number;
     total?: number;
     percent?: number;
+    loading?: boolean;
 }
 
 interface IEstimateResponse {
