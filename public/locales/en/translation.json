@@ -1,6 +1,11 @@
 {
   "welcome": "Welcome",
   "to_admin": "to admin mode",
+  "to_superadmin": "to superadmin mode",
+  "to_manager": "to manager mode",
+  "to_scrapper": "to scrapper mode",
+  "to_user": "to user mode",
+  "to_guest": "to guest mode",
   "nav_hint": "Use the navigation to explore different sections.",
   "settings": "Settings",
   "theme": "Theme",
@@ -27,6 +32,8 @@
   "save": "Save",
   "cancel": "Cancel",
   "dashboard": "Dashboard",
+  "scrapper": "Scrapper",
+  "users": "Users",
   "announcements": "Announcements",
   "create_announcement": "Create Announcement",
   "edit_announcement": "Edit Announcement",
@@ -99,5 +106,6 @@
   "mileage_label": "Mileage",
   "year_label": "Year",
   "description_label": "Description",
-  "cars_published": "Cars published"
+  "cars_published": "Cars published",
+  "insufficient_role_level_warning": "You have insufficient role level to view this page."
 }

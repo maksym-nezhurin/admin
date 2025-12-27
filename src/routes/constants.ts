@@ -3,7 +3,6 @@ import loadable from '@loadable/component';
 export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
-  SCRAPPER: '/scrapper',
   DASHBOARD: '/dashboard',
 
   /**
@@ -13,6 +12,9 @@ export const ROUTES = {
   SETTINGS: 'settings',
   ANNOUNCEMENTS: 'announcements',
   ANNOUNCEMENT_DETAIL: 'announcements/:id',
+  SCRAPPER: 'scrapper',
+  SCRAPPER_TASK: 'scrapper/task/:id',
+  USERS: 'users',
   // PREVIEW_COMPONENTS: 'preview-components',
   MAIN: '', // index route under dashboard
 }
@@ -23,6 +25,9 @@ export const PAGES = {
   Scrapper: loadable(() => import('../pages/Scrapper')),
 
   Dashboard: loadable(() => import('../pages/Dashboard')),
+  Users: loadable(() => import('../pages/Users')),
+  DashboardScrapper: loadable(() => import('../pages/DashboardScrapper')),
+  ScrapperTask: loadable(() => import('../pages/ScrapperItem')),
   Profile: loadable(() => import('../pages/Profile')),
   Settings: loadable(() => import('../pages/Settings')),
   Announcements: loadable(() => import('../pages/Announcements')),

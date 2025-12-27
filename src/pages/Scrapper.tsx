@@ -10,7 +10,7 @@ import { NavBar } from '../components/Scrapper/NavBar';
 import { useMediaQuery } from '@mantine/hooks';
 
 import { ScrapperSelector } from '../components/Scrapper/ScrapperSelector';
-import { ScrapperNavigation } from '../components/Scrapper/ScrapperNavigation';
+import { ScrapperNavigation } from '../components/Scrapper/ScrapperRequestList';
 
 import { ScrapperProvider, useScrapper } from '../contexts/ScrapperContext';
 import { Loader } from '../components/Loader';

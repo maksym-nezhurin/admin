@@ -6,8 +6,6 @@ export const ScrapperSelector = () => {
     const { setMarket, market, allowedMarkets } = data;
 
     return allowedMarkets?.length && <div>
-        <h3>Scrapper Selector Component</h3>
-
         <Select
             value={market}
             name="scrappingSource"

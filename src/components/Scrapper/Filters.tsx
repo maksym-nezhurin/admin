@@ -1,4 +1,4 @@
-import { Button, NumberInput, Select, Stack, Group, MultiSelect } from "@mantine/core";
+import { Button, NumberInput, Select, Group, MultiSelect } from "@mantine/core";
 import { useState, useEffect } from "react";
 
 import { prepareOptionsForSelect } from "../../utils/formAdapters";
@@ -44,7 +44,8 @@ export const Filters = () => {
   }
 
   return (
-    <Stack style={{ background: "#f8f9fa", borderRadius: 8, gap: '16px', padding: '16px' }}>
+    <div>
+      <div className="filters-container">
       {filtersConfig.map((f) => (
         <div key={f.name}>
           {f.type === "number" && (
@@ -52,7 +53,7 @@ export const Filters = () => {
               type="number"
               label={f.label}
               placeholder={String(f.placeholder)}
-              value={Number(values[f.name])}
+              value={Number(values[f.name] || f.placeholder)}
               onChange={(value) => handleChange(f.name, value)}
             />
           )}
@@ -80,12 +81,12 @@ export const Filters = () => {
           )}
         </div>
       ))}
-
-      <Group style={{ justifyContent: 'flex-end' }}>
+      </div>
+      <Group style={{ justifyContent: 'center', marginTop: '1rem' }}>
         <Button onClick={applyFilters} disabled={isVirgin}>
           Застосувати
         </Button>
       </Group>
-    </Stack>
+    </div>
   );
 };
