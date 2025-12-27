@@ -25,11 +25,9 @@ export const ScrapperNavigation = () => {
         }));
 
         const res = await apiClient.get(`/progress/${taskId}`);
-        console.log('Progress response:', res.data);
         const { processed, total, percent } = res.data;
 
         setRequests(requests.map(r => {
-            console.log('r:', r, taskId);
             if (r.task_id === taskId) {
                 return { ...r, status: res.data.status, processed, total, percent, loading: false };
             }

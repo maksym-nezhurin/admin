@@ -107,7 +107,7 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
 
   useEffect(() => {
     const fetchRequests = async () => {
-      if (!userId || !market) return;
+      if (!userId) return;
       
       setLoading(true);
       setError(undefined);
