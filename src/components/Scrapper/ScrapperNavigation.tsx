@@ -5,30 +5,6 @@ import { Button } from '@mantine/core';
 import { useScrapper } from '../../contexts/ScrapperContext';
 import { AVAILABLE_FILTERS, DEFAULT_FILTERS_VALUES } from '../../constants/scrapper';
 
-interface IParsedCarItem {
-    title: string;
-    price: string;
-    phone: string;
-    url: string;
-}
-
-interface IResponse<T> {
-    items: T[];
-    total: number;
-    limit: number;
-    offset: number;
-    count: number;
-}
-
-interface IRequestStatus {
-    id: string;
-    status: string;
-    processed?: number;
-    total?: number;
-    percent?: number;
-    loading?: boolean;
-}
-
 interface IEstimateResponse {
     url_tested: string;
     total_estimate: number;
@@ -91,7 +67,7 @@ export const ScrapperNavigation = () => {
 
         const { task_id, status } = res.data;
 
-        setRequests([...requests, { task_id, status }]);
+        setRequests([...requests, { task_id, status, id: task_id, market, items_count: 0, duration_seconds: 0 }]);
 
         setLoadingRequests(false);
     };

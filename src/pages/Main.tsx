@@ -14,7 +14,7 @@ const Main = () => {
     <Welcome />
 
     {
-      roleLevel.level <= 60 ?
+      roleLevel && roleLevel.level <= 60 ?
         (
             <Text color="red">{t('insufficient_role_level_warning')}</Text>
         ) : (

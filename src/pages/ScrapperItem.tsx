@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button, Group, Stack } from "@mantine/core";
 import { scrapperServices } from '../services/scrapper';
 import { useScrapper } from '../contexts/ScrapperContext';
+import type { IParsedCarItem } from '../types/scrapper';
 import { useAuth } from '../contexts/AuthContext';
 
 import { ScrapperProvider } from '../contexts/ScrapperContext';
@@ -16,15 +17,15 @@ const ScrapperItem = () => {
     const navigate = useNavigate();
     const { userInfo } = useAuth();
     const { market } = useScrapper();
-    const [scrapperItemDetails, setScrapperItemDetails] = useState([]);
+    const [scrapperItemDetails, setScrapperItemDetails] = useState<IParsedCarItem[]>([]);
     const totalAmount = scrapperItemDetails.length;
-    const itemsWithoutPhone = scrapperItemDetails.filter((item) => !item.phone);
+    const itemsWithoutPhone = scrapperItemDetails.filter((item: IParsedCarItem) => !item.phone);
 
     const onHanldeClick = async () => {
         const res = await scrapperServices.refreshScrapperItemDetails({
-            user_id: userInfo.id,
+            user_id: userInfo?.id,
             urls: itemsWithoutPhone.map(item => item.url),
-            market: market, 
+            market: market || null, 
         });
         console.log('Refreshing scrapper item details for id:', id, res);
     }
@@ -69,9 +70,11 @@ const ScrapperItem = () => {
 
         <div>
             {
-                scrapperItemDetails
-                 ? <ScrapperTable rowData={scrapperItemDetails} />
-                 : null
+                scrapperItemDetails.length > 0 ? (
+                    <ScrapperTable rowData={scrapperItemDetails} />
+                ) : (
+                    <p>No items available</p>
+                )
             }
         </div>
     </>

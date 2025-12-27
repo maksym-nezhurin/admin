@@ -66,7 +66,7 @@ export const ScrapperNavigation = () => {
                                         <span style={{ fontStyle: 'italic' }}>
                                             {
                                              isFinished && request.duration_seconds
-                                             ? ' (finished during ' + parseInt(request.duration_seconds, 10) + ' seconds)'
+                                             ? ' (finished during ' + parseInt(String(request.duration_seconds), 10) + ' seconds)'
                                              : <strong>
                                                 {' '}{request.status === 'enqueued' ? 'In Queue' : request.status}
                                                </strong>

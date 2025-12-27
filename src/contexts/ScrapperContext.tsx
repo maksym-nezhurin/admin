@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type { ReactNode } from 'react';
 import { DEFAULT_FILTERS_CONFIG, ADDITIONAL_FILTERS_CONFIG, GET_SCRAPPING_SOURCES_BY_MARKET, SCRAPPING_MARKETS_ENUM } from '../constants/scrapper';
 import type { FilterConfig } from '../constants/scrapper';
 import type { TSelectOption } from '../types/common';
@@ -11,6 +10,10 @@ export interface IFilters {
 
 interface IRequest {
     id: string;
+    task_id: string;
+    items_count?: number;
+    duration_seconds?: number;
+    market?: SCRAPPING_MARKETS_ENUM | null;
     status: string;
     processed?: number;
     total?: number;
@@ -19,8 +22,8 @@ interface IRequest {
 }
 
 interface ScrapperContextType {
-  market: string;
-  setMarket: (m: string) => void;
+  market: SCRAPPING_MARKETS_ENUM | null;
+  setMarket: (m: SCRAPPING_MARKETS_ENUM | null) => void;
   filters: IFilters;
   filtersConfig: FilterConfig[];
   setFilters: (f: IFilters) => void;
@@ -32,6 +35,11 @@ interface ScrapperContextType {
   setRequests: (r: IRequest[]) => void;
 }
 
+interface ScrapperProviderProps {
+  userId?: string;
+  children: React.ReactNode;
+}
+
 const ScrapperContext = createContext<ScrapperContextType | undefined>(undefined);
 
 export const useScrapper = (): ScrapperContextType => {
@@ -40,12 +48,12 @@ export const useScrapper = (): ScrapperContextType => {
   return ctx;
 };
 
-export const ScrapperProvider = ({ userId, children }: { children: ReactNode }) => {
-  const [market, setMarket] = useState<string>('');
+export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, children }) => {
+  const [market, setMarket] = useState<SCRAPPING_MARKETS_ENUM | null>(null);
   const [requests, setRequests] = useState<IRequest[]>([]);
   const [filtersConfig, setFiltersConfig] = useState<FilterConfig[]>([]);
   const [filters, setFilters] = useState<IFilters>({
-    user_id: userId,
+    user_id: userId ?? undefined,
   });
   const [allowedMarkets, setAllowedMarkets] = useState<TSelectOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,10 +78,10 @@ export const ScrapperProvider = ({ userId, children }: { children: ReactNode }) 
       }, []);
 
       const permData = { defaultMarket: allowed[0].value };
-      const defaultMarket: string = String(permData.defaultMarket ?? allowed[0].value);
+      const defaultMarket: SCRAPPING_MARKETS_ENUM = String(permData.defaultMarket ?? allowed[0].value) as SCRAPPING_MARKETS_ENUM;
       
       setAllowedMarkets(allowed);
-      setMarket(prev => prev || defaultMarket);
+      setMarket(prev => prev || (defaultMarket as SCRAPPING_MARKETS_ENUM) || null);
     } catch (err: Error | any) {
       setError(err?.message ?? 'unknown');
     } finally {
@@ -99,6 +107,8 @@ export const ScrapperProvider = ({ userId, children }: { children: ReactNode }) 
 
   useEffect(() => {
     const fetchRequests = async () => {
+      if (!userId || !market) return;
+      
       setLoading(true);
       setError(undefined);
       try {
@@ -114,7 +124,7 @@ export const ScrapperProvider = ({ userId, children }: { children: ReactNode }) 
     if (userId) {
         fetchRequests();
     }
-  }, []);
+  }, [userId, getMyRequests]);
 
   const refresh = useCallback(async () => {
     await fetchPermissions();

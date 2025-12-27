@@ -4,9 +4,9 @@ import apiScrapperClient from "../api/apiScrapperClient";
 import { SCRAPPING_MARKETS_ENUM } from "../constants/scrapper";
 
 interface IRefreshScrapperItem {
-    user_id: string,
+    user_id?: string,
     urls: string[],
-    market: SCRAPPING_MARKETS_ENUM
+    market?: SCRAPPING_MARKETS_ENUM | null
 };
 
 export const scrapperServices = {

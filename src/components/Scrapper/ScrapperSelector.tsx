@@ -5,6 +5,8 @@ export const ScrapperSelector = () => {
     const data = useScrapper();
     const { setMarket, market, allowedMarkets } = data;
 
+    console.log('ScrapperSelector data:', { market, allowedMarkets });
+
     return allowedMarkets?.length && <div>
         <Select
             value={market}

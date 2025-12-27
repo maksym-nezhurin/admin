@@ -16,12 +16,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const verifyAndSetUser = useCallback(async (userResponse: AuthResponse) => {
     try {      
       const { valid, user } = await authService.verifyToken(userResponse.access_token);
-      if (valid) {
+      if (valid && user) {
         setUser(userResponse);
         setUserInfo(user);
-        const higherRole = user.roles.reduce((prev, current) => {
+        const higherRole = user?.roles?.reduce((prev, current) => {
           return prev.level > current.role.level ? prev : current.role;
-        }, { level: 10, name: '' });
+        }, { level: 10, name: '' } as { level: number; name: string }) || { level: 10, name: '' };
         setRoleLevel(higherRole);
         return true;
       }
