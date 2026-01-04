@@ -10,7 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { ScrapperProvider } from '../contexts/ScrapperContext';
 import { ScrapperTable } from '../components/Scrapper/Table';
 
-const BASE_URL = import.meta.env.VITE_SCRAPPER_URL || 'http://localhost:8000';
+const BASE_URL = import.meta.env.VITE_SCRAPPER_URL || 'http://localhost:8000/';
 
 const ScrapperItem = () => {
     const { id } = useParams();
@@ -47,7 +47,6 @@ const ScrapperItem = () => {
         }
     }, [id]);
 
-    console.log(loading)
     return (
         <>
             <Stack spacing="md" mb={20}>

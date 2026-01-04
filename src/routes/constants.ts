@@ -13,11 +13,15 @@ export const ROUTES = {
   ANNOUNCEMENTS: 'announcements',
   ANNOUNCEMENT_DETAIL: 'announcements/:id',
   SCRAPPER: 'scrapper',
-  SCRAPPER_TASK: 'scrapper/task/:id',
+  SCRAPPER_TASK: 'task/:id',
   USERS: 'users',
   // PREVIEW_COMPONENTS: 'preview-components',
   MAIN: '', // index route under dashboard
 }
+
+export const LAYOUTS = {
+  Scrapper: loadable(() => import('../layouts/Scrapper')),
+};
 
 export const PAGES = {
   Login: loadable(() => import('../pages/Login')),

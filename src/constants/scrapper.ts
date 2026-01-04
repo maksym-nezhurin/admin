@@ -50,6 +50,7 @@ export const FUEL_TYPES: TSelectOption[] = [
   { value: 8, label: "Газ Metan/Бензин" },
   { value: 5, label: "Гібрид" },
   { value: 10, label: "Plug-In Hybrid" },
+  { value: 11, label: "MHEB" },
   { value: 6, label: "Електро" },
 ];
 

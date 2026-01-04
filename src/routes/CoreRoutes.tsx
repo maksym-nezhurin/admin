@@ -1,6 +1,6 @@
 import { Route } from 'react-router-dom'
 import { PrivateRoute } from './PrivateRoute'
-import { ROUTES, PAGES } from './constants'
+import { ROUTES, PAGES, LAYOUTS } from './constants'
 
 export const CoreRoutes = (
   <Route
@@ -15,10 +15,9 @@ export const CoreRoutes = (
     <Route path={ROUTES.SETTINGS} element={<PAGES.Settings />} />
     <Route path={ROUTES.ANNOUNCEMENTS} element={<PAGES.Announcements />} />
     <Route path={ROUTES.ANNOUNCEMENT_DETAIL} element={<PAGES.Announcement />} />
-    <Route>
-    {/* TODO: scrapper item details by id */}
-      <Route index path={ROUTES.SCRAPPER} element={<PAGES.DashboardScrapper />} />
-      <Route index path={ROUTES.SCRAPPER_TASK} element={<PAGES.ScrapperTask />} />  
+    <Route path={ROUTES.SCRAPPER} element={<LAYOUTS.Scrapper />}>
+      <Route index element={<PAGES.DashboardScrapper />} />
+      <Route path={ROUTES.SCRAPPER_TASK} element={<PAGES.ScrapperTask />} />
     </Route>
     <Route path={ROUTES.USERS} element={<PAGES.Users />} />
     {/* <Route path={ROUTES.PREVIEW_COMPONENTS} element={<PAGES.PreviewComponents />} /> */}
