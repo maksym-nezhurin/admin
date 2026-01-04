@@ -21,6 +21,13 @@ const apiClient = axios.create({
   },
 });
 
+const localApiClient = axios.create({
+  baseURL: 'http://localhost:8000',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+});
+
 export const ScrapperNavigation = () => {
     const { filters, market, requests, setRequests } = useScrapper();
     const [estimate, setEstimates] = useState<IEstimateResponse>({
@@ -29,6 +36,8 @@ export const ScrapperNavigation = () => {
         per_page: 0,
         note: '',
     });
+    const [client, setClient] = useState(apiClient);
+    const [disabled, setDisabled] = useState(false);
     const [loadingEstimate, setLoadingEstimate] = useState(false);
     const [loadingRequests, setLoadingRequests] = useState(false);
 
@@ -54,16 +63,21 @@ export const ScrapperNavigation = () => {
     const onHandleEstimate = async () => {
         setLoadingEstimate(true);
         const params = getParams();
-        const res = await apiClient.post('/estimate', params);
+        const res = await client.post('/estimate', params);
 
         setEstimates(res.data);
         setLoadingEstimate(false);
     };
 
+    const useLocal = async () => {
+        setClient(localApiClient);
+        setDisabled(true);
+    };
+
     const onHandleStart = async () => {
         setLoadingRequests(true);
         const params = getParams();
-        const res = await apiClient.post('/start', params);
+        const res = await client.post('/start', params);
 
         const { task_id, status } = res.data;
 
@@ -75,6 +89,9 @@ export const ScrapperNavigation = () => {
     return <div>
          <nav>
             <ul style={{ listStyleType: 'none', padding: 0, display: 'flex', gap: '10px' }}>
+                <li>
+                    <Button onClick={useLocal} disabled={disabled}>Use Local</Button>
+                </li>
                 <li>
                     <Button onClick={onHandleEstimate} disabled={loadingEstimate}>Estimate request</Button>
                 </li>
