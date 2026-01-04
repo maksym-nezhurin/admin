@@ -18,6 +18,7 @@ const ScrapperItem = () => {
     const { userInfo } = useAuth();
     const { market } = useScrapper();
     const [scrapperItemDetails, setScrapperItemDetails] = useState<IParsedCarItem[]>([]);
+    const [loading, setLoading] = useState(true);
     const totalAmount = scrapperItemDetails.length;
     const itemsWithoutPhone = scrapperItemDetails.filter((item: IParsedCarItem) => !item.phone);
 
@@ -33,52 +34,64 @@ const ScrapperItem = () => {
         const items = await scrapperServices.getTaskDataItems(itemId);
 
         setScrapperItemDetails(items);
+        setLoading(false);
     };
 
     useEffect(() => {
-        getScrapperItemDetails(id || '');
+        setLoading(true);
+        try {
+            getScrapperItemDetails(id || '');
+        } catch(error) {
+            console.log(error);
+            setLoading(false);
+        }
     }, [id]);
 
-  return (
-    <>
-        <Stack spacing="md" mb={20}>
-            <Group spacing={4} align='center' style={{ justifyContent: 'space-between' }}>
-                <h4>Details for Task ID: {id}</h4>
+    console.log(loading)
+    return (
+        <>
+            <Stack spacing="md" mb={20}>
+                <Group spacing={4} align='center' style={{ justifyContent: 'space-between' }}>
+                    <h4>Details for Task ID: {id}</h4>
 
-                <Button onClick={() => navigate('/dashboard/scrapper')}>Back to scrapper</Button>
-            </Group>
-            
+                    <Button onClick={() => navigate('/dashboard/scrapper')}>Back to scrapper</Button>
+                </Group>
+                
 
-            <Group spacing="xs" mt={8}>
-                <Link to={`${BASE_URL}export/task/${id}.xlsx`} download={true}>Generate XLS</Link>
-            </Group>
-        </Stack>
+                <Group spacing="xs" mt={8}>
+                    {
+                        loading ? 'Please wait...' : (
+                            <Link to={`${BASE_URL}export/task/${id}.xlsx`} download={true}>Generate XLS</Link>
+                        )
+                    }
+                </Group>
+            </Stack>
 
-        <div>
-            <h4>Scrapper Items</h4>
-            <p>Total Items: {totalAmount}</p>
+            <div>
+                <h4>Scrapper Items</h4>
+                <p>Total Items: {loading ? 'loading ...' : totalAmount}</p>
 
-            <Group spacing="xl" mt={8}>
-                <div>
-                    <p>Items without phones: {itemsWithoutPhone.length}</p>
-                </div>
-                <div>
-                    <Button onClick={onHanldeClick} disabled={itemsWithoutPhone.length === 0}>Refresh Items</Button>
-                </div>
-            </Group>
-        </div>
+                <Group spacing="xl" mt={8}>
+                    <div>
+                        <p>Items without phones: {loading ? 'loading ...' : itemsWithoutPhone.length}</p>
+                    </div>
+                    <div>
+                        <Button onClick={onHanldeClick} disabled={itemsWithoutPhone.length === 0}>Refresh Items</Button>
+                    </div>
+                </Group>
+            </div>
 
-        <div>
-            {
-                scrapperItemDetails.length > 0 ? (
-                    <ScrapperTable rowData={scrapperItemDetails} />
-                ) : (
-                    <p>No items available</p>
-                )
-            }
-        </div>
-    </>
-  );
+            <div>
+                {
+                    scrapperItemDetails.length > 0 ? (
+                        <ScrapperTable rowData={scrapperItemDetails} />
+                    ) : (
+                        <p>No items available</p>
+                    )
+                }
+            </div>
+        </>
+    );
 };
 
 const ScrapperItemPage: React.FC = () => {
