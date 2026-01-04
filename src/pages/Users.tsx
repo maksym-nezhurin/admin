@@ -6,10 +6,10 @@ const UsersPage = () => {
 
     return <Stack>
         <Title>{t('users.header')}</Title>
-        <Text>Please take a look:</Text>
+        <Text>{t('users.content')}</Text>
 
         <List>
-            <List.Item>First</List.Item>
+            <List.Item>Admin</List.Item>
         </List>
     </Stack>;
 }

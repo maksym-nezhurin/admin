@@ -16,7 +16,8 @@
   "cars_by_date": "Ogłoszenia według daty (na użytkownika)",
   "all_announcements": "Wszystkie ogłoszenia",
   "users": {
-    "header": "To jest użytkownikem"
+    "header": "Wszystkie użytkownicy",
+    "content": "Wszystkie details"
   },
   "brand": "Marka",
   "model": "Model",

@@ -15,7 +15,8 @@
   "cars_by_date": "Cars Published by Date (per user)",
   "all_announcements": "All Announcements",
   "users": {
-    "header": "This is the header"
+    "header": "This is the header",
+    "content": "Some content"
   },
   "brand": "Brand",
   "model": "Model",
@@ -29,7 +30,6 @@
   "password": "Password",
   "confirmPassword": "Confirm Password",
   "email": "Email",
-
   "edit_profile": "Edit Profile",
   "save": "Save",
   "cancel": "Cancel",
