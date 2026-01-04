@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ag-grid-enterprise/menu": "^32.3.9",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@loadable/component": "^5.16.7",
@@ -21,10 +20,10 @@
     "@mantine/hooks": "^6.0.22",
     "@mantine/notifications": "^6.0.22",
     "@react-keycloak/web": "^3.4.0",
-    "@reelo/ui": "git+https://github.com/maksym-nezhurin/reelo-ui",
     "@tabler/icons-react": "^3.31.0",
     "@tanstack/react-query": "^5.0.0",
     "@types/react-router-dom": "^5.3.3",
+    "@ag-grid-enterprise/menu": "^32.3.9",
     "ag-grid-community": "^35.0.0",
     "ag-grid-enterprise": "^35.0.0",
     "ag-grid-react": "^35.0.0",
