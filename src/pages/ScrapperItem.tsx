@@ -50,7 +50,7 @@ const ScrapperItem = () => {
             
 
             <Group spacing="xs" mt={8}>
-                <Link to={`${BASE_URL}/export/task/${id}.xlsx`} download={true}>Generate XLS</Link>
+                <Link to={`${BASE_URL}export/task/${id}.xlsx`} download={true}>Generate XLS</Link>
             </Group>
         </Stack>
 
