@@ -5,7 +5,7 @@ const Layout: React.FC = () => {
     return (
         <>
             <Group dir="column">
-                <Title level={3}>Scrapper</Title>
+                <Title>Scrapper</Title>
             </Group>
 
             <div>

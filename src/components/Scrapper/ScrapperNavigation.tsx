@@ -2,6 +2,8 @@ import { useState } from 'react';
 import axios from 'axios';
 import { Button } from '@mantine/core';
 
+import type { AxiosInstance } from 'axios';
+
 import { useScrapper } from '../../contexts/ScrapperContext';
 import { AVAILABLE_FILTERS, DEFAULT_FILTERS_VALUES } from '../../constants/scrapper';
 
@@ -36,7 +38,7 @@ export const ScrapperNavigation = () => {
         per_page: 0,
         note: '',
     });
-    const [client, setClient] = useState(apiClient);
+    const [client, setClient] = useState<AxiosInstance>(apiClient);
     const [disabled, setDisabled] = useState(false);
     const [loadingEstimate, setLoadingEstimate] = useState(false);
     const [loadingRequests, setLoadingRequests] = useState(false);
