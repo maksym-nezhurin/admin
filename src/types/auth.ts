@@ -1,12 +1,13 @@
 export interface IUser {
-  sub: string;
+  sub?: string;
+  id: string;
   firstName: string;
   username: string;
   lastName: string;
   email: string;
-  phone?: string;
-  role?: string;
+  phone?: string;  
   email_verified?: boolean;
+  roles?: Array<{ role: { level: number; name: string } }>;
 }
 
 export interface AuthResponse {
@@ -25,9 +26,15 @@ export interface IRegisterForm {
   confirmPassword?: string;
 }
 
+export interface IRoleLevel {
+  level: number;
+  name: string;
+}
+
 export interface AuthContextType {
   user: AuthResponse | null;
   userInfo: IUser | null;
+  roleLevel: IRoleLevel | null;
   loading: boolean;
   error: string | null;
   login: (username: string, password: string) => Promise<void>;

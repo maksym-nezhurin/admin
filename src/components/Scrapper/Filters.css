@@ -1,0 +1,67 @@
+.filters-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.filters-panel {
+  background: #fff;
+  padding: 20px 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 1000px;
+  width: 100%;
+}
+
+/* Each field wrapper */
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 calc(33% - 15px);
+  min-width: 200px;
+}
+
+.filter-field label {
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.filter-field input {
+  border: 1px solid #ddd;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.filter-field input:focus {
+  border-color: #0077ff;
+  box-shadow: 0 0 4px rgba(0, 119, 255, 0.3);
+  outline: none;
+}
+
+/* Button styling */
+.filters-panel button {
+  background: #0077ff;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  flex: 1 1 100%;
+  margin-top: 10px;
+}
+
+.filters-panel button:hover {
+  background: #005fcc;
+}

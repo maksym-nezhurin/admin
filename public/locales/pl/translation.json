@@ -1,6 +1,11 @@
 {
   "welcome": "Witamy",
   "to_admin": "w trybie administratora",
+  "to_superadmin": "w trybie super administratora",
+  "to_manager": "w trybie menedżera",
+  "to_scrapper": "w trybie skraper",
+  "to_user": "w trybie użytkownika",
+  "to_guest": "w trybie gościa",
   "nav_hint": "Użyj nawigacji, aby przejść do innych sekcji.",
   "settings": "Ustawienia",
   "theme": "Motyw",
@@ -10,6 +15,10 @@
   "saveProfile": "Zapisz profil",
   "cars_by_date": "Ogłoszenia według daty (na użytkownika)",
   "all_announcements": "Wszystkie ogłoszenia",
+  "users": {
+    "header": "Wszystkie użytkownicy",
+    "content": "Wszystkie details"
+  },
   "brand": "Marka",
   "model": "Model",
   "year": "Rok",
@@ -26,8 +35,12 @@
   "edit_profile": "Edytuj profil",
   "save": "Zapisz",
   "cancel": "Anuluj",
-  "dashboard": "Panel",
-  "announcements": "Ogłoszenia",
+  "menu": {
+    "dashboard": "Panel",
+    "scrapper": "Scrapper",
+    "users": "Użytkownicy",
+    "announcements": "Ogłoszenia"
+  },
   "create_announcement": "Utwórz ogłoszenie",
   "edit_announcement": "Edytuj ogłoszenie",
   "delete_announcement": "Usuń ogłoszenie",
@@ -99,5 +112,6 @@
   "mileage_label": "Przebieg",
   "year_label": "Rok",
   "description_label": "Opis",
-  "cars_published": "Opublikowane samochody"
+  "cars_published": "Opublikowane samochody",
+  "insufficient_role_level_warning": "Nie masz wystarczającego poziomu dostępu, aby wyświetlić tę stronę."
 }

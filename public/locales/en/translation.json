@@ -1,8 +1,12 @@
 {
   "welcome": "Welcome",
   "to_admin": "to admin mode",
+  "to_superadmin": "to superadmin mode",
+  "to_manager": "to manager mode",
+  "to_scrapper": "to scrapper mode",
+  "to_user": "to user mode",
+  "to_guest": "to guest mode",
   "nav_hint": "Use the navigation to explore different sections.",
-  "settings": "Settings",
   "theme": "Theme",
   "language": "Language",
   "firstName": "First Name",
@@ -10,6 +14,10 @@
   "saveProfile": "Save Profile",
   "cars_by_date": "Cars Published by Date (per user)",
   "all_announcements": "All Announcements",
+  "users": {
+    "header": "This is the header",
+    "content": "Some content"
+  },
   "brand": "Brand",
   "model": "Model",
   "year": "Year",
@@ -22,12 +30,17 @@
   "password": "Password",
   "confirmPassword": "Confirm Password",
   "email": "Email",
-  "profile": "Profile",
   "edit_profile": "Edit Profile",
   "save": "Save",
   "cancel": "Cancel",
-  "dashboard": "Dashboard",
-  "announcements": "Announcements",
+  "menu": {
+    "dashboard": "Dashboard",
+    "scrapper": "Scrapper",
+    "users": "Users",
+    "announcements": "Announcements",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
   "create_announcement": "Create Announcement",
   "edit_announcement": "Edit Announcement",
   "delete_announcement": "Delete Announcement",
@@ -99,5 +112,6 @@
   "mileage_label": "Mileage",
   "year_label": "Year",
   "description_label": "Description",
-  "cars_published": "Cars published"
+  "cars_published": "Cars published",
+  "insufficient_role_level_warning": "You have insufficient role level to view this page."
 }

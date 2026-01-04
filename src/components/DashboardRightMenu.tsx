@@ -28,7 +28,7 @@ const DashboardRightMenu: React.FC<DashboardRightMenuProps> = ({ name, logout })
             component={Link}
             to="settings"
           >
-            {t('settings')}
+            {t('menu.settings')}
           </Menu.Item>
 
           <Menu.Item

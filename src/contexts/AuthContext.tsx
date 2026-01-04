@@ -6,8 +6,9 @@ import type { IUser, IRegisterForm, AuthContextType, AuthResponse } from '../typ
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthResponse | null>(null);
+  const [user, setUser] = useState<AuthResponse | null>(null); // TODO: change user to authData
   const [userInfo, setUserInfo] = useState<IUser | null>(null);
+  const [roleLevel, setRoleLevel] = useState<{ level: number; name: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [logged, setLogged] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -15,9 +16,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const verifyAndSetUser = useCallback(async (userResponse: AuthResponse) => {
     try {      
       const { valid, user } = await authService.verifyToken(userResponse.access_token);
-      if (valid) {
+      if (valid && user) {
         setUser(userResponse);
         setUserInfo(user);
+        const higherRole = user?.roles?.reduce((prev, current) => {
+          return prev.level > current.role.level ? prev : current.role;
+        }, { level: 10, name: '' } as { level: number; name: string }) || { level: 10, name: '' };
+        setRoleLevel(higherRole);
         return true;
       }
       return false;
@@ -117,9 +122,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     register,
     logout,
+    roleLevel,
     isAuthenticated: !!user,
     refreshToken,
-  }), [user, userInfo, loading, error, login, logout, register, refreshToken]);
+  }), [user, userInfo, loading, error, roleLevel, login, logout, register, refreshToken]);
 
   return (
     <AuthContext.Provider value={value}>

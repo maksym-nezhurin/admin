@@ -1,8 +1,12 @@
 {
   "welcome": "Вітаємо",
+  "to_superadmin": "в режимі супер адміністратора",
+  "to_manager": "в режимі менеджера",
   "to_admin": "в режимі адміністратора",
+  "to_scrapper": "в режимі скреппера",
+  "to_user": "в режимі користувача",
+  "to_guest": "в режимі гостя",
   "nav_hint": "Використовуйте навігацію для переходу по розділах.",
-  "settings": "Налаштування",
   "theme": "Тема",
   "language": "Мова",
   "firstName": "Ім'я",
@@ -10,6 +14,10 @@
   "saveProfile": "Зберегти профіль",
   "cars_by_date": "Оголошення за датою (по користувачах)",
   "all_announcements": "Всі оголошення",
+  "users": {
+    "header": "Список користувачів",
+    "content": "Тут вся інформація про ваших користувачів"
+  },
   "brand": "Бренд",
   "model": "Модель",
   "year": "Рік",
@@ -22,12 +30,18 @@
   "password": "Пароль",
   "confirmPassword": "Підтвердити пароль",
   "email": "Електронна пошта",
-  "profile": "Профіль",
+
   "edit_profile": "Редагувати профіль",
   "save": "Зберегти",
   "cancel": "Скасувати",
-  "dashboard": "Дашборд",
-  "announcements": "Оголошення",
+  "menu": {
+    "dashboard": "Дашборд",
+    "scrapper": "Скреппер",
+    "users": "Користувачі",
+    "profile": "Профіль",
+    "settings": "Налаштування",
+    "announcements": "Оголошення"
+  },
   "create_announcement": "Створити оголошення",
   "edit_announcement": "Редагувати оголошення",
   "delete_announcement": "Видалити оголошення",
@@ -99,5 +113,6 @@
   "mileage_label": "Пробіг",
   "year_label": "Рік",
   "description_label": "Опис",
-  "cars_published": "Опубліковано авто"
+  "cars_published": "Опубліковано авто",
+  "insufficient_role_level_warning": "У вас недостатній рівень доступу для взаємодії з даним функціоналом."
 }

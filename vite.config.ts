@@ -1,8 +1,18 @@
 import { defineConfig } from 'vite'
+import tsconfigPaths from 'vite-tsconfig-paths'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tsconfigPaths()],
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
+  optimizeDeps: {
+    include: ['@reelo/ui'],
+  },
+  ssr: {
+    noExternal: ['@reelo/ui'],
+  },
   define: {
     'process.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL),
   },
