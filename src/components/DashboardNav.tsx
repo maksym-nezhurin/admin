@@ -5,12 +5,12 @@ import { useAuth } from '../contexts/AuthContext';
 
 const getAvailablePages = (roleLevel: number) => {
     const pages = [
-        { label: 'dashboard', path: '/', roleLevel: 10 },
-        { label: 'scrapper', path: 'scrapper', roleLevel: 60 },
-        { label: 'users', path: 'users', roleLevel: 100 },
-        { label: 'profile', path: 'profile', roleLevel: 10 },
-        { label: 'settings', path: 'settings', roleLevel: 10 },
-        { label: 'announcements', path: 'announcements', roleLevel: 20 },
+        { label: 'menu.dashboard', path: '/', roleLevel: 10 },
+        { label: 'menu.scrapper', path: 'scrapper', roleLevel: 60 },
+        { label: 'menu.users', path: 'users', roleLevel: 100 },
+        { label: 'menu.profile', path: 'profile', roleLevel: 10 },
+        { label: 'menu.settings', path: 'settings', roleLevel: 10 },
+        { label: 'menu.announcements', path: 'announcements', roleLevel: 20 },
     ];
     return pages.filter(page => page.roleLevel <= roleLevel);
 };
@@ -43,10 +43,10 @@ export const DashboardNav = () => {
     } else {
         return (
             <>
-                <NavLink label={t('dashboard')} component={Link} to="/" active={isActive('/dashboard')} />
-                <NavLink label={t('profile')} component={Link} to="profile" active={isActive('/dashboard/profile')} />
-                <NavLink label={t('settings')} component={Link} to="settings" active={isActive('/dashboard/settings')} />
-                <NavLink label={t('announcements')} component={Link} to="announcements" active={isActive('/dashboard/announcements')} />
+                <NavLink label={t('menu.dashboard')} component={Link} to="/" active={isActive('/dashboard')} />
+                <NavLink label={t('menu.profile')} component={Link} to="profile" active={isActive('/dashboard/profile')} />
+                <NavLink label={t('menu.settings')} component={Link} to="settings" active={isActive('/dashboard/settings')} />
+                <NavLink label={t('menu.announcements')} component={Link} to="announcements" active={isActive('/dashboard/announcements')} />
             </>
         );
     }

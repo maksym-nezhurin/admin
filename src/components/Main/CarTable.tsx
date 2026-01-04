@@ -4,10 +4,12 @@ import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { carsService } from '../../services/cars';
 import { Loader } from '../Loader';
-// import { CarAnalyticsChart } from '../components/CarAnalyticsChart';
+import { CarAnalyticsChart } from '../../components/CarAnalyticsChart';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const CarTable = () => {
     const { t } = useTranslation();
+    const { userInfo } = useAuth();
     const { data: cars = [], isLoading } = useQuery({
         queryKey: ['all-announcements'],
         queryFn: () => carsService.getAllCars?.() ?? carsService.getCars(), // fallback to getCars if getAllCars not present
@@ -21,7 +23,7 @@ export const CarTable = () => {
                 <Stack spacing="xl">
                     <Paper p="md" withBorder shadow="sm">
                         <Title order={4} mb={8}>{t('cars_by_date')}</Title>
-                    {/* <CarAnalyticsChart cars={cars} userId={userInfo?.sub} /> */}
+                        <CarAnalyticsChart cars={cars} userId={userInfo?.sub} />
                     </Paper>
                     <Paper p="md" withBorder shadow="sm">
                         <Title order={4} mb={8}>{t('all_announcements')}</Title>

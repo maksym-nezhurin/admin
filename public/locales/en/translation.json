@@ -7,7 +7,6 @@
   "to_user": "to user mode",
   "to_guest": "to guest mode",
   "nav_hint": "Use the navigation to explore different sections.",
-  "settings": "Settings",
   "theme": "Theme",
   "language": "Language",
   "firstName": "First Name",
@@ -15,6 +14,9 @@
   "saveProfile": "Save Profile",
   "cars_by_date": "Cars Published by Date (per user)",
   "all_announcements": "All Announcements",
+  "users": {
+    "header": "This is the header"
+  },
   "brand": "Brand",
   "model": "Model",
   "year": "Year",
@@ -27,14 +29,18 @@
   "password": "Password",
   "confirmPassword": "Confirm Password",
   "email": "Email",
-  "profile": "Profile",
+
   "edit_profile": "Edit Profile",
   "save": "Save",
   "cancel": "Cancel",
-  "dashboard": "Dashboard",
-  "scrapper": "Scrapper",
-  "users": "Users",
-  "announcements": "Announcements",
+  "menu": {
+    "dashboard": "Dashboard",
+    "scrapper": "Scrapper",
+    "users": "Users",
+    "announcements": "Announcements",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
   "create_announcement": "Create Announcement",
   "edit_announcement": "Edit Announcement",
   "delete_announcement": "Delete Announcement",

@@ -7,7 +7,6 @@
   "to_user": "в режимі користувача",
   "to_guest": "в режимі гостя",
   "nav_hint": "Використовуйте навігацію для переходу по розділах.",
-  "settings": "Налаштування",
   "theme": "Тема",
   "language": "Мова",
   "firstName": "Ім'я",
@@ -15,6 +14,9 @@
   "saveProfile": "Зберегти профіль",
   "cars_by_date": "Оголошення за датою (по користувачах)",
   "all_announcements": "Всі оголошення",
+  "users": {
+    "header": "Список користувачів"
+  },
   "brand": "Бренд",
   "model": "Модель",
   "year": "Рік",
@@ -27,14 +29,18 @@
   "password": "Пароль",
   "confirmPassword": "Підтвердити пароль",
   "email": "Електронна пошта",
-  "profile": "Профіль",
+
   "edit_profile": "Редагувати профіль",
   "save": "Зберегти",
   "cancel": "Скасувати",
-  "dashboard": "Дашборд",
-  "scrapper": "Скреппер",
-  "users": "Користувачі",
-  "announcements": "Оголошення",
+  "menu": {
+    "dashboard": "Дашборд",
+    "scrapper": "Скреппер",
+    "users": "Користувачі",
+    "profile": "Профіль",
+    "settings": "Налаштування",
+    "announcements": "Оголошення"
+  },
   "create_announcement": "Створити оголошення",
   "edit_announcement": "Редагувати оголошення",
   "delete_announcement": "Видалити оголошення",

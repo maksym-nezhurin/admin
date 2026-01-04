@@ -15,6 +15,9 @@
   "saveProfile": "Zapisz profil",
   "cars_by_date": "Ogłoszenia według daty (na użytkownika)",
   "all_announcements": "Wszystkie ogłoszenia",
+  "users": {
+    "header": "To jest użytkownikem"
+  },
   "brand": "Marka",
   "model": "Model",
   "year": "Rok",
@@ -31,10 +34,12 @@
   "edit_profile": "Edytuj profil",
   "save": "Zapisz",
   "cancel": "Anuluj",
-  "dashboard": "Panel",
-  "scrapper": "Scrapper",
-  "users": "Użytkownicy",
-  "announcements": "Ogłoszenia",
+  "menu": {
+    "dashboard": "Panel",
+    "scrapper": "Scrapper",
+    "users": "Użytkownicy",
+    "announcements": "Ogłoszenia"
+  },
   "create_announcement": "Utwórz ogłoszenie",
   "edit_announcement": "Edytuj ogłoszenie",
   "delete_announcement": "Usuń ogłoszenie",

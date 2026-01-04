@@ -29,15 +29,13 @@ export const Header = () => {
             )}
             <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                 <Burger
-                opened={sidebarOpen}
-                onClick={toggleSidebar}
-                size="sm"
-                mr="xl"
+                  opened={sidebarOpen}
+                  onClick={toggleSidebar}
+                  size="sm"
+                  mr="xl"
                 />
             </MediaQuery>
         </Group>
-
-        
 
         <Group spacing="md">
 
