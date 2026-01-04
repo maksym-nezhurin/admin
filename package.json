@@ -34,6 +34,7 @@
     "react-dom": "^19.1.1",
     "react-i18next": "^15.5.2",
     "react-router-dom": "^7.6.0",
+    "apexcharts": "^5.3.6",
     "zustand": "^4.4.0"
   },
   "devDependencies": {
