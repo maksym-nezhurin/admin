@@ -1,7 +1,9 @@
 import { Select } from "@mantine/core";
+import { useTranslation } from 'react-i18next';
 import { useScrapper } from "../../contexts/ScrapperContext";
 
 export const ScrapperSelector = () => {
+    const { t } = useTranslation();
     const data = useScrapper();
     const { setMarket, market, allowedMarkets } = data;
 
@@ -9,8 +11,8 @@ export const ScrapperSelector = () => {
         <Select
             value={market}
             name="scrappingSource"
-            label="Select the source to scrap from"
-            placeholder="Pick value"
+            label={t('scrapper.select_source')}
+            placeholder={t('scrapper.pick_value')}
             disabled={allowedMarkets.length <= 1}
             onChange={setMarket}
             data={(allowedMarkets || []).map((opt) => ({
