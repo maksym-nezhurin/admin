@@ -144,7 +144,7 @@
     "scrapper_items": "Scrapper Items",
     "total_items_count": "Total Items:",
     "loading": "loading...",
-    "items_without_phones": "Items without phones:",
+    "items_without_phone": "items without phones",
     "refresh_items": "Refresh Items",
     "no_items_available": "No items available",
     "price_from": "Price from",
@@ -155,5 +155,20 @@
     "year_to": "Year to",
     "region": "Region",
     "fuel_type": "Fuel type"
+  },
+  "api_client": {
+    "current": "Current API",
+    "local": "Local",
+    "remote": "Remote",
+    "switch_to_local": "Switch to Local",
+    "switch_to_remote": "Switch to Remote"
+  },
+  "time": {
+    "seconds": "seconds",
+    "second": "second",
+    "minutes": "minutes",
+    "minute": "minute",
+    "hours": "hours",
+    "hour": "hour"
   }
 }

@@ -26,7 +26,6 @@ export const NavBar = () => {
                     <h4>{t('scrapper.navigation')}</h4>
 
                     <ScrapperNavigation />
-
                 </Paper>
             </div>
         </Stack>

@@ -19,6 +19,7 @@ interface IRequest {
     total?: number;
     percent?: number;
     loading?: boolean;
+    items_without_phone?: number;
 }
 
 interface ScrapperContextType {
@@ -33,6 +34,7 @@ interface ScrapperContextType {
   refresh: () => Promise<void>;
   requests: IRequest[];
   setRequests: (r: IRequest[]) => void;
+  fetchRequests: (userId: string) => Promise<void>;
 }
 
 interface ScrapperProviderProps {
@@ -89,6 +91,22 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
     }
   }, []);
 
+  const fetchRequests = async (userId: string) => {
+    console.log('fetchRequests', userId);
+    if (!userId) return;
+    
+    setLoading(true);
+    setError(undefined);
+    try {
+      const tasks = await getMyRequests(userId);
+      setRequests(tasks || []);
+    } catch (err: Error | any) {
+      setError(err?.message ?? 'unknown');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     console.log('Fetching scrapper permissions and sources...');
     fetchPermissions();
@@ -106,25 +124,8 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
   }, [market]);
 
   useEffect(() => {
-    const fetchRequests = async () => {
-      if (!userId) return;
-      
-      setLoading(true);
-      setError(undefined);
-      try {
-        const tasks = await getMyRequests(userId);
-        setRequests(tasks || []);
-      } catch (err: Error | any) {
-        setError(err?.message ?? 'unknown');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (userId) {
-        fetchRequests();
-    }
-  }, [userId, getMyRequests]);
+    userId && fetchRequests(userId);
+  }, [userId]);
 
   const refresh = useCallback(async () => {
     await fetchPermissions();
@@ -144,6 +145,7 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
         refresh,
         requests,
         setRequests,
+        fetchRequests,
       }}
     >
       {children}

@@ -147,6 +147,7 @@
     "items_without_phones": "Elementy bez telefonów:",
     "refresh_items": "Odśwież elementy",
     "no_items_available": "Brak dostępnych elementów",
+    "items_without_phone": "elementów bez telefonów",
     "price_from": "Cena od",
     "price_to": "Cena do",
     "mileage_from": "Przebieg od",
@@ -155,5 +156,20 @@
     "year_to": "Rok do",
     "region": "Region",
     "fuel_type": "Typ paliwa"
+  },
+  "api_client": {
+    "current": "Aktualne API",
+    "local": "Lokalne",
+    "remote": "Zdalne",
+    "switch_to_local": "Przełącz na lokalne",
+    "switch_to_remote": "Przełącz na zdalne"
+  },
+  "time": {
+    "seconds": "sekund",
+    "second": "sekunda",
+    "minutes": "minut",
+    "minute": "minuta",
+    "hours": "godzin",
+    "hour": "godzina"
   }
 }

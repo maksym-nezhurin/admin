@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { Button } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 
 import { useScrapper } from '../../contexts/ScrapperContext';
+import { useApiClient } from '../../contexts/ApiClientContext';
 import { AVAILABLE_FILTERS, DEFAULT_FILTERS_VALUES } from '../../constants/scrapper';
 
 interface IEstimateResponse {
@@ -13,32 +13,16 @@ interface IEstimateResponse {
     note: string;
 }
 
-const BASE_URL = import.meta.env.VITE_SCRAPPER_URL || 'http://localhost:8000';
-
-const apiClient = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-});
-
-const localApiClient = axios.create({
-  baseURL: 'http://localhost:8000',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-});
-
 export const ScrapperNavigation = () => {
     const { t } = useTranslation();
     const { filters, market, requests, setRequests } = useScrapper();
+    const { getClient } = useApiClient();
     const [estimate, setEstimates] = useState<IEstimateResponse>({
         url_tested: '',
         total_estimate: 0,
         per_page: 0,
         note: '',
     });
-    const [isLocal, setIsLocal] = useState(false);
     const [loadingEstimate, setLoadingEstimate] = useState(false);
     const [loadingRequests, setLoadingRequests] = useState(false);
 
@@ -64,20 +48,16 @@ export const ScrapperNavigation = () => {
     const onHandleEstimate = async () => {
         setLoadingEstimate(true);
         const params = getParams();
-        const res = await (isLocal ? localApiClient : apiClient).post('/estimate', params);
+        const res = await getClient().post('/estimate', params);
 
         setEstimates(res.data);
         setLoadingEstimate(false);
     };
 
-    const useLocal = async () => {
-        setIsLocal(true);
-    };
-
     const onHandleStart = async () => {
         setLoadingRequests(true);
         const params = getParams();
-        const res = await (isLocal ? localApiClient : apiClient).post('/start', params);
+        const res = await getClient().post('/start', params);
 
         const { task_id, status } = res.data;
 
@@ -89,9 +69,6 @@ export const ScrapperNavigation = () => {
     return <div>
          <nav>
             <ul style={{ listStyleType: 'none', padding: 0, display: 'flex', gap: '10px' }}>
-                <li>
-                    <Button onClick={useLocal} disabled={isLocal}>{t('scrapper.use_local')}</Button>
-                </li>
                 <li>
                     <Button onClick={onHandleEstimate} disabled={loadingEstimate}>{t('scrapper.estimate_request')}</Button>
                 </li>
