@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 
 import { Button, Group, Stack } from "@mantine/core";
 import { scrapperServices } from '../services/scrapper';
@@ -25,7 +26,12 @@ const ScrapperItem = () => {
     const itemsWithoutPhone = scrapperItemDetails.filter((item: IParsedCarItem) => !item.phone);
 
     const onHanldeClick = async () => {
-        const res = await scrapperServices.refreshScrapperItemDetails({
+        // const res = await scrapperServices.refreshScrapperItemDetails({
+        //     user_id: userInfo?.id,
+        //     urls: itemsWithoutPhone.map(item => item.url),
+        //     market: market || null, 
+        // });
+        const res = await axios.post(`http://localhost:8000/start/urls`, {
             user_id: userInfo?.id,
             urls: itemsWithoutPhone.map(item => item.url),
             market: market || null, 
