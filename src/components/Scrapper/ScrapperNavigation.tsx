@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { Button } from '@mantine/core';
-
-import type { AxiosInstance } from 'axios';
+import { useTranslation } from 'react-i18next';
 
 import { useScrapper } from '../../contexts/ScrapperContext';
 import { AVAILABLE_FILTERS, DEFAULT_FILTERS_VALUES } from '../../constants/scrapper';
@@ -31,6 +30,7 @@ const localApiClient = axios.create({
 });
 
 export const ScrapperNavigation = () => {
+    const { t } = useTranslation();
     const { filters, market, requests, setRequests } = useScrapper();
     const [estimate, setEstimates] = useState<IEstimateResponse>({
         url_tested: '',
@@ -38,8 +38,7 @@ export const ScrapperNavigation = () => {
         per_page: 0,
         note: '',
     });
-    const [client, setClient] = useState<AxiosInstance>(apiClient);
-    const [disabled, setDisabled] = useState(false);
+    const [isLocal, setIsLocal] = useState(false);
     const [loadingEstimate, setLoadingEstimate] = useState(false);
     const [loadingRequests, setLoadingRequests] = useState(false);
 
@@ -65,21 +64,20 @@ export const ScrapperNavigation = () => {
     const onHandleEstimate = async () => {
         setLoadingEstimate(true);
         const params = getParams();
-        const res = await client.post('/estimate', params);
+        const res = await (isLocal ? localApiClient : apiClient).post('/estimate', params);
 
         setEstimates(res.data);
         setLoadingEstimate(false);
     };
 
     const useLocal = async () => {
-        setClient(localApiClient);
-        setDisabled(true);
+        setIsLocal(true);
     };
 
     const onHandleStart = async () => {
         setLoadingRequests(true);
         const params = getParams();
-        const res = await client.post('/start', params);
+        const res = await (isLocal ? localApiClient : apiClient).post('/start', params);
 
         const { task_id, status } = res.data;
 
@@ -92,22 +90,22 @@ export const ScrapperNavigation = () => {
          <nav>
             <ul style={{ listStyleType: 'none', padding: 0, display: 'flex', gap: '10px' }}>
                 <li>
-                    <Button onClick={useLocal} disabled={disabled}>Use Local</Button>
+                    <Button onClick={useLocal} disabled={isLocal}>{t('scrapper.use_local')}</Button>
                 </li>
                 <li>
-                    <Button onClick={onHandleEstimate} disabled={loadingEstimate}>Estimate request</Button>
+                    <Button onClick={onHandleEstimate} disabled={loadingEstimate}>{t('scrapper.estimate_request')}</Button>
                 </li>
                 <li>
-                    <Button onClick={onHandleStart} disabled={loadingRequests}>Start request</Button>
+                    <Button onClick={onHandleStart} disabled={loadingRequests}>{t('scrapper.start_request')}</Button>
                 </li>
             </ul>
         </nav>
 
          {
             estimate?.url_tested && <div>
-                <h4>Estimate Result:</h4>
+                <h4>{t('scrapper.estimate_result')}</h4>
                 <span style={{ fontSize: '12px' }}>
-                    Scrapping{' '}
+                    {t('scrapper.scrapping_url')}{' '}
                     <a
                      href={estimate.url_tested}
                      target="_blank" rel="noopener noreferrer"

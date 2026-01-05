@@ -1,5 +1,6 @@
 import { Button, NumberInput, Select, Group, MultiSelect } from "@mantine/core";
 import { useState, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 
 import { prepareOptionsForSelect } from "../../utils/formAdapters";
 import { useScrapper, type IFilters } from "../../contexts/ScrapperContext";
@@ -7,6 +8,7 @@ import { useScrapper, type IFilters } from "../../contexts/ScrapperContext";
 import "./Filters.css";
 
 export const Filters = () => {
+  const { t } = useTranslation();
   const { filters, setFilters, filtersConfig } = useScrapper();
   const [isVirgin, setIsVirgin] = useState(true);
   const [values, setValues] = useState<IFilters>(filters);
@@ -40,7 +42,7 @@ export const Filters = () => {
   }, [filters]);
 
   if (!filtersConfig || filtersConfig.length === 0) {
-      return <div>No filters available for the selected market.</div>;
+      return <div>{t('scrapper.no_filters_available')}</div>;
   }
 
   return (
@@ -51,7 +53,7 @@ export const Filters = () => {
           {f.type === "number" && (
             <NumberInput
               type="number"
-              label={f.label}
+              label={t(f.label)}
               placeholder={String(f.placeholder)}
               value={Number(values[f.name] || f.placeholder)}
               onChange={(value) => handleChange(f.name, value)}
@@ -60,7 +62,7 @@ export const Filters = () => {
 
           {f.type === "select" && (
             <Select
-              label={f.label}
+              label={t(f.label)}
               placeholder={String(f.placeholder)}
               data={prepareOptionsForSelect(f.data)}
               value={values[f.name] !== undefined && values[f.name] !== null ? String(values[f.name]) : null}
@@ -71,7 +73,7 @@ export const Filters = () => {
 
           {f.type === "multiselect" && (
             <MultiSelect
-              label={f.label}
+              label={t(f.label)}
               placeholder={String(f.placeholder)}
               data={prepareOptionsForSelect(f.data)}
               value={Array.isArray(values[f.name]) ? (values[f.name] as (string | number)[]).map(String) : []}
@@ -84,7 +86,7 @@ export const Filters = () => {
       </div>
       <Group style={{ justifyContent: 'center', marginTop: '1rem' }}>
         <Button onClick={applyFilters} disabled={isVirgin}>
-          Застосувати
+          {t('scrapper.apply')}
         </Button>
       </Group>
     </div>

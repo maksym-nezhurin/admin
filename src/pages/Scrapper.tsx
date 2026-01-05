@@ -18,7 +18,7 @@ import { Loader } from '../components/Loader';
 const ScrapperContent: React.FC = () => {
     const isMobile = useMediaQuery('(max-width: 48em)'); // Mantine's 'sm' breakpoint
     const { loading } = useScrapper();
-    console.log('Scrapper');
+
     return loading ?
      <Loader /> :
      (

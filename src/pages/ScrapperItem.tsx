@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { Button, Group, Stack } from "@mantine/core";
 import { scrapperServices } from '../services/scrapper';
@@ -13,6 +14,7 @@ import { ScrapperTable } from '../components/Scrapper/Table';
 const BASE_URL = import.meta.env.VITE_SCRAPPER_URL || 'http://localhost:8000/';
 
 const ScrapperItem = () => {
+    const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
     const { userInfo } = useAuth();
@@ -51,31 +53,31 @@ const ScrapperItem = () => {
         <>
             <Stack spacing="md" mb={20}>
                 <Group spacing={4} align='center' style={{ justifyContent: 'space-between' }}>
-                    <h4>Details for Task ID: {id}</h4>
+                    <h4>{t('scrapper.details_for_task')} {id}</h4>
 
-                    <Button onClick={() => navigate('/dashboard/scrapper')}>Back to scrapper</Button>
+                    <Button onClick={() => navigate('/dashboard/scrapper')}>{t('scrapper.back_to_scrapper')}</Button>
                 </Group>
                 
 
                 <Group spacing="xs" mt={8}>
                     {
-                        loading ? 'Please wait...' : (
-                            <Link to={`${BASE_URL}export/task/${id}.xlsx`} download={true}>Generate XLS</Link>
+                        loading ? t('scrapper.please_wait') : (
+                            <Link to={`${BASE_URL}export/task/${id}.xlsx`} download={true}>{t('scrapper.generate_xls')}</Link>
                         )
                     }
                 </Group>
             </Stack>
 
             <div>
-                <h4>Scrapper Items</h4>
-                <p>Total Items: {loading ? 'loading ...' : totalAmount}</p>
+                <h4>{t('scrapper.scrapper_items')}</h4>
+                <p>{t('scrapper.total_items_count')} {loading ? t('scrapper.loading') : totalAmount}</p>
 
                 <Group spacing="xl" mt={8}>
                     <div>
-                        <p>Items without phones: {loading ? 'loading ...' : itemsWithoutPhone.length}</p>
+                        <p>{t('scrapper.items_without_phones')} {loading ? t('scrapper.loading') : itemsWithoutPhone.length}</p>
                     </div>
                     <div>
-                        <Button onClick={onHanldeClick} disabled={itemsWithoutPhone.length === 0}>Refresh Items</Button>
+                        <Button onClick={onHanldeClick} disabled={itemsWithoutPhone.length === 0}>{t('scrapper.refresh_items')}</Button>
                     </div>
                 </Group>
             </div>
@@ -85,7 +87,7 @@ const ScrapperItem = () => {
                     scrapperItemDetails.length > 0 ? (
                         <ScrapperTable rowData={scrapperItemDetails} />
                     ) : (
-                        <p>No items available</p>
+                        <p>{t('scrapper.no_items_available')}</p>
                     )
                 }
             </div>

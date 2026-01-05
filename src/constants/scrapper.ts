@@ -128,33 +128,66 @@ export interface FilterConfig {
     data?: TSelectOption[];
 }
 
+// Function to generate default filters config with translations
+export const getDefaultFiltersConfig = (t: (key: string) => string): FilterConfig[] => [
+  { type: 'number', name: AVAILABLE_FILTERS.PRICE_FROM, label: t('scrapper.price_from'), placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.PRICE_FROM] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.PRICE_TO, label: t('scrapper.price_to'), placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.PRICE_TO] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.MILEAGE_FROM, label: t('scrapper.mileage_from'), placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.MILEAGE_FROM] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.MILEAGE_TO, label: t('scrapper.mileage_to'), placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.MILEAGE_TO] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.YEAR_FROM, label: t('scrapper.year_from'), placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.YEAR_FROM] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.YEAR_TO, label: t('scrapper.year_to'), placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.YEAR_TO] ?? 0 },
+];
+
+// Function to generate additional filters config with translations
+export const getAdditionalFiltersConfig = (t: (key: string) => string): AdditionalFiltersConfig => ({
+  [SCRAPPING_SOURCES_ENUM.AUTORIA]: [
+    {
+      type: 'multiselect',
+      name: AVAILABLE_FILTERS.STATE_IDS,
+      label: t('scrapper.region'),
+      placeholder: t('scrapper.pick_value'),
+      data: REGION_UA,
+    },
+    {
+      type: 'multiselect',
+      name: AVAILABLE_FILTERS.FUEL_TYPE,
+      label: t('scrapper.fuel_type'),
+      placeholder: t('scrapper.pick_value'),
+      data: FUEL_TYPES,
+    },
+  ],
+  [SCRAPPING_SOURCES_ENUM.AUTOBazar]: [],
+});
+
+// Keep the old configs for backward compatibility (deprecated)
 export const DEFAULT_FILTERS_CONFIG: FilterConfig[] = [
-  { type: 'number', name: AVAILABLE_FILTERS.PRICE_FROM, label: 'Ціна від', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.PRICE_FROM] ?? 0 },
-  { type: 'number', name: AVAILABLE_FILTERS.PRICE_TO, label: 'Ціна до', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.PRICE_TO] ?? 0 },
-  { type: 'number', name: AVAILABLE_FILTERS.MILEAGE_FROM, label: 'Пробіг від', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.MILEAGE_FROM] ?? 0 },
-  { type: 'number', name: AVAILABLE_FILTERS.MILEAGE_TO, label: 'Пробіг до', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.MILEAGE_TO] ?? 0 },
-  { type: 'number', name: AVAILABLE_FILTERS.YEAR_FROM, label: 'Рік від', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.YEAR_FROM] ?? 0 },
-  { type: 'number', name: AVAILABLE_FILTERS.YEAR_TO, label: 'Рік до', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.YEAR_TO] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.PRICE_FROM, label: 'scrapper.price_from', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.PRICE_FROM] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.PRICE_TO, label: 'scrapper.price_to', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.PRICE_TO] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.MILEAGE_FROM, label: 'scrapper.mileage_from', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.MILEAGE_FROM] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.MILEAGE_TO, label: 'scrapper.mileage_to', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.MILEAGE_TO] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.YEAR_FROM, label: 'scrapper.year_from', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.YEAR_FROM] ?? 0 },
+  { type: 'number', name: AVAILABLE_FILTERS.YEAR_TO, label: 'scrapper.year_to', placeholder: DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.YEAR_TO] ?? 0 },
 ];
 
 interface AdditionalFiltersConfig {
     [key: string]: FilterConfig[];
 }
 
+// Keep the old configs for backward compatibility (deprecated)
 export const ADDITIONAL_FILTERS_CONFIG: AdditionalFiltersConfig = {
   [SCRAPPING_SOURCES_ENUM.AUTORIA]: [
     {
       type: 'multiselect',
       name: AVAILABLE_FILTERS.STATE_IDS,
-      label: 'Регіон',
-      placeholder: 'Виберіть регіон',
+      label: 'scrapper.region',
+      placeholder: 'scrapper.pick_value',
       data: REGION_UA,
     },
     {
       type: 'multiselect',
       name: AVAILABLE_FILTERS.FUEL_TYPE,
-      label: 'Тип палива',
-      placeholder: 'Виберіть тип палива',
+      label: 'scrapper.fuel_type',
+      placeholder: 'scrapper.pick_value',
       data: FUEL_TYPES,
     },
   ],
