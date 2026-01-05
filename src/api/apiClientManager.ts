@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
+import { SCRAPPER_URL, LOCAL_SCRAPPER_URL } from './apiScrapperClient';
 
 export interface ApiClientConfig {
   baseURL: string;
@@ -12,7 +13,7 @@ class ApiClientManager {
 
   constructor() {
     this.defaultClient = this.createClient({
-      baseURL: import.meta.env.VITE_SCRAPPER_URL || 'http://localhost:8000/',
+      baseURL: SCRAPPER_URL,
     });
   }
 
@@ -97,11 +98,11 @@ export const apiClientManager = new ApiClientManager();
 // Initialize with default clients
 console.log('🚀 Initializing API Client Manager...');
 apiClientManager.registerClient('local', {
-  baseURL: 'http://localhost:8000/',
+  baseURL: LOCAL_SCRAPPER_URL,
 });
 
 apiClientManager.registerClient('remote', {
-  baseURL: import.meta.env.VITE_SCRAPPER_URL || 'http://localhost:8000/',
+  baseURL: SCRAPPER_URL,
 });
 
 // Set initial default to remote
