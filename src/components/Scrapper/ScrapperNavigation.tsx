@@ -2,8 +2,6 @@ import { useState } from 'react';
 import axios from 'axios';
 import { Button } from '@mantine/core';
 
-import type { AxiosInstance } from 'axios';
-
 import { useScrapper } from '../../contexts/ScrapperContext';
 import { AVAILABLE_FILTERS, DEFAULT_FILTERS_VALUES } from '../../constants/scrapper';
 
@@ -38,8 +36,7 @@ export const ScrapperNavigation = () => {
         per_page: 0,
         note: '',
     });
-    const [client, setClient] = useState<AxiosInstance>(apiClient);
-    const [disabled, setDisabled] = useState(false);
+    const [isLocal, setIsLocal] = useState(false);
     const [loadingEstimate, setLoadingEstimate] = useState(false);
     const [loadingRequests, setLoadingRequests] = useState(false);
 
@@ -65,21 +62,20 @@ export const ScrapperNavigation = () => {
     const onHandleEstimate = async () => {
         setLoadingEstimate(true);
         const params = getParams();
-        const res = await client.post('/estimate', params);
+        const res = await (isLocal ? localApiClient : apiClient).post('/estimate', params);
 
         setEstimates(res.data);
         setLoadingEstimate(false);
     };
 
     const useLocal = async () => {
-        setClient(localApiClient);
-        setDisabled(true);
+        setIsLocal(true);
     };
 
     const onHandleStart = async () => {
         setLoadingRequests(true);
         const params = getParams();
-        const res = await client.post('/start', params);
+        const res = await (isLocal ? localApiClient : apiClient).post('/start', params);
 
         const { task_id, status } = res.data;
 
@@ -92,7 +88,7 @@ export const ScrapperNavigation = () => {
          <nav>
             <ul style={{ listStyleType: 'none', padding: 0, display: 'flex', gap: '10px' }}>
                 <li>
-                    <Button onClick={useLocal} disabled={disabled}>Use Local</Button>
+                    <Button onClick={useLocal} disabled={isLocal}>Use Local</Button>
                 </li>
                 <li>
                     <Button onClick={onHandleEstimate} disabled={loadingEstimate}>Estimate request</Button>
