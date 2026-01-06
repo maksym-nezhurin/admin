@@ -23,7 +23,7 @@ const ScrapperItemPage: React.FC = () => {
     const totalAmount = scrapperItemDetails.length;
     const itemsWithoutPhone = scrapperItemDetails.filter((item: IParsedCarItem) => !item.phone);
 
-    const onHanldeClick = async () => {
+    const onHanldeClick = () => {
         scrapperServices.refreshScrapperItemDetails({
             user_id: userInfo?.id,
             urls: itemsWithoutPhone.map(item => item.url),

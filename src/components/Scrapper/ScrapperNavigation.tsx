@@ -3,8 +3,9 @@ import { Button } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 
 import { useScrapper } from '../../contexts/ScrapperContext';
-import { useApiClient } from '../../contexts/ApiClientContext';
 import { AVAILABLE_FILTERS, DEFAULT_FILTERS_VALUES } from '../../constants/scrapper';
+
+import { scrapperServices } from '../../services/scrapper';
 
 interface IEstimateResponse {
     url_tested: string;
@@ -16,7 +17,6 @@ interface IEstimateResponse {
 export const ScrapperNavigation = () => {
     const { t } = useTranslation();
     const { filters, market, requests, setRequests } = useScrapper();
-    const { getClient } = useApiClient();
     const [estimate, setEstimates] = useState<IEstimateResponse>({
         url_tested: '',
         total_estimate: 0,
@@ -48,18 +48,17 @@ export const ScrapperNavigation = () => {
     const onHandleEstimate = async () => {
         setLoadingEstimate(true);
         const params = getParams();
-        const res = await getClient().post('/estimate', params);
+        const data = await scrapperServices.getRequestEstimate(params);
 
-        setEstimates(res.data);
+        setEstimates(data);
         setLoadingEstimate(false);
     };
 
     const onHandleStart = async () => {
         setLoadingRequests(true);
         const params = getParams();
-        const res = await getClient().post('/start', params);
-
-        const { task_id, status } = res.data;
+        const data = await scrapperServices.createScrapperRequest(params);
+        const { task_id, status } = data;
 
         setRequests([...requests, { task_id, status, id: task_id, market, items_count: 0, duration_seconds: 0 }]);
 

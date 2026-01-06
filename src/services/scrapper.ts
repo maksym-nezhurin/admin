@@ -34,12 +34,10 @@ export const scrapperServices = {
         return res.data.items || [];
     },
     async refreshScrapperItemDetails(data: IRefreshScrapperItem): Promise<any> {
-        console.log('Refreshing scrapper item details with data:', data);
         const res = await apiClientManager.getClient().post('/start/urls', { ...data });
-        console.log('Refresh scrapper item details response:', res.data);
+
         return res.data;
     },
-    // New method to export task
     async exportTask(taskId: string): Promise<Blob> {
         const res = await apiClientManager.getClient().get(`/export/task/${taskId}.xlsx`, {
             responseType: 'blob'
