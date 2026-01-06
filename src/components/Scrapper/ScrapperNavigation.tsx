@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { Button } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 
 import { useScrapper } from '../../contexts/ScrapperContext';
 import { AVAILABLE_FILTERS, DEFAULT_FILTERS_VALUES } from '../../constants/scrapper';
+
+import { scrapperServices } from '../../services/scrapper';
 
 interface IEstimateResponse {
     url_tested: string;
@@ -12,22 +13,6 @@ interface IEstimateResponse {
     per_page: number;
     note: string;
 }
-
-const BASE_URL = import.meta.env.VITE_SCRAPPER_URL || 'http://localhost:8000';
-
-const apiClient = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-});
-
-const localApiClient = axios.create({
-  baseURL: 'http://localhost:8000',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-});
 
 export const ScrapperNavigation = () => {
     const { t } = useTranslation();
@@ -38,7 +23,6 @@ export const ScrapperNavigation = () => {
         per_page: 0,
         note: '',
     });
-    const [isLocal, setIsLocal] = useState(false);
     const [loadingEstimate, setLoadingEstimate] = useState(false);
     const [loadingRequests, setLoadingRequests] = useState(false);
 
@@ -64,22 +48,17 @@ export const ScrapperNavigation = () => {
     const onHandleEstimate = async () => {
         setLoadingEstimate(true);
         const params = getParams();
-        const res = await (isLocal ? localApiClient : apiClient).post('/estimate', params);
+        const data = await scrapperServices.getRequestEstimate(params);
 
-        setEstimates(res.data);
+        setEstimates(data);
         setLoadingEstimate(false);
-    };
-
-    const useLocal = async () => {
-        setIsLocal(true);
     };
 
     const onHandleStart = async () => {
         setLoadingRequests(true);
         const params = getParams();
-        const res = await (isLocal ? localApiClient : apiClient).post('/start', params);
-
-        const { task_id, status } = res.data;
+        const data = await scrapperServices.createScrapperRequest(params);
+        const { task_id, status } = data;
 
         setRequests([...requests, { task_id, status, id: task_id, market, items_count: 0, duration_seconds: 0 }]);
 
@@ -89,9 +68,6 @@ export const ScrapperNavigation = () => {
     return <div>
          <nav>
             <ul style={{ listStyleType: 'none', padding: 0, display: 'flex', gap: '10px' }}>
-                <li>
-                    <Button onClick={useLocal} disabled={isLocal}>{t('scrapper.use_local')}</Button>
-                </li>
                 <li>
                     <Button onClick={onHandleEstimate} disabled={loadingEstimate}>{t('scrapper.estimate_request')}</Button>
                 </li>

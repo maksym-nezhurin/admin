@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
 
 import { Button, Group, Stack } from "@mantine/core";
 import { scrapperServices } from '../services/scrapper';
@@ -9,13 +8,12 @@ import { useScrapper } from '../contexts/ScrapperContext';
 import type { IParsedCarItem } from '../types/scrapper';
 import { useAuth } from '../contexts/AuthContext';
 
-import { ScrapperProvider } from '../contexts/ScrapperContext';
 import { ScrapperTable } from '../components/Scrapper/Table';
+import { useApiClient } from '../contexts/ApiClientContext';
 
-const BASE_URL = import.meta.env.VITE_SCRAPPER_URL || 'http://localhost:8000/';
-
-const ScrapperItem = () => {
+const ScrapperItemPage: React.FC = () => {
     const { t } = useTranslation();
+    const { getXLSUrl } = useApiClient();
     const { id } = useParams();
     const navigate = useNavigate();
     const { userInfo } = useAuth();
@@ -25,18 +23,12 @@ const ScrapperItem = () => {
     const totalAmount = scrapperItemDetails.length;
     const itemsWithoutPhone = scrapperItemDetails.filter((item: IParsedCarItem) => !item.phone);
 
-    const onHanldeClick = async () => {
-        // const res = await scrapperServices.refreshScrapperItemDetails({
-        //     user_id: userInfo?.id,
-        //     urls: itemsWithoutPhone.map(item => item.url),
-        //     market: market || null, 
-        // });
-        const res = await axios.post(`http://localhost:8000/start/urls`, {
+    const onHanldeClick = () => {
+        scrapperServices.refreshScrapperItemDetails({
             user_id: userInfo?.id,
             urls: itemsWithoutPhone.map(item => item.url),
             market: market || null, 
         });
-        console.log('Refreshing scrapper item details for id:', id, res);
     }
     const getScrapperItemDetails = async (itemId: string) => {
         const items = await scrapperServices.getTaskDataItems(itemId);
@@ -68,7 +60,7 @@ const ScrapperItem = () => {
                 <Group spacing="xs" mt={8}>
                     {
                         loading ? t('scrapper.please_wait') : (
-                            <Link to={`${BASE_URL}export/task/${id}.xlsx`} download={true}>{t('scrapper.generate_xls')}</Link>
+                            <Link to={getXLSUrl(id || '')} download={true}>{t('scrapper.generate_xls')}</Link>
                         )
                     }
                 </Group>
@@ -80,7 +72,7 @@ const ScrapperItem = () => {
 
                 <Group spacing="xl" mt={8}>
                     <div>
-                        <p>{t('scrapper.items_without_phones')} {loading ? t('scrapper.loading') : itemsWithoutPhone.length}</p>
+                        <p>{t('scrapper.items_without_phone')} {loading ? t('scrapper.loading') : itemsWithoutPhone.length}</p>
                     </div>
                     <div>
                         <Button onClick={onHanldeClick} disabled={itemsWithoutPhone.length === 0}>{t('scrapper.refresh_items')}</Button>
@@ -98,14 +90,6 @@ const ScrapperItem = () => {
                 }
             </div>
         </>
-    );
-};
-
-const ScrapperItemPage: React.FC = () => {
-    return (
-      <ScrapperProvider>
-        <ScrapperItem />
-      </ScrapperProvider>
     );
 };
 

@@ -148,6 +148,7 @@
     "items_without_phones": "Елементи без телефонів:",
     "refresh_items": "Оновити елементи",
     "no_items_available": "Немає доступних елементів",
+    "items_without_phone": "елементів без телефонів",
     "price_from": "Ціна від",
     "price_to": "Ціна до",
     "mileage_from": "Пробіг від",
@@ -156,5 +157,20 @@
     "year_to": "Рік до",
     "region": "Регіон",
     "fuel_type": "Тип палива"
+  },
+  "api_client": {
+    "current": "Поточний API",
+    "local": "Локальний",
+    "remote": "Віддалений",
+    "switch_to_local": "Переключити на локальний",
+    "switch_to_remote": "Переключити на віддалений"
+  },
+  "time": {
+    "seconds": "секунд",
+    "second": "секунда",
+    "minutes": "хвилин",
+    "minute": "хвилина",
+    "hours": "годин",
+    "hour": "година"
   }
 }
