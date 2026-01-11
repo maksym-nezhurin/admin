@@ -20,7 +20,7 @@ const ScrapperItemPage: React.FC = () => {
     const { market } = useScrapper();
     const [scrapperItemDetails, setScrapperItemDetails] = useState<IParsedCarItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [totalEstimated, setTotalEstimated] = useState(0);
+    const [totalEstimated, setTotalEstimated] = useState<number>(0);
     const totalAmount = scrapperItemDetails.length;
     const itemsWithoutPhone = scrapperItemDetails.filter((item: IParsedCarItem) => !item.phone);
 

@@ -1,7 +1,7 @@
 import apiClientManager from "../api/apiClientManager";
 // import type { ICreateScrapperRequest, IRequestStatus } from "../types/scrapper";
 // import type { IEstimateResponse } from "../types/scrapper";
-import { SCRAPPING_MARKETS_ENUM } from "../constants/scrapper";
+import { SCRAPPING_MARKETS_ENUM, type IParsedCarItem } from "../constants/scrapper";
 
 interface IRefreshScrapperItem {
     user_id?: string,
@@ -29,10 +29,10 @@ export const scrapperServices = {
         const res = await apiClientManager.getClient().get(`/progress/${taskId}`);
         return res.data;
     },
-    async getTaskDataItems(taskId: string): Promise<any[]> {
+    async getTaskDataItems(taskId: string): Promise<{items: IParsedCarItem[], total_estimate: number}> {
         const res = await apiClientManager.getClient().get(`/items/task/${taskId}`);
         return res.data || {
-            items: [],
+            items: [] as IParsedCarItem[],
             total_estimate: 0,
         };
     },

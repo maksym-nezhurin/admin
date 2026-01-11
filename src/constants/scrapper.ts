@@ -193,3 +193,23 @@ export const ADDITIONAL_FILTERS_CONFIG: AdditionalFiltersConfig = {
   ],
   [SCRAPPING_SOURCES_ENUM.AUTOBazar]: [],
 };
+
+export interface IParsedCarItem {
+    id: number;
+    url: string;
+    phone: string;
+    year: string;
+    active_ads: string;
+    brand: string;
+    created_at: string;
+    mileage: string,
+    model: string,
+    path: string,
+    price: string,
+    raw?: string,
+    registration_number: string,
+    seller_name?: string,
+    title: string,
+    total_ads: string,
+    updated_at: string,
+}
