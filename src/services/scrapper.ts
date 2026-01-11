@@ -31,7 +31,10 @@ export const scrapperServices = {
     },
     async getTaskDataItems(taskId: string): Promise<any[]> {
         const res = await apiClientManager.getClient().get(`/items/task/${taskId}`);
-        return res.data.items || [];
+        return res.data || {
+            items: [],
+            total_estimate: 0,
+        };
     },
     async refreshScrapperItemDetails(data: IRefreshScrapperItem): Promise<any> {
         const res = await apiClientManager.getClient().post('/start/urls', { ...data });

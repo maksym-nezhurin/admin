@@ -20,6 +20,7 @@ const ScrapperItemPage: React.FC = () => {
     const { market } = useScrapper();
     const [scrapperItemDetails, setScrapperItemDetails] = useState<IParsedCarItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [totalEstimated, setTotalEstimated] = useState(0);
     const totalAmount = scrapperItemDetails.length;
     const itemsWithoutPhone = scrapperItemDetails.filter((item: IParsedCarItem) => !item.phone);
 
@@ -31,9 +32,10 @@ const ScrapperItemPage: React.FC = () => {
         });
     }
     const getScrapperItemDetails = async (itemId: string) => {
-        const items = await scrapperServices.getTaskDataItems(itemId);
+        const { total_estimate, items } = await scrapperServices.getTaskDataItems(itemId);
 
         setScrapperItemDetails(items);
+        setTotalEstimated(total_estimate);
         setLoading(false);
     };
 
@@ -68,7 +70,7 @@ const ScrapperItemPage: React.FC = () => {
 
             <div>
                 <h4>{t('scrapper.scrapper_items')}</h4>
-                <p>{t('scrapper.total_items_count')} {loading ? t('scrapper.loading') : totalAmount}</p>
+                <p>{t('scrapper.total_items_count')} {loading ? t('scrapper.loading') : totalAmount + '/' + totalEstimated}</p>
 
                 <Group spacing="xl" mt={8}>
                     <div>
