@@ -224,6 +224,7 @@ export interface IQueueStatus {
     age_minutes: number;
     is_stuck: boolean;
   }>;
+  total_active_messages: number;
   total_stuck_messages: number;
   summary: {
     pending_in_queue: number;
