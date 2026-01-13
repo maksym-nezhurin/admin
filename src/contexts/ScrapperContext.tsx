@@ -3,6 +3,8 @@ import { DEFAULT_FILTERS_CONFIG, ADDITIONAL_FILTERS_CONFIG, GET_SCRAPPING_SOURCE
 import type { FilterConfig } from '../constants/scrapper';
 import type { TSelectOption } from '../types/common';
 import { scrapperServices } from '../services/scrapper';
+import type { IQueueStatus } from '../constants/scrapper';
+import { useApiClient } from '../contexts/ApiClientContext';
 
 export interface IFilters {
   [key: string]: string | number | Array<string | number> | undefined;
@@ -35,6 +37,11 @@ interface ScrapperContextType {
   requests: IRequest[];
   setRequests: (r: IRequest[]) => void;
   fetchRequests: (userId: string) => Promise<void>;
+  fetchQueueStatus: () => Promise<void>;
+  redisQueueStatus: IQueueStatus | null;
+  socketStatus: 'connected' | 'disconnected' | 'fallback' | 'connecting';
+  connectSocket: () => Promise<boolean>;
+  disconnectSocket: () => void;
 }
 
 interface ScrapperProviderProps {
@@ -53,6 +60,8 @@ export const useScrapper = (): ScrapperContextType => {
 export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, children }) => {
   const [market, setMarket] = useState<SCRAPPING_MARKETS_ENUM | null>(null);
   const [requests, setRequests] = useState<IRequest[]>([]);
+  const [redisQueueStatus, setRedisQueueStatus] = useState<IQueueStatus | null>(null);
+  const [socketStatus, setSocketStatus] = useState<'connected' | 'disconnected' | 'fallback' | 'connecting'>('disconnected');
   const [filtersConfig, setFiltersConfig] = useState<FilterConfig[]>([]);
   const [filters, setFilters] = useState<IFilters>({
     user_id: userId ?? undefined,
@@ -60,7 +69,8 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
   const [allowedMarkets, setAllowedMarkets] = useState<TSelectOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
-  const { getMyRequests } = scrapperServices;
+  const { getMyRequests, getQueueStatus, subscribeToQueueStatus, subscribeToSocketStatus, connectSocket, disconnectSocket, isSocketHealthy } = scrapperServices;
+  const { getClient } = useApiClient();
 
   const fetchPermissions = useCallback(async () => {
     setLoading(true);
@@ -107,6 +117,101 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
     }
   };
 
+  const fetchQueueStatus = async () => {
+    console.log('fetchQueueStatus');
+    
+    // If socket is healthy, no need to fetch via HTTP
+    if (isSocketHealthy()) {
+      console.log('Socket is healthy, skipping HTTP fetch');
+      return;
+    }
+    
+    try {
+      const status = await getQueueStatus();
+      console.log('Queue status (HTTP fallback):', status);
+      setRedisQueueStatus(status);
+      setSocketStatus('fallback');
+    } catch (err: Error | any) {
+      console.error('Failed to fetch queue status:', err);
+      setSocketStatus('fallback');
+    }
+  };
+
+  // Socket connection management
+  const handleConnectSocket = useCallback(async (): Promise<boolean> => {
+    try {
+      const currentClient = getClient();
+      const baseUrl = currentClient.defaults.baseURL;
+      
+      const connected = await connectSocket(baseUrl);
+      console.log('Socket connection result:', connected);
+      
+      if (connected) {
+        setSocketStatus('connected');
+        console.log('✅ Socket connected successfully');
+      } else {
+        setSocketStatus('disconnected');
+        console.log('❌ Socket connection failed');
+      }
+      return connected;
+    } catch (error) {
+      console.error('Socket connection error:', error);
+      setSocketStatus('disconnected');
+      return false;
+    }
+  }, [getClient, connectSocket]);
+
+  const handleDisconnectSocket = useCallback(() => {
+    disconnectSocket();
+    setSocketStatus('disconnected');
+    console.log('🔌 Socket disconnected');
+  }, []);
+
+  // Initialize socket subscriptions
+  useEffect(() => {
+    let unsubscribeQueueStatus: (() => void) | null = null;
+    let unsubscribeSocketStatus: (() => void) | null = null;
+
+    const setupSubscriptions = () => {
+      // Subscribe to queue status updates
+      unsubscribeQueueStatus = subscribeToQueueStatus((data: IQueueStatus) => {
+        console.log('📊 Real-time queue status update:', data);
+        setRedisQueueStatus(data);
+        setSocketStatus('connected');
+      });
+
+      // Subscribe to socket status changes
+      unsubscribeSocketStatus = subscribeToSocketStatus((status) => {
+        if (status.connected) {
+          setSocketStatus('connected');
+        } else if (status.connecting) {
+          setSocketStatus('connecting');
+        } else {
+          setSocketStatus('disconnected');
+        }
+      });
+    };
+
+    // Try to connect socket
+    handleConnectSocket().then(connected => {
+      console.log('Socket connection result:', connected);
+      if (connected) {
+        setupSubscriptions();
+      } else {
+        // Fallback to HTTP polling
+        console.log('⚠️ Using HTTP fallback');
+        setSocketStatus('fallback');
+      }
+    });
+
+    // Cleanup
+    return () => {
+      if (unsubscribeQueueStatus) unsubscribeQueueStatus();
+      if (unsubscribeSocketStatus) unsubscribeSocketStatus();
+      handleDisconnectSocket();
+    };
+  }, [handleConnectSocket, handleDisconnectSocket]);
+
   useEffect(() => {
     console.log('Fetching scrapper permissions and sources...');
     fetchPermissions();
@@ -124,7 +229,10 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
   }, [market]);
 
   useEffect(() => {
-    userId && fetchRequests(userId);
+    if (userId) {
+      fetchRequests(userId);
+      fetchQueueStatus();
+    }
   }, [userId]);
 
   const refresh = useCallback(async () => {
@@ -146,6 +254,11 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
         requests,
         setRequests,
         fetchRequests,
+        fetchQueueStatus,
+        redisQueueStatus,
+        socketStatus,
+        connectSocket: handleConnectSocket,
+        disconnectSocket: handleDisconnectSocket,
       }}
     >
       {children}

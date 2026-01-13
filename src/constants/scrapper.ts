@@ -213,3 +213,23 @@ export interface IParsedCarItem {
     total_ads: string,
     updated_at: string,
 }
+
+export interface IQueueStatus {
+  queue_size: number;
+  active_workers: number;
+  desired_workers: number;
+  active_messages: Array<{
+    message_id: string;
+    actor: string;
+    age_minutes: number;
+    is_stuck: boolean;
+  }>;
+  total_stuck_messages: number;
+  summary: {
+    pending_in_queue: number;
+    being_processed: number;
+    stuck_messages: number;
+    total_pending: number;
+    status: "empty" | "processing" | "queued";
+  };
+}

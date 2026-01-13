@@ -145,6 +145,18 @@
     "scrapper_items": "Елементи скреппера",
     "total_items_count": "Всього елементів:",
     "loading": "завантаження...",
+    "redis_queue_status": {
+      "title": "Стан черги Redis",
+      "refresh": "Оновити",
+      "clean_stucked": "Очистити застряглі",
+      "amount_of_active_workers": "Кількість активних воркерів: {{count}}",
+      "total_stuck_messages": "Кількість застряглих повідомлень: {{count}}",
+      "total_active_messages": "Кількість активних повідомлень: {{count}}",
+      "socket_disconnected": "Сокет від'єднано",
+      "socket_disconnected_message": "Оновлення в реальному часі недоступні. Використовується HTTP опитування для оновлень. Ви можете спробувати підключитися вручну або продовжити в режимі опитування.",
+      "connect_socket": "Підключити сокет",
+      "disconnect_socket": "Відключити сокет"
+    },
     "items_without_phones": "Елементи без телефонів:",
     "refresh_items": "Оновити елементи",
     "no_items_available": "Немає доступних елементів",
@@ -156,7 +168,8 @@
     "year_from": "Рік від",
     "year_to": "Рік до",
     "region": "Регіон",
-    "fuel_type": "Тип палива"
+    "fuel_type": "Тип палива",
+    "amount_of_active_workers": "Кількість активних робітників: {{count}}"
   },
   "api_client": {
     "current": "Поточний API",

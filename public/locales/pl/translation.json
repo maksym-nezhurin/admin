@@ -144,6 +144,18 @@
     "scrapper_items": "Elementy skrapera",
     "total_items_count": "Łącznie elementów:",
     "loading": "ładowanie...",
+    "redis_queue_status": {
+      "title": "Status kolejki Redis",
+      "refresh": "Odśwież",
+      "clean_stucked": "Wyczyść zakleszczone",
+      "amount_of_active_workers": "Liczba aktywnych workerów: {{count}}",
+      "total_stuck_messages": "Liczba zakleszczonych wiadomości: {{count}}",
+      "total_active_messages": "Liczba aktywnych wiadomości: {{count}}",
+      "socket_disconnected": "Socket rozłączony",
+      "socket_disconnected_message": "Aktualizacje w czasie rzeczywistym są niedostępne. Używane jest odpytywanie HTTP do aktualizacji. Możesz spróbować połączyć się ręcznie lub kontynuować w trybie odpytywania.",
+      "connect_socket": "Połącz Socket",
+      "disconnect_socket": "Rozłącz Socket"
+    },
     "items_without_phones": "Elementy bez telefonów:",
     "refresh_items": "Odśwież elementy",
     "no_items_available": "Brak dostępnych elementów",
@@ -155,7 +167,8 @@
     "year_from": "Rok od",
     "year_to": "Rok do",
     "region": "Region",
-    "fuel_type": "Typ paliwa"
+    "fuel_type": "Typ paliwa",
+    "amount_of_active_workers": "Liczba aktywnych pracowników: {{count}}"
   },
   "api_client": {
     "current": "Aktualne API",

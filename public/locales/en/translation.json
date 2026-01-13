@@ -144,6 +144,18 @@
     "scrapper_items": "Scrapper Items",
     "total_items_count": "Total Items:",
     "loading": "loading...",
+    "redis_queue_status": {
+      "title": "Redis Queue Status",
+      "refresh": "Refresh",
+      "clean_stucked": "Clean Stucked",
+      "amount_of_active_workers": "Amount of active workers: {{count}}",
+      "total_stuck_messages": "Total stuck messages: {{count}}",
+      "total_active_messages": "Total active messages: {{count}}",
+      "socket_disconnected": "Socket Disconnected",
+      "socket_disconnected_message": "Real-time updates are unavailable. Using HTTP polling for updates. You can try to reconnect manually or continue with polling mode.",
+      "connect_socket": "Connect Socket",
+      "disconnect_socket": "Disconnect Socket"
+    },
     "items_without_phone": "items without phones",
     "refresh_items": "Refresh Items",
     "no_items_available": "No items available",
