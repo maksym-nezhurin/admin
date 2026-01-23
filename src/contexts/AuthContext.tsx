@@ -6,34 +6,39 @@ import type { IUser, IRegisterForm, AuthContextType, AuthResponse } from '../typ
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthResponse | null>(null); // TODO: change user to authData
+  const [user, setUser] = useState<AuthResponse | null>(null);
   const [userInfo, setUserInfo] = useState<IUser | null>(null);
-  const [roleLevel, setRoleLevel] = useState<{ level: number; name: string } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [logged, setLogged] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+  const [roles, setRoles] = useState<any[]>([]);
+  const [roleLevel, setRoleLevel] = useState<{ level: number; name: string } | null>(null);
+
   const verifyAndSetUser = useCallback(async (userResponse: AuthResponse) => {
     try {      
-      const { valid, user } = await authService.verifyToken(userResponse.access_token);
-      if (valid && user) {
+      const tokenVerification = await authService.verifyToken(userResponse.access_token);
+      if (tokenVerification.valid && tokenVerification.user) {
         setUser(userResponse);
-        setUserInfo(user);
-        const higherRole = user?.roles?.reduce((prev, current) => {
+        console.log('tokenVerification', tokenVerification);
+        setUserInfo(tokenVerification.user);
+        const higherRole = tokenVerification.user?.roles?.reduce((prev, current) => {
           return prev.level > current.role.level ? prev : current.role;
         }, { level: 10, name: '' } as { level: number; name: string }) || { level: 10, name: '' };
         setRoleLevel(higherRole);
         return true;
       }
+      // Reset roleLevel when invalid
+      setRoleLevel(null);
       return false;
     } catch (error) {
       console.error('Token verification failed:', error);
+      setRoleLevel(null);
       return false;
     }
   }, []);
 
   useEffect(() => {
     const initializeAuth = async () => {
+      setLoading(true);
       try {
         const userResponse = authService.getCurrentUser();
         if (userResponse?.access_token) {          
@@ -52,22 +57,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initializeAuth();
-  }, [logged, verifyAndSetUser]);
+  }, [verifyAndSetUser]);
 
   const login = useCallback(async (username: string, password: string) => {
     try {
       setError(null);
       setLoading(true);
       const response = await authService.login({ username, password });
-      setLogged(response.access_token ? true : false);
+      
+      // Set user state immediately after successful login
+      await verifyAndSetUser(response);
     } catch (err) {
       setError('Invalid username or password');
-      setLogged(false);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [verifyAndSetUser]);
 
   const register = useCallback(async (credentials: IRegisterForm) => {
     try {
@@ -89,8 +95,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     authService.logout();
     setUser(null);
     setUserInfo(null);
+    setRoleLevel(null);
     setError(null)
   }, []);
+
+  const fetchRoles = useCallback(async () => {
+    // Не тягнемо ролі, якщо користувач не автентифікований
+    if (!user?.access_token) {
+      setRoles([]);
+      return;
+    }
+
+    try {
+      const allRoles = await authService.getAllRoles();
+      setRoles(allRoles);
+    } catch (error) {
+      console.error('Failed to fetch roles:', error);
+    }
+  }, [user?.access_token]);
+
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
 
   const refreshToken = useCallback(async () => {
     if (!user?.refresh_token) throw new Error('No refresh token');
@@ -100,6 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const updatedUser = { ...user, ...newTokens };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      localStorage.setItem('tokenTimestamp', Date.now().toString());
       await verifyAndSetUser(updatedUser);
       return updatedUser;
     } catch (error) {
@@ -109,6 +136,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
   }, [user, logout, verifyAndSetUser]);
+
+  // Proactive token refresh before expiration
+  useEffect(() => {
+    if (!user?.access_token || !user?.expires_in) return;
+
+    const checkTokenExpiration = () => {
+      const tokenTimestamp = localStorage.getItem('tokenTimestamp');
+      if (!tokenTimestamp) return;
+
+      const issuedAt = parseInt(tokenTimestamp);
+      const expiresAt = issuedAt + (user.expires_in * 1000);
+      const now = Date.now();
+      const timeUntilExpiry = expiresAt - now;
+      
+      // Refresh 5 minutes before expiration
+      const refreshThreshold = 5 * 60 * 1000; // 5 minutes
+      
+      if (timeUntilExpiry <= refreshThreshold && timeUntilExpiry > 0) {
+        console.log('Token expiring soon, proactively refreshing...');
+        refreshToken().catch(error => {
+          console.error('Proactive refresh failed:', error);
+        });
+      }
+    };
+
+    const interval = setInterval(checkTokenExpiration, 180000); // Check every 3 minutes
+    return () => clearInterval(interval);
+  }, [user, refreshToken]);
 
   useEffect(() => {
     setRefreshTokenHandler(refreshToken);
@@ -123,9 +178,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     register,
     logout,
     roleLevel,
+    roles,
     isAuthenticated: !!user,
     refreshToken,
-  }), [user, userInfo, loading, error, roleLevel, login, logout, register, refreshToken]);
+    setUserInfo,
+  }), [user, userInfo, loading, error, roleLevel, roles, login, logout, register, refreshToken]);
 
   return (
     <AuthContext.Provider value={value}>

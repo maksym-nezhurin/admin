@@ -49,7 +49,7 @@ const Login: React.FC = () => {
         message: t('login_success'),
         color: 'green',
       });
-      navigate('/dashboard');
+      // Navigation will happen in useEffect when user state is updated
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       form.setErrors({ password: error, username: error })

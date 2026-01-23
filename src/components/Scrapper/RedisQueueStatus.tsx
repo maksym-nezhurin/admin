@@ -76,18 +76,25 @@ export const RedisQueueStatus = () => {
                 </Alert>
             )}
 
-            <Text>
-                {t('scrapper.redis_queue_status.amount_of_active_workers', { count: active_workers })}
-            </Text>
+            <Stack spacing="xs"
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between'
+                }}
+            >
+                <Stack>
+                    <Text size="xs">
+                        {t('scrapper.redis_queue_status.amount_of_active_workers', { count: active_workers })}
+                    </Text>
 
-            <Text>
-                {t('scrapper.redis_queue_status.total_active_messages', { count: total_active_messages })}
-            </Text>
+                    <Text size="xs">
+                        {t('scrapper.redis_queue_status.total_active_messages', { count: total_active_messages })}
+                    </Text>
 
-            <Text>
-                {
-                    total_stuck_messages ? (
-                        <Text c="red">
+                    <Text size="xs">
+                        {
+                            total_stuck_messages ? (
+                                <Text c="red">
                             {t('scrapper.redis_queue_status.total_stuck_messages', { count: total_stuck_messages })}
                         </Text>
                     ) : (
@@ -97,9 +104,23 @@ export const RedisQueueStatus = () => {
                     )
                 }
             </Text>
+                </Stack>
+
+                {/* TODO: implement window with max height 100px and scrolling, fontsize small but readdalle and coloring support understanf the. situation */}
+                <div style={{
+                    maxHeight: '100px',
+                    overflow: 'auto',
+                    fontSize: '12px',
+                    color: total_stuck_messages > 0 ? 'red' : 'black',
+                }}>
+                    <code>
+                        <pre>{JSON.stringify(redisQueueStatus, null, 2)}</pre>
+                    </code>
+                </div>
+            </Stack>
 
             <Group variant="subtle">
-                <Button onClick={() => fetchQueueStatus()}>
+                <Button onClick={() => fetchQueueStatus()} disabled={socketStatus === 'connected'}>
                     {t('scrapper.redis_queue_status.refresh')}
                 </Button>
                 
@@ -120,18 +141,6 @@ export const RedisQueueStatus = () => {
                     {t('scrapper.redis_queue_status.clean_stucked')}
                 </Button>
             </Group>
-            
-            {/* TODO: implement window with max height 100px and scrolling, fontsize small but readdalle and coloring support understanf the. situation */}
-            <div style={{
-                maxHeight: '100px',
-                overflow: 'auto',
-                fontSize: '12px',
-                color: total_stuck_messages > 0 ? 'red' : 'black',
-            }}>
-                <code>
-                    <pre>{JSON.stringify(redisQueueStatus, null, 2)}</pre>
-                </code>
-            </div>
         </Stack>
     );
 };

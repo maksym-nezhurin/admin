@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useScrapper } from '../../contexts/ScrapperContext';
 import { AVAILABLE_FILTERS, DEFAULT_FILTERS_VALUES } from '../../constants/scrapper';
-
 import { scrapperServices } from '../../services/scrapper';
+import apiClientManager from '../../api/apiClientManager';
 
 interface IEstimateResponse {
     url_tested: string;
@@ -16,7 +16,7 @@ interface IEstimateResponse {
 
 export const ScrapperNavigation = () => {
     const { t } = useTranslation();
-    const { filters, market, requests, setRequests } = useScrapper();
+    const { filters, market, requests, setRequests, taskProgressEnabled, connectToTaskProgress } = useScrapper();
     const [estimate, setEstimates] = useState<IEstimateResponse>({
         url_tested: '',
         total_estimate: 0,
@@ -61,6 +61,17 @@ export const ScrapperNavigation = () => {
         const { task_id, status } = data;
 
         setRequests([...requests, { task_id, status, id: task_id, market, items_count: 0, duration_seconds: 0 }]);
+
+        // Auto-connect to WebSocket for the new task if real-time progress is enabled
+        if (taskProgressEnabled) {
+            try {
+                const currentClient = apiClientManager.getClient();
+                const baseUrl = currentClient.defaults.baseURL || '';
+                await connectToTaskProgress(baseUrl, task_id);
+            } catch (error) {
+                console.error('Failed to connect to task progress WebSocket:', error);
+            }
+        }
 
         setLoadingRequests(false);
     };

@@ -1,3 +1,10 @@
+export interface IRoleLevel {
+  level: number;
+  description: string;
+  id: string;
+  name: string;
+}
+
 export interface IUser {
   sub?: string;
   id: string;
@@ -6,8 +13,14 @@ export interface IUser {
   lastName: string;
   email: string;
   phone?: string;  
-  email_verified?: boolean;
-  roles?: Array<{ role: { level: number; name: string } }>;
+  emailVerified?: boolean;
+  isActive: boolean,
+  isCompanyRepresentative: boolean,
+  company: string,
+  roles?: Array<{ role: IRoleLevel }>;
+  nativeCountry?: string;
+  preferredCountries?: string[];
+  countryCode?: string;
 }
 
 export interface AuthResponse {
@@ -26,15 +39,11 @@ export interface IRegisterForm {
   confirmPassword?: string;
 }
 
-export interface IRoleLevel {
-  level: number;
-  name: string;
-}
-
 export interface AuthContextType {
   user: AuthResponse | null;
   userInfo: IUser | null;
-  roleLevel: IRoleLevel | null;
+  roleLevel: { level: number; name: string } | null;
+  roles: IRoleLevel[];
   loading: boolean;
   error: string | null;
   login: (username: string, password: string) => Promise<void>;
@@ -42,13 +51,7 @@ export interface AuthContextType {
   register: (credentials: IRegisterForm) => Promise<void>;
   refreshToken?: () => Promise<AuthResponse | null>;
   isAuthenticated?: boolean;
-}
-
-export interface AuthResponse {
-  access_token: string;
-  expires_in: number;
-  refresh_token?: string;
-  token_type: string;
+  setUserInfo: (user: IUser | null) => void;
 }
 
 export interface LoginCredentials {
@@ -79,6 +82,10 @@ export interface RegisterResponse {
 export interface ISession {
   id: string;
   username: string;
+  email: string;
   ipAddress: string;
   lastAccess: string;
+  expiresAt: string;
+  createdAt: string;
+  isCurrent: boolean;
 }

@@ -1,4 +1,4 @@
-import { Button, NumberInput, Select, Group, MultiSelect } from "@mantine/core";
+import { Button, NumberInput, Select, Group, MultiSelect, Checkbox } from "@mantine/core";
 import { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 
@@ -63,7 +63,7 @@ export const Filters = () => {
           {f.type === "select" && (
             <Select
               label={t(f.label)}
-              placeholder={String(f.placeholder)}
+              placeholder={t(String(f.placeholder))}
               data={prepareOptionsForSelect(f.data)}
               value={values[f.name] !== undefined && values[f.name] !== null ? String(values[f.name]) : null}
               onChange={(value: string | null) => handleChange(f.name, value)}
@@ -74,11 +74,19 @@ export const Filters = () => {
           {f.type === "multiselect" && (
             <MultiSelect
               label={t(f.label)}
-              placeholder={String(f.placeholder)}
+              placeholder={t(String(f.placeholder))}
               data={prepareOptionsForSelect(f.data)}
               value={Array.isArray(values[f.name]) ? (values[f.name] as (string | number)[]).map(String) : []}
               onChange={(value: string[] | null) => handleChange(f.name, value)}
               clearable
+            />
+          )}
+
+          {f.type === "checkbox" && (
+            <Checkbox
+              label={t(f.label)}
+              checked={Boolean(values[f.name])}
+              onChange={(e) => handleChange(f.name, e.target.checked)}
             />
           )}
         </div>

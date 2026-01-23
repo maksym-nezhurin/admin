@@ -73,6 +73,11 @@ apiClient.interceptors.response.use(
         let newTokens;
         const currentUser = authService.getCurrentUser();
         const refresh_token = currentUser?.refresh_token;
+        
+        console.log('🔍 Current user object:', currentUser);
+        console.log('🔑 Refresh token exists:', !!refresh_token);
+        console.log('🔑 Refresh token value:', refresh_token ? refresh_token.substring(0, 20) + '...' : 'NULL');
+        
         if (!refresh_token) {
           isRefreshing = false;
           processQueue('No refresh token', null);

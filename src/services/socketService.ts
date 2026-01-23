@@ -5,7 +5,7 @@
  * Backend endpoint: ws://localhost:8000/queue/status/ws
  */
 
-import type { IQueueStatus } from '../constants/scrapper';
+import type { IQueueStatus, ITaskProgress } from '../constants/scrapper';
 
 export interface SocketServiceConfig {
   autoConnect?: boolean;
@@ -24,6 +24,9 @@ export interface SocketStatus {
   reconnectAttempts: number;
 }
 
+// Task progress socket status has same shape as main SocketStatus
+type TaskProgressSocketStatus = SocketStatus;
+
 export class SocketService {
   private ws: WebSocket | null = null;
   private status: SocketStatus = {
@@ -33,13 +36,34 @@ export class SocketService {
     lastConnected: null,
     reconnectAttempts: 0
   };
+  private activeConnections: Set<string> = new Set(); // Track active connections
   private statusCallbacks: Set<(status: SocketStatus) => void> = new Set();
   private queueStatusCallbacks: Set<(data: IQueueStatus) => void> = new Set();
+  private taskProgressCallbacks: Set<(data: ITaskProgress) => void> = new Set();
+  private taskProgressWs: WebSocket | null = null;
+  private taskProgressStatus: TaskProgressSocketStatus = {
+    connected: false,
+    connecting: false,
+    error: null,
+    lastConnected: null,
+    reconnectAttempts: 0
+  };
+  private taskProgressStatusCallbacks: Set<(status: TaskProgressSocketStatus) => void> = new Set();
   private config: SocketServiceConfig;
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private currentBaseUrl: string = '';
   private shouldReconnect: boolean = true;
   private connectionTimeout: NodeJS.Timeout | null = null;
+  private taskProgressReconnectTimeout: NodeJS.Timeout | null = null;
+  private taskProgressConnectionTimeout: NodeJS.Timeout | null = null;
+  private taskProgressReconnectAttempts: number = 0;
+  private lastConnectionTaskId: string = '';
+  private lastConnectionAttemptTime: number = 0;
+  private shouldReconnectTaskProgress: boolean = true;
+  
+  // Global rate limiting
+  private connectionAttemptsPerMinute: Map<number, number[]> = new Map();
+  private maxConnectionsPerMinute: number = 10;
 
   constructor(config: SocketServiceConfig = {}) {
     this.config = {
@@ -57,13 +81,14 @@ export class SocketService {
    * Update the base URL and reconnect if needed
    */
   updateBaseUrl(baseUrl: string): void {
+    console.log('🔄 Base URL changed, reconnecting socket...');
     if (this.currentBaseUrl !== baseUrl) {
       this.currentBaseUrl = baseUrl;
       if (this.ws?.readyState === WebSocket.OPEN) {
         console.log('🔄 Base URL changed, reconnecting socket...');
         this.disconnect();
         // Auto-reconnect with new URL after a short delay
-        setTimeout(() => this.connect(), 100);
+        // setTimeout(() => this.connect(), 100);
       }
     }
   }
@@ -158,6 +183,152 @@ export class SocketService {
   }
 
   /**
+   * Connect to task progress WebSocket for specific task
+   */
+  async connectToTaskProgress(baseUrl: string, taskId: string): Promise<boolean> {
+    if (this.taskProgressWs && this.taskProgressWs.readyState === WebSocket.OPEN && this.lastConnectionTaskId === taskId) {
+      console.log('Task progress WebSocket already connected for this task:', taskId);
+      return true;
+    }
+
+    // Check global rate limiting
+    const now = Date.now();
+    const currentMinute = Math.floor(now / 60000); // Current minute
+    const recentAttempts = this.connectionAttemptsPerMinute.get(currentMinute) || [];
+    
+    // Check if we've exceeded the maximum connections per minute
+    if (recentAttempts.length >= this.maxConnectionsPerMinute) {
+      console.log(` Rate limit exceeded. Max ${this.maxConnectionsPerMinute} connections per minute allowed. Current attempts: ${recentAttempts.length}`);
+      return false;
+    }
+    
+    // Record this attempt
+    recentAttempts.push(now);
+    this.connectionAttemptsPerMinute.set(currentMinute, recentAttempts);
+    
+    // Clean old attempts (older than 1 minute)
+    for (const [minute] of this.connectionAttemptsPerMinute.entries()) {
+      if (minute < currentMinute - 1) {
+        this.connectionAttemptsPerMinute.delete(minute);
+      }
+    }
+    
+    // Prevent too many reconnection attempts for the same task within a short time
+    const timeSinceLastAttempt = now - this.lastConnectionAttemptTime;
+    
+    // If same task was attempted within the last 10 seconds, prevent it
+    if (this.lastConnectionTaskId === taskId && timeSinceLastAttempt < 10000) {
+      console.log('Preventing duplicate connection attempt for task:', taskId, 'Time since last attempt:', timeSinceLastAttempt);
+      return false;
+    }
+    
+    // Limit maximum concurrent connections to prevent server overload
+    if (this.activeConnections.size >= 3) {
+      console.log('Maximum active connections reached, rejecting new connection for task:', taskId);
+      return false;
+    }
+    
+    this.lastConnectionTaskId = taskId;
+    this.lastConnectionAttemptTime = now;
+    
+    const wsUrl = this.getTaskProgressWebSocketUrl(baseUrl, taskId);
+    console.log('Connecting to task progress WebSocket:', wsUrl);
+    
+    // Validate WebSocket URL
+    if (!wsUrl || !wsUrl.startsWith('ws://') && !wsUrl.startsWith('wss://')) {
+      console.error('❌ Invalid WebSocket URL:', wsUrl);
+      this.updateTaskProgressStatus({
+        connected: false,
+        connecting: false,
+        error: 'Invalid WebSocket URL',
+        lastConnected: this.taskProgressStatus.lastConnected,
+        reconnectAttempts: this.taskProgressReconnectAttempts
+      });
+      return false;
+    }
+
+    this.updateTaskProgressStatus({
+      connected: false,
+      connecting: true,
+      error: null,
+      lastConnected: this.taskProgressStatus.lastConnected,
+      reconnectAttempts: this.taskProgressReconnectAttempts,
+    });
+
+    // Store the task ID we're connecting to
+    this.lastConnectionTaskId = taskId;
+    console.log('🎯 Connecting to task progress for task:', taskId);
+
+    try {
+      this.taskProgressWs = new WebSocket(wsUrl);
+      console.log('🔗 Created task progress WebSocket for task:', taskId);
+      
+      // Set up event listeners
+      this.setupTaskProgressEventListeners(taskId);
+      
+      // Set connection timeout
+      this.taskProgressConnectionTimeout = setTimeout(() => {
+        if (this.taskProgressWs && this.taskProgressWs.readyState === WebSocket.CONNECTING) {
+          console.log('⏰ Task progress WebSocket connection timeout');
+          this.taskProgressWs.close();
+          this.updateTaskProgressStatus({
+            connected: false,
+            connecting: false,
+            error: 'Connection timeout',
+            lastConnected: this.taskProgressStatus.lastConnected,
+            reconnectAttempts: this.taskProgressReconnectAttempts
+          });
+        }
+      }, 10000); // 10 second timeout
+      
+      this.taskProgressWs.onopen = () => {
+        console.log('✅ Task progress WebSocket connected for task:', taskId);
+        this.updateTaskProgressStatus({
+          connected: true,
+          connecting: false,
+          error: null,
+          lastConnected: new Date(),
+          reconnectAttempts: 0,
+        });
+        this.taskProgressReconnectAttempts = 0;
+        
+        // Add to active connections
+        this.activeConnections.add(taskId);
+        console.log('📊 Active connections:', Array.from(this.activeConnections));
+        
+        // Clear connection timeout since we connected successfully
+        if (this.taskProgressConnectionTimeout) {
+          clearTimeout(this.taskProgressConnectionTimeout);
+          this.taskProgressConnectionTimeout = null;
+        }
+        
+        // Keep lastConnectionTaskId to prevent duplicate connections
+        // this.lastConnectionTaskId = '';
+        // this.lastConnectionAttemptTime = 0;
+      };
+
+      // Successfully initiated connection
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to connect to task progress WebSocket:', error);
+      this.updateTaskProgressStatus({
+        connected: false,
+        connecting: false,
+        error: 'Connection error',
+        lastConnected: this.taskProgressStatus.lastConnected,
+        reconnectAttempts: this.taskProgressReconnectAttempts
+      });
+      return false;
+    } finally {
+      // Only clear timeout if connection failed (not on successful open)
+      if (this.taskProgressConnectionTimeout && this.taskProgressWs?.readyState !== WebSocket.OPEN) {
+        clearTimeout(this.taskProgressConnectionTimeout);
+        this.taskProgressConnectionTimeout = null;
+      }
+    }
+  }
+
+  /**
    * Disconnect from WebSocket
    */
   disconnect(): void {
@@ -186,6 +357,56 @@ export class SocketService {
   }
 
   /**
+   * Disconnect from task progress WebSocket
+   */
+  disconnectTaskProgress(): void {
+    this.shouldReconnectTaskProgress = false;
+    
+    if (this.taskProgressReconnectTimeout) {
+      clearTimeout(this.taskProgressReconnectTimeout);
+      this.taskProgressReconnectTimeout = null;
+    }
+
+    if (this.taskProgressConnectionTimeout) {
+      clearTimeout(this.taskProgressConnectionTimeout);
+      this.taskProgressConnectionTimeout = null;
+    }
+
+    if (this.taskProgressWs) {
+      this.taskProgressWs.close(1000, 'Manual disconnect');
+      this.taskProgressWs = null;
+    }
+
+    // Reset task progress connection tracking
+    this.lastConnectionTaskId = '';
+    this.lastConnectionAttemptTime = 0;
+    this.taskProgressReconnectAttempts = 0;
+    this.activeConnections.clear();
+
+    this.updateTaskProgressStatus({
+      connected: false,
+      connecting: false,
+      error: null,
+      lastConnected: this.taskProgressStatus.lastConnected,
+      reconnectAttempts: 0
+    });
+  }
+
+  /**
+   * Disconnect from all WebSockets
+   */
+  disconnectAll(): void {
+    this.disconnect();
+    this.disconnectTaskProgress();
+    
+    // Reset all connection tracking to prevent infinite loops
+    this.lastConnectionTaskId = '';
+    this.lastConnectionAttemptTime = 0;
+    this.taskProgressReconnectAttempts = 0;
+    this.activeConnections.clear();
+  }
+
+  /**
    * Subscribe to queue status updates
    */
   subscribeToQueueStatus(callback: (data: IQueueStatus) => void): () => void {
@@ -194,6 +415,33 @@ export class SocketService {
     // Return unsubscribe function
     return () => {
       this.queueStatusCallbacks.delete(callback);
+    };
+  }
+
+  /**
+   * Subscribe to task progress updates
+   */
+  subscribeToTaskProgress(callback: (data: ITaskProgress) => void): () => void {
+    this.taskProgressCallbacks.add(callback);
+    
+    // Return unsubscribe function
+    return () => {
+      this.taskProgressCallbacks.delete(callback);
+    };
+  }
+
+  /**
+   * Subscribe to task progress socket status changes
+   */
+  subscribeToTaskProgressStatus(callback: (status: SocketStatus) => void): () => void {
+    this.taskProgressStatusCallbacks.add(callback);
+    
+    // Send current status immediately
+    callback(this.taskProgressStatus);
+    
+    // Return unsubscribe function
+    return () => {
+      this.taskProgressStatusCallbacks.delete(callback);
     };
   }
 
@@ -217,10 +465,24 @@ export class SocketService {
   }
 
   /**
+   * Get current task progress socket status
+   */
+  getTaskProgressStatus(): SocketStatus {
+    return { ...this.taskProgressStatus };
+  }
+
+  /**
    * Check if socket is healthy
    */
   isHealthy(): boolean {
     return this.status.connected && !this.status.error;
+  }
+
+  /**
+   * Check if task progress socket is healthy
+   */
+  isTaskProgressHealthy(): boolean {
+    return this.taskProgressStatus.connected && !this.taskProgressStatus.error;
   }
 
   private setupEventListeners(): void {
@@ -366,6 +628,167 @@ export class SocketService {
         console.error('Error in queue status callback:', error);
       }
     });
+  }
+
+  private notifyTaskProgressCallbacks(data: ITaskProgress): void {
+    console.log('📈 Task progress data received:', data);
+    console.log('📊 Active task progress callbacks:', this.taskProgressCallbacks.size);
+    
+    this.taskProgressCallbacks.forEach(callback => {
+      try {
+        console.log('🔄 Calling task progress callback with data:', data);
+        callback(data);
+      } catch (error) {
+        console.error('❌ Error in task progress callback:', error);
+      }
+    });
+  }
+
+  private notifyTaskProgressStatusCallbacks(status: SocketStatus): void {
+    this.taskProgressStatusCallbacks.forEach(callback => {
+      try {
+        callback(status);
+      } catch (error) {
+        console.error('Error in task progress status callback:', error);
+      }
+    });
+  }
+
+  private setupTaskProgressEventListeners(taskId: string): void {
+    console.log('🔧 Setting up task progress event listeners for task:', taskId);
+    if (!this.taskProgressWs) {
+      console.error('❌ No task progress WebSocket available for event listeners');
+      return;
+    }
+    console.log('✅ Task progress WebSocket available, setting up listeners');
+
+    this.taskProgressWs.addEventListener('open', () => {
+      console.log('✅ Task Progress WebSocket connected');
+      if (this.taskProgressConnectionTimeout) {
+        clearTimeout(this.taskProgressConnectionTimeout);
+        this.taskProgressConnectionTimeout = null;
+      }
+      this.updateTaskProgressStatus({
+        connected: true,
+        connecting: false,
+        error: null,
+        lastConnected: new Date(),
+        reconnectAttempts: 0
+      });
+      this.shouldReconnectTaskProgress = true;
+    });
+
+    this.taskProgressWs.addEventListener('close', (event) => {
+      console.log('🔌 Task Progress WebSocket disconnected:', event.code, event.reason);
+      
+      if (this.taskProgressConnectionTimeout) {
+        clearTimeout(this.taskProgressConnectionTimeout);
+        this.taskProgressConnectionTimeout = null;
+      }
+
+      this.updateTaskProgressStatus({
+        connected: false,
+        connecting: false,
+        error: `Disconnected: ${event.reason || `Code ${event.code}`}`
+      });
+
+      // Handle reconnection if not a manual disconnect
+      if (event.code !== 1000 && this.shouldReconnectTaskProgress) {
+        this.handleTaskProgressReconnect(taskId);
+      }
+    });
+
+    this.taskProgressWs.addEventListener('error', (error) => {
+      console.error('❌ Task Progress WebSocket error:', error);
+      if (this.taskProgressConnectionTimeout) {
+        clearTimeout(this.taskProgressConnectionTimeout);
+        this.taskProgressConnectionTimeout = null;
+      }
+      this.updateTaskProgressStatus({
+        connected: false,
+        connecting: false,
+        error: 'Task Progress WebSocket connection error'
+      });
+    });
+
+    this.taskProgressWs.addEventListener('message', (event) => {
+      console.log('📨 Task progress message received RAW:', event.data);
+      console.log('🔍 Message event type:', typeof event.data);
+      console.log('🔍 WebSocket readyState:', this.taskProgressWs?.readyState);
+      
+      try {
+        const data = JSON.parse(event.data);
+        // console.log('📊 Parsed task progress data:', data);
+        
+        // Check if it's an error message
+        if (data.error) {
+          console.error('❌ Task Progress Server error:', data.error);
+          this.updateTaskProgressStatus({
+            error: data.error
+          });
+          return;
+        }
+
+        // Task progress update
+        console.log('📈 Task progress update:', data);
+        this.notifyTaskProgressCallbacks(data as ITaskProgress);
+      } catch (error) {
+        console.error('❌ Error parsing task progress message:', error);
+        console.error('❌ Raw data that failed to parse:', event.data);
+      }
+    });
+  }
+
+  private handleTaskProgressReconnect(taskId: string): void {
+    if (!this.config.reconnection || !this.shouldReconnectTaskProgress) {
+      return;
+    }
+
+    if (this.taskProgressStatus.reconnectAttempts >= (this.config.reconnectionAttempts || 5)) {
+      console.error('❌ Max task progress reconnection attempts reached');
+      this.updateTaskProgressStatus({
+        error: 'Max task progress reconnection attempts reached',
+        reconnectAttempts: this.taskProgressStatus.reconnectAttempts
+      });
+      return;
+    }
+
+    const attemptNumber = this.taskProgressStatus.reconnectAttempts + 1;
+    console.log(`🔄 Task Progress Reconnection attempt ${attemptNumber}/${this.config.reconnectionAttempts}`);
+
+    // Exponential backoff with max delay
+    const delay = Math.min(
+      (this.config.reconnectionDelay || 1000) * Math.pow(2, attemptNumber - 1),
+      this.config.reconnectDelayMax || 30000
+    );
+
+    this.updateTaskProgressStatus({
+      reconnectAttempts: attemptNumber
+    });
+
+    this.taskProgressReconnectTimeout = setTimeout(() => {
+      this.connectToTaskProgress(this.currentBaseUrl, taskId);
+    }, delay);
+  }
+
+  private getTaskProgressWebSocketUrl(httpUrl: string, taskId: string): string {
+    try {
+      const url = new URL(httpUrl);
+      const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+      // Task progress endpoint: /progress/{task_id}/ws
+      const wsUrl = `${protocol}//${url.host}/progress/${taskId}/ws`;
+      return wsUrl;
+    } catch (error) {
+      console.error('Invalid URL:', httpUrl);
+      // Fallback for localhost
+      return httpUrl.replace(/^https?/, 'ws') + `/progress/${taskId}/ws`;
+    }
+  }
+
+  private updateTaskProgressStatus(updates: Partial<SocketStatus>): void {
+    this.taskProgressStatus = { ...this.taskProgressStatus, ...updates };
+    // Notify status callbacks
+    this.notifyTaskProgressStatusCallbacks(this.taskProgressStatus);
   }
 }
 

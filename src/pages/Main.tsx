@@ -2,8 +2,8 @@ import { Text } from '@mantine/core';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
-import { Welcome } from '../components/Main/Welcome';
-import { CarTable } from '../components/Main/CarTable';
+import { Welcome } from '../components/Welcome';
+import { CarTable } from '../components/CarTable';
 // import { CarAnalyticsChart } from '../components/CarAnalyticsChart';
 
 const Main = () => {
