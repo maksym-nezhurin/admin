@@ -23,6 +23,10 @@ const possibleSourcePaths = [
   join(__dirname, '../../node_modules/@reelo/i18n/locales'),
   // From admin app directory
   join(__dirname, '../node_modules/@reelo/i18n/locales'),
+  // For Vercel (absolute path from /vercel/path0)
+  '/node_modules/@reelo/i18n/locales',
+  // For Vercel (from root of monorepo)
+  join(__dirname, '../../../../node_modules/@reelo/i18n/locales'),
 ];
 
 const targetPath = join(__dirname, '../public/locales');
