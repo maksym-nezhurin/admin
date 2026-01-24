@@ -1,7 +1,7 @@
 {
   "buildCommand": "echo '🚀 Starting build...' && echo '📂 Current directory:' && pwd && echo '📋 Running build script...' && pnpm build",
   "outputDirectory": "dist",
-  "installCommand": "echo '📦 Installing dependencies from monorepo root...' && cd ../.. && pnpm install && cd apps/admin",
+  "installCommand": "echo '📦 Installing dependencies from monorepo root...' && cd ../.. && pnpm install",
   "framework": "vite",
   "rewrites": [
     {
