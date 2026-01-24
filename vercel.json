@@ -1,7 +1,7 @@
 {
-  "buildCommand": "echo '🚀 Starting build...' && pnpm build",
+  "buildCommand": "echo '🚀 Starting build...' && cd ../.. && pnpm install --filter=admin && cd apps/admin && pnpm build",
   "outputDirectory": "dist",
-  "installCommand": "echo '📦 Installing dependencies...' && pnpm install",
+  "installCommand": "echo '📦 Installing dependencies from root...' && cd ../.. && pnpm install",
   "framework": "vite",
   "rewrites": [
     {
