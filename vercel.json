@@ -1,5 +1,5 @@
 {
-  "buildCommand": "echo '🚀 Starting build...' && echo '📂 Current directory:' && pwd && echo '📋 Running build script...' && pnpm build",
+  "buildCommand": "echo '🚀 Starting build...' && pwd && ls -la package.json && pnpm build",
   "outputDirectory": "dist",
   "installCommand": "echo '📦 Installing dependencies from monorepo root...' && cd ../.. && pnpm install",
   "framework": "vite",
