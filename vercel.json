@@ -3,7 +3,6 @@
   "outputDirectory": "dist",
   "installCommand": "echo '📦 Installing dependencies...' && pnpm install",
   "framework": "vite",
-  "rootDirectory": "apps/admin",
   "rewrites": [
     {
       "source": "/(.*)",
