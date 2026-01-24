@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "postinstall": "node scripts/copy-locales.js",
-    "build": "node scripts/copy-locales.js && tsc -b && vite build",
+    "build": "echo '📦 Step 1: Copying translation files...' && node scripts/copy-locales.js && echo '🔨 Step 2: TypeScript compilation...' && tsc -b && echo '⚡ Step 3: Vite build...' && vite build && echo '✅ Build completed successfully!'",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -1,7 +1,7 @@
 {
-  "buildCommand": "pnpm build",
+  "buildCommand": "echo '🚀 Starting build...' && pnpm build",
   "outputDirectory": "dist",
-  "installCommand": "pnpm install",
+  "installCommand": "echo '📦 Installing dependencies...' && pnpm install",
   "framework": "vite",
   "rootDirectory": "apps/admin",
   "rewrites": [
