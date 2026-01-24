@@ -1,8 +1,4 @@
 {
-  "buildCommand": "echo '🚀 Starting build...' && corepack enable && corepack prepare pnpm@9.6.0 --activate && echo '📦 Checking pnpm version...' && pnpm -v && echo '📂 Current directory:' && pwd && ls -la package.json && echo '🔨 Running build...' && pnpm build",
-  "outputDirectory": "dist",
-  "installCommand": "echo '📦 Setting up pnpm via corepack...' && corepack enable && corepack prepare pnpm@9.6.0 --activate && echo '📦 Installing dependencies from monorepo root...' && cd ../.. && pnpm install",
-  "framework": "vite",
   "rewrites": [
     {
       "source": "/(.*)",
