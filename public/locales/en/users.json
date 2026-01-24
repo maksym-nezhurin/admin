@@ -1,0 +1,12 @@
+{
+  "header": "Users Management",
+  "content": "Manage system users and their roles",
+  "loading": "Loading users...",
+  "manage_roles": "Manage Roles",
+  "delete_user": "Delete User",
+  "assign_roles": "Assign Roles",
+  "select_roles": "Select Roles",
+  "choose_roles": "Choose roles to assign",
+  "confirm_delete": "Are you sure you want to delete this user?",
+  "remove_role": "Remove Role"
+}

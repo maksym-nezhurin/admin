@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "postinstall": "node scripts/copy-locales.js",
+    "build": "node scripts/copy-locales.js && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -40,7 +41,8 @@
     "react-dom": "^19.1.1",
     "react-i18next": "^16.5.0",
     "react-router-dom": "^7.6.0",
-    "zustand": "^4.4.0"
+    "zustand": "^4.4.0",
+    "@reelo/i18n": "git+https://github.com/maksym-nezhurin/reelo-i18n.git"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

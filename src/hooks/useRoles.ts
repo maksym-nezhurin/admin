@@ -51,7 +51,6 @@ export const useRoles = () => {
 
   // Перевірити мінімальний рівень ролі
   const hasMinimumLevel = (level: number): boolean => {
-    console.log(roles);
     if (!userInfo?.roles) return false;
     return userInfo.roles.some(userRole => 
       userRole.role.level >= level

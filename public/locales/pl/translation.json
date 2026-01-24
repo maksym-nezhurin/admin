@@ -47,10 +47,15 @@
     "role_examples": "Przykłady ról",
     "sections": {
       "main": "Główne",
+      "main_description": "Główne funkcje i ustawienia",
       "content": "Treść",
+      "content_description": "Zarządzanie treścią i publikacjami",
       "tools": "Narzędzia",
+      "tools_description": "Profesjonalne narzędzia i analityka",
       "admin": "Panel admina",
-      "system": "System"
+      "admin_description": "Administracja systemem i użytkownikami",
+      "system": "System",
+      "system_description": "Ustawienia systemowe i monitoring"
     },
     "system_settings": "Ustawienia systemu",
     "system_logs": "Logi systemu",
@@ -130,6 +135,10 @@
   "year_label": "Rok",
   "description_label": "Opis",
   "cars_published": "Opublikowane samochody",
+  "roles": "Role",
+  "company": "Firma",
+  "company.createdAt": "Firma utworzona",
+  "company.metadata": "Metadane firmy",
   "insufficient_role_level_warning": "Nie masz wystarczającego poziomu dostępu, aby wyświetlić tę stronę.",
   "scrapper": {
     "title": "Scrapper",
