@@ -1,0 +1,10 @@
+{
+  "firstName": "Imię",
+  "lastName": "Nazwisko",
+  "saveProfile": "Zapisz profil",
+  "edit_profile": "Edytuj profil",
+  "roles": "Role",
+  "company": "Firma",
+  "company.createdAt": "Firma utworzona",
+  "company.metadata": "Metadane firmy"
+}

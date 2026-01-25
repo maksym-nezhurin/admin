@@ -2,7 +2,7 @@ import React from 'react';
 import { IconSettings, IconLogout } from '@tabler/icons-react';
 import { Menu, ActionIcon, Group, Avatar } from '@mantine/core';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation, type TranslationKey } from '../i18n';
 
 type DashboardRightMenuProps = {
   name: string;
@@ -10,7 +10,7 @@ type DashboardRightMenuProps = {
 };
 
 const DashboardRightMenu: React.FC<DashboardRightMenuProps> = ({ name, logout }) => {
-  const { t } = useTranslation();
+  const { t } = useTypedTranslation();
   return (
     <Menu position="bottom-end">
         <Menu.Target>
@@ -28,14 +28,14 @@ const DashboardRightMenu: React.FC<DashboardRightMenuProps> = ({ name, logout })
             component={Link}
             to="settings"
           >
-            {t('menu.settings')}
+            {t('menu.sections.main.items.settings.label' as TranslationKey)}
           </Menu.Item>
 
           <Menu.Item
             icon={<IconLogout size={16} />}
             onClick={logout}
           >
-            {t('logout')}
+            {t('logout' as TranslationKey)}
           </Menu.Item>
         </Menu.Dropdown>
       </Menu>

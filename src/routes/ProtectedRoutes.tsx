@@ -78,8 +78,14 @@ export const ProtectedCoreRoutes = (
       </PrivateRoute>
     }
   >
-    {/* Dashboard index page */}
+    {/* Dashboard index page - redirects to main dashboard */}
     <Route index element={<PAGES.Dashboard />} />
+    
+    {/* Main dashboard route (alternative path) */}
+    <Route 
+      path={ROUTES.MAIN} 
+      element={<PAGES.Dashboard />} 
+    />
     
     {/* Базові роути для всіх залогінених (USER+) */}
     <Route 
@@ -205,9 +211,6 @@ export const ProtectedCoreRoutes = (
         </CombinedProtectedRoute>
       } 
     />
-
-    {/* Індексний роут */}
-    <Route index element={<PAGES.Main />} />
   </Route>
 );
 

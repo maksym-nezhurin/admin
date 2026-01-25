@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NavLink, Group, Text, Badge, Progress, Tooltip, useMantineTheme } from '@mantine/core';
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation, type TranslationKey } from '../i18n';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   IconChevronRight, 
@@ -29,12 +29,12 @@ import { useMediaQuery } from '@mantine/hooks';
 
 // Типи для пунктів меню
 interface MenuItem {
-  label: string;
+  label: TranslationKey;
   path?: string;
   icon?: React.ReactNode;
   requiredLevel?: number;
   badge?: string;
-  description?: string;
+  description?: TranslationKey;
   isNew?: boolean;
   isPopular?: boolean;
   disabled?: boolean;
@@ -42,12 +42,12 @@ interface MenuItem {
 
 // Типи для розділів меню
 interface MenuSection {
-  label: string;
+  label: TranslationKey;
   icon?: React.ReactNode;
   requiredLevel?: number;
   badge?: string;
   defaultOpen?: boolean;
-  description?: string;
+  description?: TranslationKey;
   items: MenuItem[];
   color?: string;
 }
@@ -55,48 +55,48 @@ interface MenuSection {
 // Конфігурація меню з просунутими можливостями
 const MENU_SECTIONS: MenuSection[] = [
   {
-    label: 'menu.sections.main',
+    label: 'menu.sections.main.label',
     icon: <IconHome size={16} />,
     requiredLevel: 0,
     defaultOpen: true,
-    description: 'Основні функції та налаштування',
+    description: 'menu.sections.main.description',
     color: '#339af0',
     items: [
       { 
-        label: 'menu.dashboard', 
+        label: 'menu.sections.main.items.dashboard.label', 
         path: '', 
         requiredLevel: 0,
-        description: 'Головна панель керування',
+        description: 'menu.sections.main.items.dashboard.tooltip',
         icon: <IconActivity size={14} />
       },
       { 
-        label: 'menu.profile', 
+        label: 'menu.sections.main.items.profile.label', 
         path: 'profile', 
         requiredLevel: 0,
-        description: 'Персональні дані та налаштування',
+        description: 'menu.sections.main.items.profile.tooltip',
         icon: <IconUser size={14} />
       },
       { 
-        label: 'menu.settings', 
+        label: 'menu.sections.main.items.settings.label', 
         path: 'settings', 
         requiredLevel: 0,
-        description: 'Загальні налаштування системи',
+        description: 'menu.sections.main.items.settings.tooltip',
         icon: <IconSettings size={14} />
       },
     ]
   },
   {
-    label: 'menu.sections.content',
+    label: 'menu.sections.content.label',
     icon: <IconFileText size={16} />,
     requiredLevel: 0,
-    description: 'Керування контентом та публікаціями',
+    description: 'menu.sections.content.description',
     color: '#51cf66',
     items: [
       { 
-        label: 'menu.announcements', 
+        label: 'menu.sections.content.items.announcements.label', 
         path: 'announcements', 
         requiredLevel: 0,
-        description: 'Створення та керування оголошеннями',
+        description: 'menu.sections.content.items.announcements.tooltip',
         icon: <IconBell size={14} />,
         disabled: true,
         isNew: true
@@ -104,89 +104,89 @@ const MENU_SECTIONS: MenuSection[] = [
     ]
   },
   {
-    label: 'menu.sections.tools',
+    label: 'menu.sections.tools.label',
     icon: <IconTools size={16} />,
     requiredLevel: 60,
     badge: 'PRO',
-    description: 'Професійні інструменти та аналітика',
+    description: 'menu.sections.tools.description',
     color: '#ff6b6b',
     items: [
       { 
-        label: 'menu.scrapper', 
+        label: 'menu.sections.tools.items.scrapper.label', 
         path: 'scrapper', 
         requiredLevel: 60,
-        description: 'Автоматичний збір даних',
+        description: 'menu.sections.tools.items.scrapper.tooltip',
         isPopular: true
       },
     ]
   },
   {
-    label: 'menu.sections.admin',
+    label: 'menu.sections.admin.label',
     icon: <IconShield size={16} />,
     requiredLevel: 80,
     badge: 'ADMIN',
-    description: 'Адміністрування системи та користувачів',
+    description: 'menu.sections.admin.description',
     color: '#845ef7',
     items: [
       { 
-        label: 'menu.users', 
+        label: 'menu.sections.admin.items.users.label', 
         path: 'users', 
         requiredLevel: 80,
-        description: 'Керування користувачами та ролями',
+        description: 'menu.sections.admin.items.users.tooltip',
         icon: <IconUsers size={14} />,
         isPopular: true
       },
       { 
-        label: 'menu.admin_page', 
-        path: 'admin', 
+        label: 'menu.sections.admin.items.admin.label', 
+        path: 'admin',
         requiredLevel: 80,
-        description: 'Адміністративна панель',
+        description: 'menu.sections.admin.items.admin.tooltip',
         icon: <IconClipboard size={14} />,
         isNew: true
       },
       { 
-        label: 'menu.audit', 
+        label: 'menu.sections.admin.items.audit.label', 
         path: 'audit', 
         requiredLevel: 80,
-        description: 'Аудит системних дій',
+        description: 'menu.sections.admin.items.audit.tooltip',
         icon: <IconChartBar size={14} />
       },
       { 
-        label: 'menu.role_examples', 
+        label: 'menu.sections.admin.items.role_examples.label', 
         path: 'role-examples', 
         requiredLevel: 80,
-        description: 'Приклади системи ролей',
+        description: 'menu.sections.admin.items.role_examples.tooltip',
         icon: <IconStar size={14} />
       },
     ]
   },
   {
-    label: 'menu.sections.system',
+    label: 'menu.sections.system.label',
     icon: <IconServer size={16} />,
     requiredLevel: 100,
     badge: 'SUPER',
-    description: 'Системні налаштування та моніторинг',
+    description: 'menu.sections.system.description',
     color: '#ff922b',
     items: [
       { 
-        label: 'menu.system_settings', 
+        label: 'menu.sections.system.items.system_settings.label', 
         path: 'system', 
         requiredLevel: 100,
-        description: 'Глибокі системні налаштування'
+        description: 'menu.sections.system.items.system_settings.tooltip'
       },
       { 
-        label: 'menu.system_logs', 
+        label: 'menu.sections.system.items.logs.label', 
         path: 'system/logs', 
         requiredLevel: 100,
         disabled: true,
-        description: 'Системні логи та діагностика'
+        description: 'menu.sections.system.items.logs.tooltip'
       },
       { 
-        label: 'menu.system_monitoring', 
+        label: 'menu.sections.system.items.monitoring.label', 
         path: 'system/monitoring', 
         requiredLevel: 100,
         disabled: true,
-        description: 'Моніторинг продуктивності',
+        description: 'menu.sections.system.items.monitoring.tooltip',
         isNew: true
       },
     ]
@@ -201,7 +201,7 @@ const AdvancedMenuItemComponent: React.FC<{
   isActive: boolean;
   isMobile: boolean;
 }> = ({ item, isActive, isMobile }) => {
-  const { t } = useTranslation();
+  const { t } = useTypedTranslation();
   const theme = useMantineTheme();
   
   const isDark = theme.colorScheme === 'dark';
@@ -248,7 +248,7 @@ const AdvancedMenuItemComponent: React.FC<{
           </Group>
         }
         component={Link}
-        to={item.path!}
+        to={item.path === '' ? '/dashboard' : item.path!}
         active={isActive}
         pl={20}
         disabled={item.disabled}
@@ -270,7 +270,7 @@ const AdvancedMenuSectionComponent: React.FC<{
   isActive: (path: string) => boolean;
 }> = ({ section, isActive }) => {
   const { roleLevel } = useAuth();
-  const { t } = useTranslation();
+  const { t } = useTypedTranslation();
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(section.defaultOpen || false);
   const [isHovered, setIsHovered] = useState(false);
@@ -304,11 +304,12 @@ const AdvancedMenuSectionComponent: React.FC<{
   // Перевірити, чи розділ доступний
   const isSectionAccessible = !section.requiredLevel || (roleLevel?.level ?? 0) >= section.requiredLevel;
 
-  if (!isSectionAccessible || availableItems.length === 0) return null;
-
+  // Hooks must be called before any conditional returns
   const isMobile = useMediaQuery('(max-width: 768px)');
   const canAccess = (roleLevel?.level ?? 0) >= (section.requiredLevel || 0);
   const accessPercentage = Math.min(((roleLevel?.level ?? 0) / (section.requiredLevel || 1)) * 100, 100);
+
+  if (!isSectionAccessible || availableItems.length === 0) return null;
 
   return (
     <div style={{ marginBottom: 4 }}>
@@ -349,7 +350,7 @@ const AdvancedMenuSectionComponent: React.FC<{
             </Group>
             {section.description && (
               <Text size="xs" c={mutedColor} mt={2}>
-                { isMobile ? null : section.description}
+                { isMobile ? null : t(section.description)}
               </Text>
             )}
           </div>
@@ -358,7 +359,7 @@ const AdvancedMenuSectionComponent: React.FC<{
         <Group>
           {/* Індикатор доступу */}
           {!canAccess && (
-            <Tooltip label="Потрібен вищий рівень доступу">
+            <Tooltip label={t('errors.insufficient_role_level_warning')}>
               <IconLock size={14} color="#ff6b6b" />
             </Tooltip>
           )}
@@ -383,7 +384,7 @@ const AdvancedMenuSectionComponent: React.FC<{
             style={{ marginTop: 4 }}
           />
           <Text size="xs" c={mutedColor} mt={2}>
-            Потрібен рівень: {section.requiredLevel} (ваш: {roleLevel?.level})
+            {t('common.required_level')}: {section.requiredLevel} ({t('common.your_level')}: {roleLevel?.level})
           </Text>
         </div>
       )}
@@ -415,11 +416,16 @@ const AdvancedMenuSectionComponent: React.FC<{
  */
 export const AdvancedCollapsibleNav: React.FC = () => {
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t } = useTypedTranslation();
   const { roleLevel } = useAuth();
   const theme = useMantineTheme();
 
   const isActive = (path: string) => {
+    // Special case for Dashboard (empty path) - should match /dashboard exactly
+    if (path === '') {
+      return location.pathname === '/dashboard' || location.pathname === '/dashboard/';
+    }
+    
     return location.pathname === path || 
            location.pathname === `/${path}` ||
            location.pathname.startsWith(`/dashboard/${path}`);
@@ -447,7 +453,7 @@ export const AdvancedCollapsibleNav: React.FC = () => {
           <Group position="apart" align="center">
             <div>
               <Text size="sm" fw={600} c={textColor}>
-                {t('menu.current_role', 'Поточна роль')}
+                {t('menu.current_role')}
               </Text>
               <Text size="lg" fw={700} c={isDark ? theme.colors.blue[4] : '#339af0'}>
                 {roleLevel.name}

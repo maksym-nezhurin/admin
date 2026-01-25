@@ -9,7 +9,6 @@ export const UserList: React.FC<UserListProps> = () => {
         <>
             <Title order={4}>Users</Title>
             <Text>Users List</Text>
-            
         </>
     )
 };

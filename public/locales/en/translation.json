@@ -43,27 +43,86 @@
   "save": "Save",
   "cancel": "Cancel",
   "menu": {
-    "dashboard": "Dashboard",
-    "scrapper": "Scrapper",
-    "users": "Users",
-    "announcements": "Announcements",
-    "profile": "Profile",
-    "settings": "Settings",
-    "admin_page": "Admin Page",
-    "audit": "Audit",
-    "role_examples": "Role Examples",
     "sections": {
-      "main": "Main",
-      "content": "Content",
-      "tools": "Tools",
-      "admin": "Admin Panel",
-      "system": "System"
-    },
-    "system_settings": "System Settings",
-    "system_logs": "System Logs",
-    "system_monitoring": "Monitoring",
-    "current_role": "Current Role",
-    "sessions": "Sessions"
+      "main": {
+        "label": "Main",
+        "description": "Core features and general settings",
+        "items": {
+          "dashboard": {
+            "label": "Dashboard",
+            "tooltip": "Core features and general settings"
+          },
+          "profile": {
+            "label": "Profile",
+            "tooltip": "Personal profile and settings"
+          },
+          "settings": {
+            "label": "Settings",
+            "tooltip": "General settings"
+          }
+        }
+      },
+      "content": {
+        "label":"Content",
+        "description":"Content and publication management",
+        "items": {
+          "announcements": {
+            "label": "Announcements",
+            "tooltip": "Content and publication management"
+          }
+        }
+      },
+      "tools": {
+        "label":"Tools",
+        "description":"Professional tools and analytics",
+        "items": {
+          "scrapper": {
+            "label": "Scrapper",
+            "tooltip": "Professional tools and analytics"
+          }
+        }
+      },
+      "admin": {
+        "label": "Admin Panel",
+        "description":"System and user administration",
+        "items": {
+          "users": {
+            "label": "Users",
+            "tooltip": "Manage system users and their roles"
+          },
+          "admin": {
+            "label": "Admin Page",
+            "tooltip": "Admin Page"
+          },
+          "audit": {
+            "label": "Audit",
+            "tooltip": "Audit system actions"
+          },
+          "role_examples": {
+            "label": "Role Examples",
+            "tooltip": "Role Examples"
+          }
+        }
+      },
+      "system": {
+        "label": "System",
+        "description":"System and user administration",
+        "items": {
+          "system_settings": {
+            "label": "System Settings",
+            "tooltip": "System-level configuration and monitoring"
+          },
+          "logs": {
+            "label": "Logs",
+            "tooltip": "System-level configuration and monitoring"
+          },
+          "monitoring": {
+            "label": "Monitoring",
+            "tooltip": "System-level configuration and monitoring"
+          }
+        }
+      }
+    }
   },
   "create_announcement": "Create Announcement",
   "edit_announcement": "Edit Announcement",
@@ -137,6 +196,10 @@
   "year_label": "Year",
   "description_label": "Description",
   "cars_published": "Cars published",
+  "roles": "Roles",
+  "company": "Company",
+  "company.createdAt": "Company created at",
+  "company.metadata": "Company metadata",
   "insufficient_role_level_warning": "You have insufficient role level to view this page.",
   "scrapper": {
     "title": "Scrapper",

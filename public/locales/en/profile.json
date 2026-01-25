@@ -1,0 +1,10 @@
+{
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "saveProfile": "Save Profile",
+  "edit_profile": "Edit Profile",
+  "roles": "Roles",
+  "company": "Company",
+  "company.createdAt": "Company created at",
+  "company.metadata": "Company metadata"
+}

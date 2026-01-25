@@ -46,10 +46,15 @@
     "role_examples": "Приклади ролей",
     "sections": {
       "main": "Основне",
+      "main_description": "Основні функції та налаштування",
       "content": "Контент",
+      "content_description": "Керування контентом та публікаціями",
       "tools": "Інструменти",
+      "tools_description": "Професійні інструменти та аналітика",
       "admin": "Адмін панель",
-      "system": "Система"
+      "admin_description": "Адміністрування системи та користувачів",
+      "system": "Система",
+      "system_description": "Системні налаштування та моніторинг"
     },
     "system_settings": "Системні налаштування",
     "system_logs": "Логи системи",
@@ -129,6 +134,10 @@
   "year_label": "Рік",
   "description_label": "Опис",
   "cars_published": "Опубліковано авто",
+  "roles": "Ролі",
+  "company": "Компанія",
+  "company.createdAt": "Компанію створено",
+  "company.metadata": "Метадані компанії",
   "insufficient_role_level_warning": "У вас недостатній рівень доступу для взаємодії з даним функціоналом.",
   "scrapper": {
     "title": "Скреппер",

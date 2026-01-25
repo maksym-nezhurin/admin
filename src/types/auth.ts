@@ -5,6 +5,12 @@ export interface IRoleLevel {
   name: string;
 }
 
+export interface ICompany {
+  name: string;
+  createdAt?: string;
+  metadata?: unknown;
+}
+
 export interface IUser {
   sub?: string;
   id: string;
@@ -16,7 +22,7 @@ export interface IUser {
   emailVerified?: boolean;
   isActive: boolean,
   isCompanyRepresentative: boolean,
-  company: string,
+  company?: string | ICompany | null,
   roles?: Array<{ role: IRoleLevel }>;
   nativeCountry?: string;
   preferredCountries?: string[];

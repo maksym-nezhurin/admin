@@ -1,9 +1,9 @@
 import { Select } from "@mantine/core";
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation } from '../../i18n';
 import { useScrapper } from "../../contexts/ScrapperContext";
 
 export const ScrapperSelector = () => {
-    const { t } = useTranslation();
+    const { t } = useTypedTranslation();
     const data = useScrapper();
     const { setMarket, market, allowedMarkets } = data;
 

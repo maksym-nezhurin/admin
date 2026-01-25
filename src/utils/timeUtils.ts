@@ -4,7 +4,7 @@
  * @param t Translation function
  * @returns Formatted time string
  */
-export const formatDuration = (totalSeconds: number, t?: (key: string) => string): string => {
+export const formatDuration = (totalSeconds: number, t?: (key: string | any) => string): string => {
   if (totalSeconds < 60) {
     const seconds = t ? t('time.seconds') : 'seconds';
     return `${totalSeconds} ${totalSeconds !== 1 ? seconds : t ? t('time.second') : 'second'}`;

@@ -8,10 +8,10 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
-    include: ['@reelo/ui'],
+    include: ['@reelo/ui', '@reelo/i18n'],
   },
   ssr: {
-    noExternal: ['@reelo/ui'],
+    noExternal: ['@reelo/ui', '@reelo/i18n'],
   },
   define: {
     'process.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL),
