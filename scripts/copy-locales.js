@@ -17,6 +17,8 @@ console.log('📁 [copy-locales] Script directory:', __dirname);
 
 // Paths to check (in order of preference)
 const possibleSourcePaths = [
+  // First check local package (for development)
+  join(__dirname, '../../../packages/i18n/locales'),
   // From root node_modules (most common in monorepo)
   join(__dirname, '../../../node_modules/@reelo/i18n/locales'),
   // From admin app node_modules (symlink)

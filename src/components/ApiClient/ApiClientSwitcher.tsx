@@ -1,11 +1,11 @@
 import React from 'react';
 import { Button, Group, Text, Badge } from '@mantine/core';
 import { useApiClient } from '../../contexts/ApiClientContext';
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation } from '../../i18n';
 
 export const ApiClientSwitcher: React.FC = () => {
   const { currentClient, switchClient, getClientNames, isUsingLocal } = useApiClient();
-  const { t } = useTranslation();
+  const { t } = useTypedTranslation();
 
   const handleSwitchClient = (clientName: string) => {
     switchClient(clientName);
@@ -13,7 +13,7 @@ export const ApiClientSwitcher: React.FC = () => {
 
   return (
     <Group spacing="sm" align="center">
-      <Text size="sm">{t('api_client.current')}:</Text>
+      <Text size="sm">{t('api.current')}:</Text>
       <Badge 
         color={isUsingLocal ? 'green' : 'blue'} 
         variant="light"
@@ -28,7 +28,7 @@ export const ApiClientSwitcher: React.FC = () => {
           variant={currentClient === clientName ? 'filled' : 'outline'}
           onClick={() => handleSwitchClient(clientName)}
         >
-          {t(`api_client.${clientName}`)}
+          {t(`api.${clientName}` as any)}
         </Button>
       ))}
     </Group>

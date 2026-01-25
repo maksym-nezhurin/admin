@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@mantine/core';
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation } from '../../i18n';
 
 import { useScrapper } from '../../contexts/ScrapperContext';
 import { AVAILABLE_FILTERS, DEFAULT_FILTERS_VALUES } from '../../constants/scrapper';
@@ -15,7 +15,7 @@ interface IEstimateResponse {
 }
 
 export const ScrapperNavigation = () => {
-    const { t } = useTranslation();
+    const { t } = useTypedTranslation();
     const { filters, market, requests, setRequests, taskProgressEnabled, connectToTaskProgress } = useScrapper();
     const [estimate, setEstimates] = useState<IEstimateResponse>({
         url_tested: '',

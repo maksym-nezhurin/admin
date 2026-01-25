@@ -3,8 +3,9 @@ import { Button, Group, Select, TextInput, Title, Stack, Paper, Text, MultiSelec
 import { useAuth } from '../contexts/AuthContext';
 import { useUIStore } from '../store/uiStore';
 import { LANGUAGES, countryNameToCode } from '../types/constants';
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation } from '../i18n';
 import { authService } from '../services/auth';
+import i18n from '../i18n';
 
 const Settings: React.FC = () => {
   const { userInfo, setUserInfo } = useAuth();
@@ -16,7 +17,7 @@ const Settings: React.FC = () => {
   const [countryCode, setCountryCode] = useState(userInfo?.countryCode || '');
   const [preferredCountries, setPreferredCountries] = useState<string[]>(userInfo?.preferredCountries || []);
   const [saving, setSaving] = useState(false);
-  const { t, i18n } = useTranslation();
+  const { t } = useTypedTranslation();
 
   // Theme switcher
   const handleThemeChange = (value: string) => {
@@ -63,14 +64,14 @@ const Settings: React.FC = () => {
       <Stack spacing="xl">
         {/* Appearance section */}
         <Stack spacing="md">
-          <Title order={4}>{t('appearance', 'Appearance')}</Title>
+          <Title order={4}>{t('common.appearance')}</Title>
 
           <Group position="apart" align="center">
-            <Text>{t('theme')}</Text>
+            <Text>{t('common.theme')}</Text>
             <Select
               data={[
-                { value: 'light', label: 'Light' },
-                { value: 'dark', label: 'Dark' },
+                { value: 'light', label: t('common.light') },
+                { value: 'dark', label: t('common.dark') },
               ]}
               value={theme}
               onChange={handleThemeChange}
@@ -79,7 +80,7 @@ const Settings: React.FC = () => {
           </Group>
 
           <Group align="center" position="apart">
-            <Text>{t('language')}</Text>
+            <Text>{t('common.language')}</Text>
             <Select
               data={LANGUAGES}
               value={language}
@@ -91,15 +92,15 @@ const Settings: React.FC = () => {
 
         {/* Location section */}
         <Stack spacing="md">
-          <Title order={4}>{t('location', 'Location')}</Title>
+          <Title order={4}>{t('common.location')}</Title>
 
           <Group align="center" position="apart">
-            <Text>{t('nativeCountry', 'Native country')}</Text>
+            <Text>{t('common.nativeCountry')}</Text>
             <Text c="dimmed">{userInfo?.nativeCountry || '-'}</Text>
           </Group>
 
           <Group align="center" position="apart">
-            <Text>{t('countryCode', 'Current country')}</Text>
+            <Text>{t('common.countryCode')}</Text>
             <Select
               data={Object.keys(countryNameToCode).map((key) => ({ value: countryNameToCode[key], label: key }))}
               value={countryCode}
@@ -109,7 +110,7 @@ const Settings: React.FC = () => {
           </Group>
 
           <Group align="flex-start" position="apart">
-            <Text mt={6}>{t('preferredCountries', 'Preferred countries')}</Text>
+            <Text mt={6}>{t('common.preferredCountries')}</Text>
             <MultiSelect
               data={Object.keys(countryNameToCode).map((key) => ({ value: countryNameToCode[key], label: key }))}
               value={preferredCountries}
@@ -122,18 +123,18 @@ const Settings: React.FC = () => {
 
         {/* Profile section */}
         <Stack spacing="md">
-          <Title order={4}>{t('profile', 'Profile')}</Title>
+          <Title order={4}>{t('profile.edit_profile')}</Title>
 
           <form onSubmit={handleProfileSave}>
             <Stack spacing="sm">
               <TextInput
-                label={t('firstName')}
+                label={t('profile.firstName')}
                 value={firstName}
                 onChange={e => setFirstName(e.target.value)}
                 required
               />
               <TextInput
-                label={t('lastName')}
+                label={t('profile.lastName')}
                 value={lastName}
                 onChange={e => setLastName(e.target.value)}
                 required
@@ -141,7 +142,7 @@ const Settings: React.FC = () => {
 
               <Stack spacing="sm">
                 <Button type="submit" loading={saving} mt={8}>
-                  {t('saveProfile')}
+                  {t('profile.saveProfile')}
                 </Button>
               </Stack>
             </Stack>

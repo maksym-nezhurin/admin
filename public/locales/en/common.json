@@ -25,5 +25,12 @@
   "delete": "Delete",
   "active": "Active",
   "required_level": "Required level",
-  "your_level": "your"
+  "your_level": "your",
+  "appearance": "Appearance",
+  "location": "Location",
+  "nativeCountry": "Native country",
+  "countryCode": "Current country",
+  "preferredCountries": "Preferred countries",
+  "light": "Light",
+  "dark": "Dark"
 }

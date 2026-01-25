@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Text, Title, Stack, Group, Button, MultiSelect, ActionIcon, Modal, Alert, Badge, Paper } from '@mantine/core';
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation } from '../i18n';
 import { useRoles } from '../hooks/useRoles';
 import { authService } from '../services/auth';
 import { IconTrash, IconUserOff, IconSettings } from '@tabler/icons-react';
 import { RoleGuard } from '../components/RoleGuard';
 
 const UsersPage = () => {
-    const { t } = useTranslation();
+    const { t } = useTypedTranslation();
     const [availableRoles, setAvailableRoles] = useState<any[]>([]);
     const { getAvailableRoles, assignRole, removeRole } = useRoles();
     const [users, setUsers] = useState<any[]>([]);
@@ -25,7 +25,7 @@ const UsersPage = () => {
             setUsers(allUsers);
         } catch (error) {
             console.error('Failed to fetch all users:', error);
-            setError(t('users.load_error', 'Failed to load users'));
+            setError(t('users.load_error'));
         } finally {
             setLoading(false);
         }
@@ -38,7 +38,7 @@ const UsersPage = () => {
             setAvailableRoles(roles);
         } catch (error) {
             console.error('Failed to load available roles:', error);
-            setError(t('users.roles_load_error', 'Failed to load available roles'));
+            setError(t('users.roles_load_error'));
         }
     };
 
@@ -51,7 +51,7 @@ const UsersPage = () => {
             await assignRole(selectedUser.id, selectedRoles);
         } catch (error) {
             console.error('Failed to assign roles:', error);
-            setError(t('users.assign_error', 'Failed to assign roles'));
+            setError(t('users.assign_error'));
         } finally {
             await onHandleGetAllUsers(); // Refresh users list
             setRoleModalOpen(false);
@@ -66,7 +66,7 @@ const UsersPage = () => {
             await onHandleGetAllUsers(); // Refresh users list
         } catch (error) {
             console.error('Failed to remove role:', error);
-            setError(t('users.remove_role_error', 'Failed to remove role'));
+            setError(t('users.remove_role_error'));
         }
     };
 
@@ -79,7 +79,7 @@ const UsersPage = () => {
             await onHandleGetAllUsers(); // Refresh users list
         } catch (error) {
             console.error('Failed to delete user:', error);
-            setError(t('users.delete_error', 'Failed to delete user'));
+            setError(t('users.delete_error'));
         }
     };
 
@@ -97,11 +97,11 @@ const UsersPage = () => {
 
     return (
         <Stack>
-            <Title order={2}>{t('users.title', 'Users Management')}</Title>
+            <Title order={2}>{t('users.title')}</Title>
 
             {loading && (
                 <Alert color="blue" variant="light">
-                    {t('users.loading', 'Loading users...')}
+                    {t('users.loading')}
                 </Alert>
             )}
             {error && (
@@ -110,10 +110,10 @@ const UsersPage = () => {
                 </Alert>
             )}
 
-            <RoleGuard roles={['ADMIN', 'SUPER_ADMIN']} fallback={<Alert color="red">Access Denied</Alert>}>
+            <RoleGuard roles={['ADMIN', 'SUPER_ADMIN']} fallback={<Alert color="red">{t('common.error')}</Alert>}>
                 {!loading && !error && users.length === 0 && (
                     <Alert color="gray" variant="light">
-                        {t('users.empty', 'No users found')}
+                        {t('users.empty')}
                     </Alert>
                 )}
 
@@ -153,7 +153,7 @@ const UsersPage = () => {
                                         variant="light"
                                         color="blue"
                                         onClick={() => openRoleModal(user)}
-                                        title={t('users.manage_roles', 'Manage Roles')}
+                                        title={t('users.manage_roles')}
                                     >
                                         <IconSettings size={16} />
                                     </ActionIcon>
@@ -163,7 +163,7 @@ const UsersPage = () => {
                                             variant="light"
                                             color="red"
                                             onClick={() => handleDeleteUser(user.id)}
-                                            title={t('users.delete_user', 'Delete User')}
+                                            title={t('users.delete_user')}
                                         >
                                             <IconTrash size={16} />
                                         </ActionIcon>
@@ -179,15 +179,15 @@ const UsersPage = () => {
             <Modal
                 opened={roleModalOpen}
                 onClose={() => setRoleModalOpen(false)}
-                title={`${t('users.manage_roles', 'Manage Roles')} - ${selectedUser?.username}`}
+                title={`${t('users.manage_roles')} - ${selectedUser?.username}`}
                 centered
                 zIndex={3001}
                 size="xl"
             >
                 <Stack style={{ minHeight: '300px' }}>
                     <MultiSelect 
-                        label={t('users.select_roles', 'Select Roles')}
-                        placeholder={t('users.choose_roles', 'Choose roles...')}
+                        label={t('users.select_roles')}
+                        placeholder={t('users.choose_roles')}
                         data={availableRoles.map((role: any) => ({ 
                             value: role.value, 
                             label: `${role.label} (Level ${role.level})` 
@@ -199,10 +199,10 @@ const UsersPage = () => {
                     
                     <Group position="right">
                         <Button variant="light" onClick={() => setRoleModalOpen(false)}>
-                            {t('users.cancel', 'Cancel')}
+                            {t('common.cancel')}
                         </Button>
                         <Button onClick={handleAssignRoles}>
-                            {t('users.assign_roles', 'Assign Roles')}
+                            {t('users.assign_roles')}
                         </Button>
                     </Group>
                 </Stack>

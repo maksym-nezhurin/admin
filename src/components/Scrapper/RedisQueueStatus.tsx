@@ -3,10 +3,10 @@ import { Stack, Title, Text, Button, Group, Badge, Alert } from "@mantine/core";
 import { useScrapper } from "../../contexts/ScrapperContext";
 import { scrapperServices } from "../../services/scrapper";
 import type { IQueueStatus } from "../../constants/scrapper";
-import { useTranslation } from "react-i18next";
+import { useTypedTranslation } from "../../i18n";
 
 export const RedisQueueStatus = () => {
-    const { t } = useTranslation();
+    const { t } = useTypedTranslation();
     const { redisQueueStatus, fetchQueueStatus, socketStatus, connectSocket, disconnectSocket } = useScrapper();
     const { cleanQueueStuckedMessage } = scrapperServices;
     

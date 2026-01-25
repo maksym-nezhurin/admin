@@ -31,7 +31,6 @@ export const ProfileDetails = () => {
 
   return (
     <Paper shadow="md" radius="lg" p="xl" withBorder>
-      {/* Avatar / main identity */}
       <Group position="center" mb="lg">
         <ThemeIcon size={72} radius="xl" color="blue" variant="light">
           <IconUserCircle size={48} />

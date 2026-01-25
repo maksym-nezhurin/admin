@@ -1,6 +1,6 @@
 import { Group, Title } from "@mantine/core";
 import { Outlet } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation } from '../i18n';
 
 import { ApiClientSwitcher } from '../components/ApiClient/ApiClientSwitcher';
 // import { ActiveUserSwitcher } from '../components/Scrapper/ActiveUserSwitcher';
@@ -9,7 +9,7 @@ import { ScrapperProvider } from "../contexts/ScrapperContext";
 import { useAuth } from "../contexts/AuthContext";
 
 const Layout: React.FC = () => {
-    const { t } = useTranslation();
+    const { t } = useTypedTranslation();
     
     return (
         <>

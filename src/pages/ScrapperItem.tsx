@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation } from '../i18n';
 
 import { Button, Group, Stack } from "@mantine/core";
 import { scrapperServices } from '../services/scrapper';
@@ -12,7 +12,7 @@ import { ScrapperTable } from '../components/Scrapper/Table';
 import { useApiClient } from '../contexts/ApiClientContext';
 
 const ScrapperItemPage: React.FC = () => {
-    const { t } = useTranslation();
+    const { t } = useTypedTranslation();
     const { getXLSUrl } = useApiClient();
     const { id } = useParams();
     const navigate = useNavigate();

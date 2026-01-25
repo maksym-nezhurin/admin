@@ -1,6 +1,6 @@
 import { Button, NumberInput, Select, Group, MultiSelect, Checkbox } from "@mantine/core";
 import { useState, useEffect } from "react";
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation } from '../../i18n';
 
 import { prepareOptionsForSelect } from "../../utils/formAdapters";
 import { useScrapper, type IFilters } from "../../contexts/ScrapperContext";
@@ -8,7 +8,7 @@ import { useScrapper, type IFilters } from "../../contexts/ScrapperContext";
 import "./Filters.css";
 
 export const Filters = () => {
-  const { t } = useTranslation();
+  const { t } = useTypedTranslation();
   const { filters, setFilters, filtersConfig } = useScrapper();
   const [isVirgin, setIsVirgin] = useState(true);
   const [values, setValues] = useState<IFilters>(filters);

@@ -248,7 +248,7 @@ const AdvancedMenuItemComponent: React.FC<{
           </Group>
         }
         component={Link}
-        to={item.path!}
+        to={item.path === '' ? '/dashboard' : item.path!}
         active={isActive}
         pl={20}
         disabled={item.disabled}
@@ -421,6 +421,11 @@ export const AdvancedCollapsibleNav: React.FC = () => {
   const theme = useMantineTheme();
 
   const isActive = (path: string) => {
+    // Special case for Dashboard (empty path) - should match /dashboard exactly
+    if (path === '') {
+      return location.pathname === '/dashboard' || location.pathname === '/dashboard/';
+    }
+    
     return location.pathname === path || 
            location.pathname === `/${path}` ||
            location.pathname.startsWith(`/dashboard/${path}`);

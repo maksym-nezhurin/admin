@@ -25,5 +25,12 @@
   "delete": "Видалити",
   "active": "Активна",
   "required_level": "Потрібен рівень",
-  "your_level": "ваш"
+  "your_level": "ваш",
+  "appearance": "Зовнішній вигляд",
+  "location": "Розташування",
+  "nativeCountry": "Рідна країна",
+  "countryCode": "Поточна країна",
+  "preferredCountries": "Бажані країни",
+  "light": "Світла",
+  "dark": "Темна"
 }

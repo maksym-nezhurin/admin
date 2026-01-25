@@ -1,6 +1,6 @@
 import { Button, Group, Paper, Switch, Badge, Alert, Text, Table } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation } from '../../i18n';
 import { scrapperServices } from "../../services/scrapper";
 import apiClientManager from "../../api/apiClientManager";
 import { formatDuration } from "../../utils/timeUtils";
@@ -11,7 +11,7 @@ import { useScrapper } from "../../contexts/ScrapperContext";
 import { Loader } from "../Loader";
 
 export const ScrapperTaskList = () => {
-    const { t } = useTranslation();
+    const { t } = useTypedTranslation();
     const { getXLSUrl } = useApiClient();
     const [sortBy, setSortBy] = useState<'created_at' | 'status' | 'progress'>('created_at');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');

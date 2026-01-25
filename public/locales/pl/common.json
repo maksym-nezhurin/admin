@@ -25,5 +25,12 @@
   "delete": "Usuń",
   "active": "Aktywna",
   "required_level": "Wymagany poziom",
-  "your_level": "twój"
+  "your_level": "twój",
+  "appearance": "Wygląd",
+  "location": "Lokalizacja",
+  "nativeCountry": "Kraj pochodzenia",
+  "countryCode": "Obecny kraj",
+  "preferredCountries": "Preferowane kraje",
+  "light": "Jasny",
+  "dark": "Ciemny"
 }
