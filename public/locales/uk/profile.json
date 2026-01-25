@@ -1,0 +1,10 @@
+{
+  "firstName": "Ім'я",
+  "lastName": "Прізвище",
+  "saveProfile": "Зберегти профіль",
+  "edit_profile": "Редагувати профіль",
+  "roles": "Ролі",
+  "company": "Компанія",
+  "company.createdAt": "Компанію створено",
+  "company.metadata": "Метадані компанії"
+}

@@ -1,12 +1,12 @@
 import { Paper, Stack } from '@mantine/core';
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation } from '../../i18n';
 import { ScrapperSelector } from './ScrapperSelector';
 import { ScrapperNavigation } from './ScrapperNavigation';
 
 import { Filters } from './Filters';
 
 export const NavBar = () => {
-    const { t } = useTranslation();
+    const { t } = useTypedTranslation();
 
     return (
         <Stack spacing="md" style={{ flexDirection: 'row' }}>

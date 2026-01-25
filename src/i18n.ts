@@ -1,24 +1,7 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
-import HttpBackend from 'i18next-http-backend';
+// Import and re-export from shared i18n package
+import i18n from '@reelo/i18n';
+export { useTypedTranslation } from '@reelo/i18n';
+export type { TranslationKey, TranslationOptions, SupportedLanguage } from '@reelo/i18n';
 
-i18n
-  .use(HttpBackend)
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false,
-    },
-    detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage'],
-    },
-    backend: {
-      loadPath: '/locales/{{lng}}/translation.json',
-    },
-  });
-
+// Ensure i18n is initialized before export
 export default i18n;

@@ -86,6 +86,11 @@ const REGION_UA: TSelectOption[] = [
     { value: 23, label: "Херсонська область" }
 ];
 
+const HAS_REGISTRATION_NUMBER_OPTIONS: TSelectOption[] = [
+    { value: 'true', label: "Так" },
+    { value: 'false', label: "Ні" }
+];
+
 export const AVAILABLE_FILTERS = {
   PRICE_FROM: 'price_from',
   PRICE_TO: 'price_to',
@@ -95,6 +100,7 @@ export const AVAILABLE_FILTERS = {
   YEAR_TO: 'year_to',
   FUEL_TYPE: 'fuel_type_ids',
   STATE_IDS: 'state_ids',
+  HAS_REGISTRATION_NUMBER: 'has_registration_number',
 } as const;
 
 export type AVAILABLE_FILTERS = (typeof AVAILABLE_FILTERS)[keyof typeof AVAILABLE_FILTERS];
@@ -108,6 +114,7 @@ export type Filters = {
   [AVAILABLE_FILTERS.YEAR_TO]?: number;
   [AVAILABLE_FILTERS.FUEL_TYPE]?: string[];
   [AVAILABLE_FILTERS.STATE_IDS]?: number[];
+  [AVAILABLE_FILTERS.HAS_REGISTRATION_NUMBER]?: boolean;
 }
 
 export const DEFAULT_FILTERS_VALUES: Filters = {
@@ -121,7 +128,7 @@ export const DEFAULT_FILTERS_VALUES: Filters = {
 };
 
 export interface FilterConfig {
-    type: "number" | "select" | "multiselect";
+    type: "number" | "select" | "multiselect" | "checkbox";
     name: AVAILABLE_FILTERS;
     label: string;
     placeholder: string | number;
@@ -155,6 +162,13 @@ export const getAdditionalFiltersConfig = (t: (key: string) => string): Addition
       placeholder: t('scrapper.pick_value'),
       data: FUEL_TYPES,
     },
+    {
+      type: 'checkbox',
+      name: AVAILABLE_FILTERS.HAS_REGISTRATION_NUMBER,
+      label: t('scrapper.has_registration_number'),
+      placeholder: t('scrapper.pick_value'),
+      data: HAS_REGISTRATION_NUMBER_OPTIONS,
+    },
   ],
   [SCRAPPING_SOURCES_ENUM.AUTOBazar]: [],
 });
@@ -180,7 +194,7 @@ export const ADDITIONAL_FILTERS_CONFIG: AdditionalFiltersConfig = {
       type: 'multiselect',
       name: AVAILABLE_FILTERS.STATE_IDS,
       label: 'scrapper.region',
-      placeholder: 'scrapper.pick_value',
+      placeholder: 'scrapper.region',
       data: REGION_UA,
     },
     {
@@ -189,6 +203,12 @@ export const ADDITIONAL_FILTERS_CONFIG: AdditionalFiltersConfig = {
       label: 'scrapper.fuel_type',
       placeholder: 'scrapper.pick_value',
       data: FUEL_TYPES,
+    },
+    {
+      type: 'checkbox',
+      name: AVAILABLE_FILTERS.HAS_REGISTRATION_NUMBER,
+      label: 'scrapper.has_registration_number',
+      placeholder: 'scrapper.pick_value',
     },
   ],
   [SCRAPPING_SOURCES_ENUM.AUTOBazar]: [],
@@ -212,4 +232,51 @@ export interface IParsedCarItem {
     title: string,
     total_ads: string,
     updated_at: string,
+}
+
+export interface IQueueStatus {
+  queue_size: number;
+  active_workers: number;
+  desired_workers: number;
+  active_messages: Array<{
+    message_id: string;
+    actor: string;
+    age_minutes: number;
+    is_stuck: boolean;
+  }>;
+  total_active_messages: number;
+  total_stuck_messages: number;
+  summary: {
+    pending_in_queue: number;
+    being_processed: number;
+    stuck_messages: number;
+    total_pending: number;
+    status: "empty" | "processing" | "queued";
+  };
+}
+
+export interface ITaskProgress {
+  task_id: string;
+  total: number;
+  processed: number;
+  new: number;
+  existing: number;
+  percent: number;
+  status: string;
+  actual_total?: number;
+  pages?: {
+    enqueued: number;
+    completed: number;
+    failed: number;
+    percent?: number;
+  };
+  timestamp?: number;
+}
+
+export interface TaskProgressSocketStatus {
+  connected: boolean;
+  connecting: boolean;
+  error: string | null;
+  lastConnected: Date | null;
+  reconnectAttempts: number;
 }

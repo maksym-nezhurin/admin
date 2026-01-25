@@ -1,0 +1,83 @@
+{
+  "sections": {
+    "main": {
+      "label": "Główne",
+      "description": "Główne funkcje i ustawienia",
+      "items": {
+        "dashboard": {
+          "label": "Panel",
+          "tooltip": "Główne funkcje i ustawienia"
+        },
+        "profile": {
+          "label": "Profil",
+          "tooltip": "Profil osobisty i ustawienia"
+        },
+        "settings": {
+          "label": "Ustawienia",
+          "tooltip": "Ogólne ustawienia"
+        }
+      }
+    },
+    "content": {
+      "label": "Treść",
+      "description": "Zarządzanie treścią i publikacjami",
+      "items": {
+        "announcements": {
+          "label": "Ogłoszenia",
+          "tooltip": "Zarządzanie treścią i publikacjami"
+        }
+      }
+    },
+    "tools": {
+      "label": "Narzędzia",
+      "description": "Profesjonalne narzędzia i analityka",
+      "items": {
+        "scrapper": {
+          "label": "Scrapper",
+          "tooltip": "Profesjonalne narzędzia i analityka"
+        }
+      }
+    },
+    "admin": {
+      "label": "Panel admina",
+      "description": "Administracja systemem i użytkownikami",
+      "items": {
+        "users": {
+          "label": "Użytkownicy",
+          "tooltip": "Zarządzanie użytkownikami systemu i ich rolami"
+        },
+        "admin": {
+          "label": "Strona admina",
+          "tooltip": "Strona admina"
+        },
+        "audit": {
+          "label": "Audyt",
+          "tooltip": "Audyt działań systemu"
+        },
+        "role_examples": {
+          "label": "Przykłady ról",
+          "tooltip": "Przykłady ról"
+        }
+      }
+    },
+    "system": {
+      "label": "System",
+      "description": "Ustawienia systemowe i monitoring",
+      "items": {
+        "system_settings": {
+          "label": "Ustawienia systemu",
+          "tooltip": "Ustawienia systemowe i monitoring"
+        },
+        "logs": {
+          "label": "Logi systemu",
+          "tooltip": "Ustawienia systemowe i monitoring"
+        },
+        "monitoring": {
+          "label": "Monitorowanie",
+          "tooltip": "Ustawienia systemowe i monitoring"
+        }
+      }
+    }
+  },
+  "current_role": "Obecna rola"
+}

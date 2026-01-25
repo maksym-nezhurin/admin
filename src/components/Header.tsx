@@ -24,7 +24,7 @@ export const Header = () => {
                 <Skeleton height={28} width={80} radius="xl" />
                 ) : (
                 <Text size="xl" weight={700}>
-                    MyLogo
+                    Woohoo
                 </Text>
             )}
             <MediaQuery largerThan="sm" styles={{ display: 'none' }}>

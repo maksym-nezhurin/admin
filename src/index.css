@@ -77,3 +77,25 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Fix for Mantine modal positioning */
+.mantine-Modal-inner {
+  left: 0 !important;
+}
+
+.mantine-Modal-root {
+  z-index: 900 !important;
+}
+
+.mantine-Modal-inner.mantine-Modal-inner.mantine-1gp3704 {
+  left: 0 !important;
+}
+
+/* Additional modal positioning fixes */
+.mantine-Modal-content {
+  position: relative !important;
+}
+
+.mantine-Modal-root {
+  position: fixed !important;
+}

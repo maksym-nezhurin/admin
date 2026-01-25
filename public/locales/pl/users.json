@@ -1,0 +1,19 @@
+{
+  "title": "Zarządzanie użytkownikami",
+  "header": "Wszystkie użytkownicy",
+  "content": "Wszystkie details",
+  "loading": "Ładowanie użytkowników...",
+  "empty": "Nie znaleziono użytkowników",
+  "load_error": "Nie udało się załadować użytkowników",
+  "roles_load_error": "Nie udało się załadować dostępnych ról",
+  "assign_error": "Nie udało się przypisać ról",
+  "remove_role_error": "Nie udało się usunąć roli",
+  "delete_error": "Nie udało się usunąć użytkownika",
+  "confirm_delete": "Czy na pewno chcesz usunąć tego użytkownika?",
+  "manage_roles": "Zarządzanie rolami",
+  "delete_user": "Usuń użytkownika",
+  "assign_roles": "Przypisz role",
+  "select_roles": "Wybierz role",
+  "choose_roles": "Wybierz role...",
+  "remove_role": "Usuń rolę"
+}

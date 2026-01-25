@@ -1,6 +1,6 @@
-import { Button, NumberInput, Select, Group, MultiSelect } from "@mantine/core";
+import { Button, NumberInput, Select, Group, MultiSelect, Checkbox } from "@mantine/core";
 import { useState, useEffect } from "react";
-import { useTranslation } from 'react-i18next';
+import { useTypedTranslation, type TranslationKey } from '../../i18n';
 
 import { prepareOptionsForSelect } from "../../utils/formAdapters";
 import { useScrapper, type IFilters } from "../../contexts/ScrapperContext";
@@ -8,7 +8,7 @@ import { useScrapper, type IFilters } from "../../contexts/ScrapperContext";
 import "./Filters.css";
 
 export const Filters = () => {
-  const { t } = useTranslation();
+  const { t } = useTypedTranslation();
   const { filters, setFilters, filtersConfig } = useScrapper();
   const [isVirgin, setIsVirgin] = useState(true);
   const [values, setValues] = useState<IFilters>(filters);
@@ -53,7 +53,7 @@ export const Filters = () => {
           {f.type === "number" && (
             <NumberInput
               type="number"
-              label={t(f.label)}
+              label={t(f.label as TranslationKey)}
               placeholder={String(f.placeholder)}
               value={Number(values[f.name] || f.placeholder)}
               onChange={(value) => handleChange(f.name, value)}
@@ -62,8 +62,8 @@ export const Filters = () => {
 
           {f.type === "select" && (
             <Select
-              label={t(f.label)}
-              placeholder={String(f.placeholder)}
+              label={t(f.label as TranslationKey)}
+              placeholder={t(String(f.placeholder) as TranslationKey)}
               data={prepareOptionsForSelect(f.data)}
               value={values[f.name] !== undefined && values[f.name] !== null ? String(values[f.name]) : null}
               onChange={(value: string | null) => handleChange(f.name, value)}
@@ -73,12 +73,20 @@ export const Filters = () => {
 
           {f.type === "multiselect" && (
             <MultiSelect
-              label={t(f.label)}
-              placeholder={String(f.placeholder)}
+              label={t(f.label as TranslationKey)}
+              placeholder={t(String(f.placeholder) as TranslationKey)}
               data={prepareOptionsForSelect(f.data)}
               value={Array.isArray(values[f.name]) ? (values[f.name] as (string | number)[]).map(String) : []}
               onChange={(value: string[] | null) => handleChange(f.name, value)}
               clearable
+            />
+          )}
+
+          {f.type === "checkbox" && (
+            <Checkbox
+              label={t(f.label as TranslationKey)}
+              checked={Boolean(values[f.name])}
+              onChange={(e) => handleChange(f.name, e.target.checked)}
             />
           )}
         </div>

@@ -2,10 +2,10 @@ import { Table, Title, Paper, Stack } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { carsService } from '../../services/cars';
-import { Loader } from '../Loader';
-import { CarAnalyticsChart } from '../../components/CarAnalyticsChart';
-import { useAuth } from '../../contexts/AuthContext';
+import { carsService } from '../services/cars';
+import { Loader } from './Loader';
+import { CarAnalyticsChart } from './CarAnalyticsChart';
+import { useAuth } from '../contexts/AuthContext';
 
 export const CarTable = () => {
     const { t } = useTranslation();
@@ -20,7 +20,7 @@ export const CarTable = () => {
             isLoading
              ? <Loader />
              : (
-                <Stack spacing="xl">
+                <Stack spacing="xl" mb="xl" mt="md">
                     <Paper p="md" withBorder shadow="sm">
                         <Title order={4} mb={8}>{t('cars_by_date')}</Title>
                         <CarAnalyticsChart cars={cars} userId={userInfo?.sub} />
