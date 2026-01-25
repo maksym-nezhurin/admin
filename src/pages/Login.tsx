@@ -40,7 +40,7 @@ const Login: React.FC = () => {
       password: (value) => (value.length < 4 ? t('auth.password_min_length', { count: 4 }) : null),
     },
   });
-  console.log('🟢 [Login] loading form', form);
+
   const handleSubmit = async (values: LoginForm, event?: React.FormEvent) => {
     // Prevent default form submission to avoid page refresh
     if (event) {
