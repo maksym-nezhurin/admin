@@ -15,7 +15,7 @@ import {
   rem
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
+import { notificationService, isServiceAvailable } from '../services/notification';
 import { IconAt, IconLock } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { useTypedTranslation } from '../i18n';
@@ -26,7 +26,7 @@ interface LoginForm {
 }
 
 const Login: React.FC = () => {
-  const { login, user, error } = useAuth();
+  const { login, user, loading } = useAuth();
   const navigate = useNavigate();
   const { t } = useTypedTranslation();
 
@@ -40,24 +40,55 @@ const Login: React.FC = () => {
       password: (value) => (value.length < 4 ? t('auth.password_min_length', { count: 4 }) : null),
     },
   });
+  console.log('🟢 [Login] loading form', form);
+  const handleSubmit = async (values: LoginForm, event?: React.FormEvent) => {
+    // Prevent default form submission to avoid page refresh
+    if (event) {
+      event.preventDefault();
+    }
 
-  const handleSubmit = async (values: LoginForm) => {
     try {
       await login(values.username, values.password);
-      notifications.show({
-        title: t('common.success'),
-        message: t('auth.login_success'),
-        color: 'green',
-      });
+      // notificationService.success(t('auth.login_success'), {
+      //   title: t('common.success'),
+      // });
       // Navigation will happen in useEffect when user state is updated
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
-      form.setErrors({ password: error, username: error })
+      console.error('❌ [Login] Error caught in handleSubmit:', e);
+      // Prevent default form submission behavior
+      if (event) {
+        event.preventDefault();
+      }
       
-      notifications.show({
+      // Check if service is unavailable
+      const unavailabilityMessage = isServiceAvailable(e);
+      
+      if (unavailabilityMessage) {
+        console.log('⚠️ [Login] Service unavailable, skipping error notification');
+        // Service is unavailable - notification already shown by apiClient interceptor
+        // Don't show login error in this case
+        return;
+      }
+      
+      // Extract error message from the error object
+      let errorMessage = t('auth.invalid_credentials');
+      
+      if (e && typeof e === 'object') {
+        // Check for axios error structure: error.response.data.message or error.response.data.data.message
+        const axiosError = e as { response?: { data?: { message?: string; data?: { message?: string } } } };
+        const message = axiosError?.response?.data?.data?.message || axiosError?.response?.data?.message;
+        
+        if (message) {
+          errorMessage = message;
+        } else if (e instanceof Error) {
+          errorMessage = e.message;
+        }
+      }
+      
+      console.log('📢 [Login] Showing error notification:', errorMessage);
+      // Show error notification only (don't modify form state to avoid refresh)
+      notificationService.error(errorMessage, {
         title: t('common.error'),
-        message: error || t('auth.invalid_credentials'),
-        color: 'red',
       });
     }
   };
@@ -99,7 +130,7 @@ const Login: React.FC = () => {
                 {...form.getInputProps('password')}
               />
 
-              <Button type="submit" radius="md" fullWidth mt="xl">
+              <Button type="submit" radius="md" fullWidth mt="xl" loading={loading}>
                 {t('auth.sign_in')}
               </Button>
             </Stack>

@@ -3,7 +3,7 @@ import { Button, Group, Select, TextInput, Title, Stack, Paper, Text, MultiSelec
 import { useAuth } from '../contexts/AuthContext';
 import { useUIStore } from '../store/uiStore';
 import { LANGUAGES, countryNameToCode } from '../types/constants';
-import { useTypedTranslation } from '../i18n';
+import { useTypedTranslation, type TranslationKey } from '../i18n';
 import { authService } from '../services/auth';
 import i18n from '../i18n';
 
@@ -64,14 +64,14 @@ const Settings: React.FC = () => {
       <Stack spacing="xl">
         {/* Appearance section */}
         <Stack spacing="md">
-          <Title order={4}>{t('common.appearance')}</Title>
+          <Title order={4}>{t('common.appearance' as TranslationKey)}</Title>
 
           <Group position="apart" align="center">
             <Text>{t('common.theme')}</Text>
             <Select
               data={[
-                { value: 'light', label: t('common.light') },
-                { value: 'dark', label: t('common.dark') },
+                { value: 'light', label: t('common.light' as TranslationKey) },
+                { value: 'dark', label: t('common.dark' as TranslationKey) },
               ]}
               value={theme}
               onChange={handleThemeChange}
@@ -92,15 +92,15 @@ const Settings: React.FC = () => {
 
         {/* Location section */}
         <Stack spacing="md">
-          <Title order={4}>{t('common.location')}</Title>
+          <Title order={4}>{t('common.location' as TranslationKey)}</Title>
 
           <Group align="center" position="apart">
-            <Text>{t('common.nativeCountry')}</Text>
+            <Text>{t('common.nativeCountry' as TranslationKey)}</Text>
             <Text c="dimmed">{userInfo?.nativeCountry || '-'}</Text>
           </Group>
 
           <Group align="center" position="apart">
-            <Text>{t('common.countryCode')}</Text>
+            <Text>{t('common.countryCode' as TranslationKey)}</Text>
             <Select
               data={Object.keys(countryNameToCode).map((key) => ({ value: countryNameToCode[key], label: key }))}
               value={countryCode}
@@ -110,7 +110,7 @@ const Settings: React.FC = () => {
           </Group>
 
           <Group align="flex-start" position="apart">
-            <Text mt={6}>{t('common.preferredCountries')}</Text>
+            <Text mt={6}>{t('common.preferredCountries' as TranslationKey)}</Text>
             <MultiSelect
               data={Object.keys(countryNameToCode).map((key) => ({ value: countryNameToCode[key], label: key }))}
               value={preferredCountries}

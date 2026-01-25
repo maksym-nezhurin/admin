@@ -11,19 +11,25 @@ import { ROUTES } from './constant';
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const tokenResponse = await apiClient.post<Omit<AuthResponse, 'user'>>(`/${ROUTES.AUTH}/login`, credentials);
-    
-    if (tokenResponse.data.access_token) {
-      const fullResponse: AuthResponse = {
-        ...tokenResponse.data,
-      };
+    try {
+      const tokenResponse = await apiClient.post<Omit<AuthResponse, 'user'>>(`/${ROUTES.AUTH}/login`, credentials);
+      
+      if (tokenResponse.data.access_token) {
+        const fullResponse: AuthResponse = {
+          ...tokenResponse.data,
+        };
 
-      localStorage.setItem('user', JSON.stringify(fullResponse));
-      localStorage.setItem('tokenTimestamp', Date.now().toString());
-      return fullResponse;
+        localStorage.setItem('user', JSON.stringify(fullResponse));
+        localStorage.setItem('tokenTimestamp', Date.now().toString());
+
+        return fullResponse;
+      }
+      
+      throw new Error('No access token received');
+    } catch (error) {
+      console.error('❌ [authService] Error in login:', error);
+      throw error;
     }
-    
-    throw new Error('No access token received');
   },
 
   async register(credentials: IRegisterForm): Promise<RegisterResponse> {

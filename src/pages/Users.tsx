@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Text, Title, Stack, Group, Button, MultiSelect, ActionIcon, Modal, Alert, Badge, Paper } from '@mantine/core';
-import { useTypedTranslation } from '../i18n';
+import { useTypedTranslation, type TranslationKey } from '../i18n';
 import { useRoles } from '../hooks/useRoles';
 import { authService } from '../services/auth';
 import { IconTrash, IconUserOff, IconSettings } from '@tabler/icons-react';
@@ -25,7 +25,7 @@ const UsersPage = () => {
             setUsers(allUsers);
         } catch (error) {
             console.error('Failed to fetch all users:', error);
-            setError(t('users.load_error'));
+            setError(t('users.load_error' as TranslationKey));
         } finally {
             setLoading(false);
         }
@@ -38,7 +38,7 @@ const UsersPage = () => {
             setAvailableRoles(roles);
         } catch (error) {
             console.error('Failed to load available roles:', error);
-            setError(t('users.roles_load_error'));
+            setError(t('users.roles_load_error' as TranslationKey));
         }
     };
 
@@ -51,7 +51,7 @@ const UsersPage = () => {
             await assignRole(selectedUser.id, selectedRoles);
         } catch (error) {
             console.error('Failed to assign roles:', error);
-            setError(t('users.assign_error'));
+            setError(t('users.assign_error' as TranslationKey));
         } finally {
             await onHandleGetAllUsers(); // Refresh users list
             setRoleModalOpen(false);
@@ -66,7 +66,7 @@ const UsersPage = () => {
             await onHandleGetAllUsers(); // Refresh users list
         } catch (error) {
             console.error('Failed to remove role:', error);
-            setError(t('users.remove_role_error'));
+            setError(t('users.remove_role_error' as TranslationKey));
         }
     };
 
@@ -79,7 +79,7 @@ const UsersPage = () => {
             await onHandleGetAllUsers(); // Refresh users list
         } catch (error) {
             console.error('Failed to delete user:', error);
-            setError(t('users.delete_error'));
+            setError(t('users.delete_error' as TranslationKey));
         }
     };
 
@@ -97,7 +97,7 @@ const UsersPage = () => {
 
     return (
         <Stack>
-            <Title order={2}>{t('users.title')}</Title>
+            <Title order={2}>{t('users.title' as TranslationKey)}</Title>
 
             {loading && (
                 <Alert color="blue" variant="light">
@@ -113,7 +113,7 @@ const UsersPage = () => {
             <RoleGuard roles={['ADMIN', 'SUPER_ADMIN']} fallback={<Alert color="red">{t('common.error')}</Alert>}>
                 {!loading && !error && users.length === 0 && (
                     <Alert color="gray" variant="light">
-                        {t('users.empty')}
+                        {t('users.empty' as TranslationKey)}
                     </Alert>
                 )}
 

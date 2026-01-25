@@ -15,7 +15,7 @@ import {
   Tooltip,
   Alert,
 } from '@mantine/core';
-import { useTypedTranslation } from '../i18n';
+import { useTypedTranslation, type TranslationKey } from '../i18n';
 import {
   IconRefresh,
   IconServer,
@@ -129,11 +129,11 @@ const SystemPage: React.FC = () => {
   const getStatusBadge = (status: ServiceInfo['status']) => {
     switch (status) {
       case 'healthy':
-        return <Badge color="green" leftSection={<IconCheck size={12} />}>{t('system.status_healthy')}</Badge>;
+        return <Badge color="green" leftSection={<IconCheck size={12} />}>{t('system.status_healthy' as TranslationKey)}</Badge>;
       case 'unhealthy':
-        return <Badge color="red" leftSection={<IconX size={12} />}>{t('system.status_unhealthy')}</Badge>;
+        return <Badge color="red" leftSection={<IconX size={12} />}>{t('system.status_unhealthy' as TranslationKey)}</Badge>;
       default:
-        return <Badge color="gray" leftSection={<IconAlertCircle size={12} />}>{t('system.status_unknown')}</Badge>;
+        return <Badge color="gray" leftSection={<IconAlertCircle size={12} />}>{t('system.status_unknown' as TranslationKey)}</Badge>;
     }
   };
 
@@ -153,30 +153,30 @@ const SystemPage: React.FC = () => {
   return (
     <Stack spacing="xl">
       <Group position="apart" align="center">
-        <Title order={2}>{t('system.title')}</Title>
+        <Title order={2}>{t('system.title' as TranslationKey)}</Title>
         <Button
           leftIcon={<IconRefresh size={16} />}
           onClick={handleRefresh}
           loading={checking}
           variant="light"
         >
-          {t('system.refresh')}
+          {t('system.refresh' as TranslationKey)}
         </Button>
       </Group>
 
       <Text c="dimmed" size="sm">
-        {t('system.description')}
+        {t('system.description' as TranslationKey)}
       </Text>
 
       {/* System Overview */}
       <Paper shadow="sm" radius="md" p="lg" withBorder>
-        <Title order={3} mb="md">{t('system.overview')}</Title>
+        <Title order={3} mb="md">{t('system.overview' as TranslationKey)}</Title>
         <Grid>
           <Grid.Col span={12} md={6}>
             <Card shadow="xs" padding="md" radius="sm" withBorder>
               <Group position="apart">
                 <div>
-                  <Text size="sm" c="dimmed">{t('system.node_version')}</Text>
+                  <Text size="sm" c="dimmed">{t('system.node_version' as TranslationKey)}</Text>
                   <Text fw={600}>{systemInfo.nodeVersion}</Text>
                 </div>
                 <IconServer size={24} color="gray" />
@@ -187,7 +187,7 @@ const SystemPage: React.FC = () => {
             <Card shadow="xs" padding="md" radius="sm" withBorder>
               <Group position="apart">
                 <div>
-                  <Text size="sm" c="dimmed">{t('system.platform')}</Text>
+                  <Text size="sm" c="dimmed">{t('system.platform' as TranslationKey)}</Text>
                   <Text fw={600}>{systemInfo.platform}</Text>
                 </div>
                 <IconCloud size={24} color="gray" />
@@ -198,7 +198,7 @@ const SystemPage: React.FC = () => {
             <Card shadow="xs" padding="md" radius="sm" withBorder>
               <Group position="apart">
                 <div>
-                  <Text size="sm" c="dimmed">{t('system.memory')}</Text>
+                  <Text size="sm" c="dimmed">{t('system.memory' as TranslationKey)}</Text>
                   <Text fw={600}>{systemInfo.memory}</Text>
                 </div>
                 <IconDatabase size={24} color="gray" />
@@ -209,7 +209,7 @@ const SystemPage: React.FC = () => {
             <Card shadow="xs" padding="md" radius="sm" withBorder>
               <Group position="apart">
                 <div>
-                  <Text size="sm" c="dimmed">{t('system.language')}</Text>
+                  <Text size="sm" c="dimmed">{t('system.language' as TranslationKey)}</Text>
                   <Text fw={600}>{systemInfo.language}</Text>
                 </div>
                 <IconInfoCircle size={24} color="gray" />
@@ -222,19 +222,19 @@ const SystemPage: React.FC = () => {
       {/* Services Status */}
       <Paper shadow="sm" radius="md" p="lg" withBorder>
         <Group position="apart" mb="md">
-          <Title order={3}>{t('system.services')}</Title>
+          <Title order={3}>{t('system.services' as TranslationKey)}</Title>
           {lastChecked && (
             <Text size="xs" c="dimmed">
-              {t('system.last_checked')}: {lastChecked.toLocaleTimeString()}
+              {t('system.last_checked' as TranslationKey)}: {lastChecked.toLocaleTimeString()}
             </Text>
           )}
         </Group>
         <Table striped highlightOnHover>
           <thead>
             <tr>
-              <th>{t('system.service_name')}</th>
-              <th>{t('system.service_status')}</th>
-              <th>{t('system.service_url')}</th>
+              <th>{t('system.service_name' as TranslationKey)}</th>
+              <th>{t('system.service_status' as TranslationKey)}</th>
+              <th>{t('system.service_url' as TranslationKey)}</th>
               <th>{t('common.actions')}</th>
             </tr>
           </thead>
@@ -250,12 +250,12 @@ const SystemPage: React.FC = () => {
                 </td>
                 <td>
                   <Group spacing="xs">
-                    <Tooltip label={t('system.view_logs')}>
+                    <Tooltip label={t('system.view_logs' as TranslationKey)}>
                       <ActionIcon variant="light" size="sm">
                         <IconDatabase size={16} />
                       </ActionIcon>
                     </Tooltip>
-                    <Tooltip label={t('system.restart_service')}>
+                    <Tooltip label={t('system.restart_service' as TranslationKey)}>
                       <ActionIcon variant="light" color="orange" size="sm">
                         <IconRefresh size={16} />
                       </ActionIcon>
@@ -271,25 +271,25 @@ const SystemPage: React.FC = () => {
       {/* Environment Variables (Mock - for future implementation) */}
       <Paper shadow="sm" radius="md" p="lg" withBorder>
         <Group position="apart" mb="md">
-          <Title order={3}>{t('system.environment')}</Title>
+          <Title order={3}>{t('system.environment' as TranslationKey)}</Title>
           <Button
             size="xs"
             variant="subtle"
             onClick={() => setShowSensitive(!showSensitive)}
           >
-            {showSensitive ? t('system.hide_sensitive') : t('system.show_all')}
+            {showSensitive ? t('system.hide_sensitive' as TranslationKey) : t('system.show_all' as TranslationKey)}
           </Button>
         </Group>
         <Alert color="blue" icon={<IconInfoCircle size={16} />}>
           <Text size="sm">
-            {t('system.no_env_vars')} - {t('system.coming_soon')}
+            {t('system.no_env_vars' as TranslationKey)} - {t('system.coming_soon' as TranslationKey)}
           </Text>
         </Alert>
       </Paper>
 
       {/* Future Features */}
       <Paper shadow="sm" radius="md" p="lg" withBorder>
-        <Title order={3} mb="md">{t('system.future_features')}</Title>
+        <Title order={3} mb="md">{t('system.future_features' as TranslationKey)}</Title>
         <Grid>
           {futureFeatures.map((feature) => (
             <Grid.Col key={feature.key} span={12} md={6} lg={4}>
@@ -299,7 +299,7 @@ const SystemPage: React.FC = () => {
                   <div>
                     <Text size="sm" fw={500}>{t(`system.${feature.key}` as any)}</Text>
                     <Badge size="xs" color="gray" variant="light" mt={4}>
-                      {t('system.coming_soon')}
+                      {t('system.coming_soon' as TranslationKey)}
                     </Badge>
                   </div>
                 </Group>

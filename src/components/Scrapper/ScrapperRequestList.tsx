@@ -232,7 +232,7 @@ export const ScrapperTaskList = () => {
                                         </span>
                                         <Text size="sm" weight={500}>
                                             {isFinished && request.duration_seconds
-                                                ? formatDuration(parseInt(String(request.duration_seconds), 10), t)
+                                                ? formatDuration(parseInt(String(request.duration_seconds), 10), (key: string) => t(key as any))
                                                 : request.status === 'enqueued' 
                                                     ? t('scrapper.in_queue') 
                                                     : request.status
