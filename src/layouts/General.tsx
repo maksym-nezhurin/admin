@@ -28,7 +28,7 @@ export const General: React.FC = () => {
                 inner: { left: 0 }
             }}
             >
-            <AdvancedCollapsibleNav />
+                <AdvancedCollapsibleNav />
             </Drawer>
         )}
         <AppShell
@@ -37,7 +37,7 @@ export const General: React.FC = () => {
             // Navbar only for desktop/tablet
             !isMobile ? (
                 <Navbar width={{ base: 390 }} p="xs">
-                <AdvancedCollapsibleNav />
+                    <AdvancedCollapsibleNav />
                 </Navbar>
             ) : undefined
             }
