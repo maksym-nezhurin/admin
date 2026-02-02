@@ -1,0 +1,202 @@
+{
+  "nav": {
+    "browse": "Browse",
+    "sell": "Sell",
+    "about": "About",
+    "list": "List your car",
+    "login": "Login",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "billing": "Billing"
+  },
+  "actions": {
+    "start_searching": {
+      "title": "Start searching",
+      "description": "Discover verified listings and find the perfect match.",
+      "cta": "Start searching"
+    },
+    "list_car": {
+      "title": "List your car",
+      "description": "Publish your listing and reach buyers instantly.",
+      "cta": "List your car"
+    },
+    "create_account": {
+      "title": "Create account",
+      "description": "Save favorites, manage ads, and connect with sellers.",
+      "cta": "Create account"
+    }
+  },
+  "account_menu": {
+    "label": "Account",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "billing": "Billing",
+    "my_cars": "My cars",
+    "cars_for_sale": "Cars for sale",
+    "add_new_car": "Add new car",
+    "loading": "Loading...",
+    "guest": "Guest"
+  },
+  "account": {
+    "loading_dashboard": "Loading dashboard...",
+    "dashboard_title": "Dashboard",
+    "dashboard_subtitle": "Overview of your listings and account activity.",
+    "account_dashboard_title": "Account dashboard",
+    "account_dashboard_guest": "Please sign in to see your statistics and listings.",
+    "go_to_login": "Go to login",
+    "add_new_car": "Add new car",
+    "manage_cars": "Manage cars",
+    "summary": {
+      "active_listings": "Active listings",
+      "cars_for_sale": "Cars for sale",
+      "total_views": "Total views",
+      "new_inquiries": "New inquiries"
+    },
+    "recent_activity": "Recent activity",
+    "recent_activity_items": {
+      "item_1": "BMW X5 listing updated",
+      "item_2": "New inquiry for Tesla Model 3",
+      "item_3": "Audi A4 moved to for sale"
+    },
+    "recent_activity_times": {
+      "item_1": "2 hours ago",
+      "item_2": "Yesterday",
+      "item_3": "2 days ago"
+    },
+    "profile_quick_view": "Profile quick view",
+    "name": "Name",
+    "email": "Email",
+    "edit_settings": "Edit settings",
+    "primary_car": {
+      "title": "Your primary car",
+      "subtitle": "Keep your main vehicle visible for faster searches and sharing.",
+      "manage": "Manage cars",
+      "add": "Add your car",
+      "selected_label": "Selected vehicle",
+      "empty_title": "No primary car yet",
+      "empty_subtitle": "Add your first vehicle to personalize your dashboard.",
+      "create_listing": "Create listing"
+    }
+  },
+  "account_settings": {
+    "loading": "Loading settings...",
+    "title": "Account settings",
+    "subtitle": "Update your profile information.",
+    "guest_subtitle": "Please sign in to manage your settings.",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "country_code": "Country code",
+    "save_changes": "Save changes",
+    "saving": "Saving...",
+    "back_to_profile": "Back to profile",
+    "updated": "Settings updated.",
+    "update_error": "Unable to update settings."
+  },
+  "account_cars": {
+    "title": "My cars",
+    "subtitle": "Manage your car listings.",
+    "status": "Status",
+    "views": "views",
+    "edit": "Edit"
+  },
+  "account_cars_for_sale": {
+    "title": "Cars for sale",
+    "subtitle": "Listings currently available for sale.",
+    "view_details": "View details"
+  },
+  "account_car_new": {
+    "title": "Add new car",
+    "subtitle": "Create a new car listing.",
+    "listing_title": "Listing title",
+    "brand": "Brand",
+    "model": "Model",
+    "year": "Year",
+    "price": "Price",
+    "description": "Description",
+    "mark_for_sale": "Mark as car for sale",
+    "save_listing": "Save listing",
+    "saving": "Saving..."
+  },
+  "account_billing": {
+    "title": "Billing & plans",
+    "subtitle": "Choose a plan and pay securely via Stripe.",
+    "redirecting": "Redirecting...",
+    "pay_with_stripe": "Pay with Stripe",
+    "checkout_error": "Unable to start Stripe checkout."
+  },
+  "browse": {
+    "title": "Browse cars",
+    "subtitle": "Browse our collection of cars available for sale.",
+    "updated": "Updated listings",
+    "search_placeholder": "Search by brand, model, or keyword",
+    "filters": {
+      "sort_newest": "Newest first",
+      "sort_price_low": "Price: low to high",
+      "sort_price_high": "Price: high to low",
+      "condition_all": "All types",
+      "condition_used": "Used",
+      "condition_new": "New"
+    }
+  },
+  "home": {
+    "latest_title": "Latest Listings",
+    "latest_subtitle": "Fresh offers curated for your next ride.",
+    "latest_cta": "Start searching",
+    "latest_create": "Create account",
+    "latest_add_car": "Add your car",
+    "next_steps_title": "Next steps made simple",
+    "next_steps_subtitle": "Keep moving forward with clear actions: search, connect, and share your car.",
+    "next_steps_find": "Find cars",
+    "next_steps_dashboard": "My dashboard",
+    "next_steps_post": "Post listing",
+    "trust_title": "Trust signals",
+    "trust_verified": "Verified sellers & buyers",
+    "trust_response": "Average response time",
+    "trust_secure": "Secure payments"
+  },
+  "hero": {
+    "badge": "Trusted marketplace",
+    "title": "Find your next car with clarity, speed, and confidence.",
+    "subtitle": "Browse verified listings, compare offers, and move from search to ownership in a few clicks.",
+    "stat_active": "Active listings",
+    "stat_users": "Verified users",
+    "stat_response": "Avg. response",
+    "inventory_label": "Live inventory updated",
+    "inventory_value": "Every 5 min"
+  },
+  "features": {
+    "eyebrow": "Trust & clarity",
+    "title": "Why choose us",
+    "subtitle": "A refined experience that keeps you informed at every step.",
+    "items": {
+      "verified_title": "Verified sellers",
+      "verified_desc": "Every listing is checked to keep your journey transparent and safe.",
+      "search_title": "Fast & clear search",
+      "search_desc": "Find the right match instantly with smart filters and clean UI.",
+      "pricing_title": "Competitive pricing",
+      "pricing_desc": "Market insights help you choose the best offer without stress."
+    }
+  },
+  "partners": {
+    "eyebrow": "Trusted network",
+    "title": "Our partners",
+    "subtitle": "We collaborate with the best companies in the automobile industry."
+  },
+  "filters": {
+    "title": "Filters",
+    "open": "Filters",
+    "brand": "Brand",
+    "model": "Model",
+    "variants": "Variants",
+    "clear": "Clear",
+    "multi_select_hint": "(hold Cmd/Ctrl to multi-select)",
+    "max_price": "Max Price",
+    "reset": "Reset",
+    "apply": "Apply",
+    "select_brand": "Select brand",
+    "select_model": "Select model",
+    "year_from": "From",
+    "year_to": "To"
+  }
+}

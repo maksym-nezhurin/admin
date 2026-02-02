@@ -45,7 +45,7 @@ export const FUEL_TYPES: TSelectOption[] = [
   { value: "", label: "Будь-яке" },
   { value: 1, label: "Бензин" },
   { value: 2, label: "Дизель" },
-  { value: 3, label: "Газ/Бензин" },
+  { value: 3, label: "Газ" },
   { value: 4, label: "Газ propan-butan/Бензин" },
   { value: 8, label: "Газ Metan/Бензин" },
   { value: 5, label: "Гібрид" },

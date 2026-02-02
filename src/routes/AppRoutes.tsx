@@ -10,6 +10,6 @@ export const AppRoutes: React.FC = () => (
 
     {ProtectedCoreRoutes}
 
-    <Route path="/" element={<Navigate to={ROUTES.DASHBOARD} />} />
+    <Route path="/" element={<Navigate to={ROUTES.MAIN} />} />
   </Routes>
 )
