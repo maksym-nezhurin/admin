@@ -45,14 +45,26 @@ export const ScrapperTaskList = () => {
             console.log('taskProgressEnabled', taskProgressEnabled); 
             // Try to connect to task progress socket first
             if (taskProgressEnabled) {
-                const currentClient = apiClientManager.getClient();
-                const baseUrl = currentClient.defaults.baseURL;
-                if (!baseUrl) {
-                    throw new Error('Base URL is not configured');
+                // First, fetch task details to get WebSocket URL
+                const taskDetails = await scrapperServices.getTaskDetails(taskId);
+                console.log('📦 Task details:', taskDetails);
+                
+                let websocket_url = taskDetails.websocket_url;
+                
+                if (!websocket_url) {
+                    console.warn('⚠️ No WebSocket URL in response, generating fallback');
+                    // Fallback: generate URL manually
+                    const currentClient = apiClientManager.getClient();
+                    let baseUrl = currentClient.defaults.baseURL || '';
+                    // Remove trailing slash from baseURL
+                    baseUrl = baseUrl.replace(/\/$/, '');
+                    websocket_url = baseUrl.replace(/^http/, 'ws') + `/progress/${taskId}/ws`;
+                    console.log('   Fallback URL:', websocket_url);
                 }
-                const socketConnected = await connectToTaskProgress(baseUrl, taskId);
+                
+                const socketConnected = await connectToTaskProgress(websocket_url, taskId);
                 if (socketConnected) {
-                    console.log('Connected to task progress socket for task:', taskId);
+                    console.log('✅ Connected to task progress socket for task:', taskId);
                     setRequests(requests.map(r => {
                         if (r.task_id === taskId) {
                             return { ...r, loading: false };
@@ -73,7 +85,7 @@ export const ScrapperTaskList = () => {
                 }));
             }
         } catch (error) {
-            console.error('Failed to get task progress:', error);
+            console.error('❌ Failed to get task progress:', error);
             setRequests(requests.map(r => {
                 if (r.task_id === taskId) {
                     return { ...r, loading: false };
@@ -209,6 +221,7 @@ export const ScrapperTaskList = () => {
                 </thead>
                 <tbody>
                     {sortedRequests.map((request, index) => {
+                        console.log('request', request);
                         const isFinished = request.status === 'finished';
                         const itemsWithoutPhone = request.items_without_phone && request.items_without_phone > 0;
                         const taskStatus = getTaskProgressStatus(request.task_id);

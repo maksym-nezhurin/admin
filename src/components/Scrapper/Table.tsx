@@ -41,32 +41,44 @@ export const ScrapperTable = ({
 
     const columnDefs: ColDef[] = [
         {
-        field: 'title',
-        cellRenderer: (params: { data: IParsedCarItem; value: string }) => (
-            <Link to={params.data.url} target="_blank" rel="noopener noreferrer">
-            {params.value}
-            </Link>
-        ),
-        checkboxSelection: true
+            field: 'title',
+            cellRenderer: (params: { data: IParsedCarItem; value: string }) => (
+                <Link to={params.data.url} target="_blank" rel="noopener noreferrer">
+                {params.value}
+                </Link>
+            ),
+            checkboxSelection: true
         },
         { 
-        field: 'price',
-        filter: 'agNumberColumnFilter'
+            field: 'price',
+            filter: 'agNumberColumnFilter'
         },
         { 
-        field: 'mileage',
-        filter: 'agNumberColumnFilter'
+            field: 'mileage',
+            filter: 'agNumberColumnFilter'
         },
         { 
-        field: 'phone' 
+            field: 'phone' 
         },
         { 
-        field: 'year',
-        filter: 'agNumberColumnFilter'
+            field: 'year',
+            filter: 'agNumberColumnFilter'
         },
         { 
-        field: 'registration_number' 
-        }
+            field: 'registrationNumber' 
+        },
+        {
+            field: 'vin',
+        },
+        {
+            field: 'sellerName',
+        },
+        {
+            field: 'totalAds',
+        },
+        {
+            field: 'activeAds',
+        }        
     ];
 
    const onGridReady = useCallback((params: GridReadyEvent) => {

@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 import { ScrapperTable } from '../components/Scrapper/Table';
 import { useApiClient } from '../contexts/ApiClientContext';
+import apiClientManager from '../api/apiClientManager';
 
 const ScrapperItemPage: React.FC = () => {
     const { t } = useTypedTranslation();
@@ -17,19 +18,57 @@ const ScrapperItemPage: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { userInfo } = useAuth();
-    const { market } = useScrapper();
+    const { 
+        market,
+        taskProgressEnabled,
+        connectToTaskProgress,
+        taskProgressSocketStatus,
+        activeTaskProgressSubscriptions,
+    } = useScrapper();
     const [scrapperItemDetails, setScrapperItemDetails] = useState<IParsedCarItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalEstimated, setTotalEstimated] = useState<number>(0);
     const totalAmount = scrapperItemDetails.length;
     const itemsWithoutPhone = scrapperItemDetails.filter((item: IParsedCarItem) => !item.phone);
 
-    const onHanldeClick = () => {
-        scrapperServices.refreshScrapperItemDetails({
+    const onHanldeClick = async () => {
+        const refreshData = await scrapperServices.refreshScrapperItemDetails({
             user_id: userInfo?.id,
             urls: itemsWithoutPhone.map(item => item.url),
             market: market || null, 
         });
+
+        console.log('📦 Refresh response:', refreshData);
+        
+        let { task_id: newTaskId, websocket_url } = refreshData;
+
+        if (!newTaskId) {
+            return;
+        }
+
+        console.log('🔄 Refreshing items for task:', newTaskId);
+
+        // Generate fallback URL if not provided
+        if (!websocket_url) {
+            console.warn('⚠️ No WebSocket URL in refresh response, generating fallback');
+            const currentClient = apiClientManager.getClient();
+            let baseUrl = currentClient.defaults.baseURL || '';
+            // Remove trailing slash from baseURL
+            baseUrl = baseUrl.replace(/\/$/, '');
+            websocket_url = baseUrl.replace(/^http/, 'ws') + `/progress/${newTaskId}/ws`;
+            console.log('   Fallback URL:', websocket_url);
+        }
+
+        // Якщо реальний час увімкнено і підписки ще немає, спробувати підключитися до прогресу задачі через WebSocket
+        if (taskProgressEnabled && !activeTaskProgressSubscriptions.has(newTaskId)) {
+            try {
+                console.log('🚀 Connecting to WebSocket for refresh task:', newTaskId);
+                console.log('   WebSocket URL:', websocket_url);
+                await connectToTaskProgress(websocket_url, newTaskId);
+            } catch (error) {
+                console.error('❌ Failed to connect to task progress socket from ScrapperItemPage:', error);
+            }
+        }
     }
     const getScrapperItemDetails = async (itemId: string) => {
         const { total_estimate, items } = await scrapperServices.getTaskDataItems(itemId);

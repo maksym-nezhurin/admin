@@ -58,7 +58,11 @@ export const scrapperServices = {
             params: { user: userId }
         });
 
-        return res.data.tasks || [];
+        return res.data.tasks.map((task: any) => ({
+            ...task,
+            task_id: task.taskId,
+            market: task.market as SCRAPPING_MARKETS_ENUM
+        })) || [];
     },
     async getTaskDetails(taskId: string): Promise<any> {
         const res = await apiClientManager.getClient().get(`/progress/${taskId}`);
@@ -147,10 +151,11 @@ export const scrapperServices = {
     },
 
     // Task Progress Socket methods
-    async connectToTaskProgress(baseUrl: string, taskId: string): Promise<boolean> {
+    async connectToTaskProgress(websocketUrl: string, taskId: string): Promise<boolean> {
         const socketService = getSocketService();
-        console.log('connectToTaskProgress', baseUrl, taskId);
-        return await socketService.connectToTaskProgress(baseUrl, taskId);
+        console.log('🔌 Connecting to task progress:', taskId);
+        console.log('   WebSocket URL:', websocketUrl);
+        return await socketService.connectToTaskProgress(websocketUrl, taskId);
     },
 
     disconnectTaskProgress(): void {
