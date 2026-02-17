@@ -1,0 +1,202 @@
+{
+  "nav": {
+    "browse": "Przeglądaj",
+    "sell": "Sprzedaż",
+    "about": "O nas",
+    "list": "Dodaj auto",
+    "login": "Zaloguj",
+    "logout": "Wyloguj",
+    "dashboard": "Panel",
+    "settings": "Ustawienia",
+    "billing": "Płatności"
+  },
+  "actions": {
+    "start_searching": {
+      "title": "Rozpocznij wyszukiwanie",
+      "description": "Znajdź sprawdzone ogłoszenia i idealny samochód.",
+      "cta": "Rozpocznij wyszukiwanie"
+    },
+    "list_car": {
+      "title": "Dodaj auto",
+      "description": "Opublikuj ogłoszenie i szybko znajdź kupujących.",
+      "cta": "Dodaj auto"
+    },
+    "create_account": {
+      "title": "Utwórz konto",
+      "description": "Zapisuj ulubione, zarządzaj ogłoszeniami i kontaktuj się.",
+      "cta": "Utwórz konto"
+    }
+  },
+  "account_menu": {
+    "label": "Konto",
+    "dashboard": "Panel",
+    "settings": "Ustawienia",
+    "billing": "Płatności",
+    "my_cars": "Moje auta",
+    "cars_for_sale": "Auta na sprzedaż",
+    "add_new_car": "Dodaj auto",
+    "loading": "Ładowanie...",
+    "guest": "Gość"
+  },
+  "account": {
+    "loading_dashboard": "Ładowanie panelu...",
+    "dashboard_title": "Panel",
+    "dashboard_subtitle": "Podsumowanie ogłoszeń i aktywności.",
+    "account_dashboard_title": "Panel użytkownika",
+    "account_dashboard_guest": "Zaloguj się, aby zobaczyć statystyki i ogłoszenia.",
+    "go_to_login": "Przejdź do logowania",
+    "add_new_car": "Dodaj auto",
+    "manage_cars": "Zarządzaj autami",
+    "summary": {
+      "active_listings": "Aktywne ogłoszenia",
+      "cars_for_sale": "Auta na sprzedaż",
+      "total_views": "Łączna liczba wyświetleń",
+      "new_inquiries": "Nowe zapytania"
+    },
+    "recent_activity": "Ostatnia aktywność",
+    "recent_activity_items": {
+      "item_1": "Zaktualizowano ogłoszenie BMW X5",
+      "item_2": "Nowe zapytanie o Tesla Model 3",
+      "item_3": "Audi A4 przeniesiono do sprzedaży"
+    },
+    "recent_activity_times": {
+      "item_1": "2 godziny temu",
+      "item_2": "Wczoraj",
+      "item_3": "2 dni temu"
+    },
+    "profile_quick_view": "Szybki podgląd profilu",
+    "name": "Imię",
+    "email": "Email",
+    "edit_settings": "Edytuj ustawienia",
+    "primary_car": {
+      "title": "Główny samochód",
+      "subtitle": "Utrzymuj główny pojazd widoczny dla szybszego wyszukiwania.",
+      "manage": "Zarządzaj autami",
+      "add": "Dodaj auto",
+      "selected_label": "Wybrany pojazd",
+      "empty_title": "Brak głównego auta",
+      "empty_subtitle": "Dodaj pierwszy samochód, aby spersonalizować panel.",
+      "create_listing": "Utwórz ogłoszenie"
+    }
+  },
+  "account_settings": {
+    "loading": "Ładowanie ustawień...",
+    "title": "Ustawienia konta",
+    "subtitle": "Zaktualizuj informacje profilu.",
+    "guest_subtitle": "Zaloguj się, aby zarządzać ustawieniami.",
+    "first_name": "Imię",
+    "last_name": "Nazwisko",
+    "country_code": "Kod kraju",
+    "save_changes": "Zapisz zmiany",
+    "saving": "Zapisywanie...",
+    "back_to_profile": "Wróć do profilu",
+    "updated": "Ustawienia zapisane.",
+    "update_error": "Nie udało się zapisać ustawień."
+  },
+  "account_cars": {
+    "title": "Moje auta",
+    "subtitle": "Zarządzaj ogłoszeniami swoich aut.",
+    "status": "Status",
+    "views": "wyświetleń",
+    "edit": "Edytuj"
+  },
+  "account_cars_for_sale": {
+    "title": "Auta na sprzedaż",
+    "subtitle": "Ogłoszenia dostępne na sprzedaż.",
+    "view_details": "Zobacz szczegóły"
+  },
+  "account_car_new": {
+    "title": "Dodaj auto",
+    "subtitle": "Utwórz nowe ogłoszenie.",
+    "listing_title": "Tytuł ogłoszenia",
+    "brand": "Marka",
+    "model": "Model",
+    "year": "Rok",
+    "price": "Cena",
+    "description": "Opis",
+    "mark_for_sale": "Oznacz jako auto na sprzedaż",
+    "save_listing": "Zapisz ogłoszenie",
+    "saving": "Zapisywanie..."
+  },
+  "account_billing": {
+    "title": "Płatności i plany",
+    "subtitle": "Wybierz plan i zapłać przez Stripe.",
+    "redirecting": "Przekierowanie...",
+    "pay_with_stripe": "Zapłać Stripe",
+    "checkout_error": "Nie udało się rozpocząć płatności Stripe."
+  },
+  "browse": {
+    "title": "Przeglądaj auta",
+    "subtitle": "Przeglądaj auta dostępne na sprzedaż.",
+    "updated": "Aktualne ogłoszenia",
+    "search_placeholder": "Szukaj według marki, modelu lub słów kluczowych",
+    "filters": {
+      "sort_newest": "Najnowsze",
+      "sort_price_low": "Cena: od najniższej",
+      "sort_price_high": "Cena: od najwyższej",
+      "condition_all": "Wszystkie typy",
+      "condition_used": "Używane",
+      "condition_new": "Nowe"
+    }
+  },
+  "home": {
+    "latest_title": "Najnowsze ogłoszenia",
+    "latest_subtitle": "Świeże oferty na Twój kolejny zakup.",
+    "latest_cta": "Rozpocznij wyszukiwanie",
+    "latest_create": "Utwórz konto",
+    "latest_add_car": "Dodaj auto",
+    "next_steps_title": "Proste kolejne kroki",
+    "next_steps_subtitle": "Idź dalej: szukaj, kontaktuj się i dodaj auto.",
+    "next_steps_find": "Znajdź auto",
+    "next_steps_dashboard": "Mój panel",
+    "next_steps_post": "Dodaj ogłoszenie",
+    "trust_title": "Wskaźniki zaufania",
+    "trust_verified": "Zweryfikowani sprzedawcy i kupujący",
+    "trust_response": "Średni czas odpowiedzi",
+    "trust_secure": "Bezpieczne płatności"
+  },
+  "hero": {
+    "badge": "Zaufany marketplace",
+    "title": "Znajdź swoje auto szybko i pewnie.",
+    "subtitle": "Przeglądaj zweryfikowane ogłoszenia i wybieraj bez stresu.",
+    "stat_active": "Aktywne ogłoszenia",
+    "stat_users": "Zweryfikowani użytkownicy",
+    "stat_response": "Średni czas odpowiedzi",
+    "inventory_label": "Aktualizacja bazy",
+    "inventory_value": "Co 5 min"
+  },
+  "features": {
+    "eyebrow": "Zaufanie i przejrzystość",
+    "title": "Dlaczego my",
+    "subtitle": "Dopieszczony proces od wyszukiwania do zakupu.",
+    "items": {
+      "verified_title": "Zweryfikowani sprzedawcy",
+      "verified_desc": "Każde ogłoszenie jest sprawdzane dla Twojego bezpieczeństwa.",
+      "search_title": "Szybkie wyszukiwanie",
+      "search_desc": "Znajduj idealne auto dzięki inteligentnym filtrom.",
+      "pricing_title": "Konkurencyjne ceny",
+      "pricing_desc": "Analizy pomagają wybrać najlepszą ofertę."
+    }
+  },
+  "partners": {
+    "eyebrow": "Zaufana sieć",
+    "title": "Nasi partnerzy",
+    "subtitle": "Współpracujemy z najlepszymi firmami w branży motoryzacyjnej."
+  },
+  "filters": {
+    "title": "Filtry",
+    "open": "Filtry",
+    "brand": "Marka",
+    "model": "Model",
+    "variants": "Warianty",
+    "clear": "Wyczyść",
+    "multi_select_hint": "(przytrzymaj Cmd/Ctrl, aby zaznaczyć wiele)",
+    "max_price": "Maks. cena",
+    "reset": "Resetuj",
+    "apply": "Zastosuj",
+    "select_brand": "Wybierz markę",
+    "select_model": "Wybierz model",
+    "year_from": "Od",
+    "year_to": "Do"
+  }
+}

@@ -4,10 +4,25 @@ import { useScrapper } from "../../contexts/ScrapperContext";
 import { scrapperServices } from "../../services/scrapper";
 import type { IQueueStatus } from "../../constants/scrapper";
 import { useTypedTranslation } from "../../i18n";
+import type { TranslationKey } from "../../i18n";
 
 export const RedisQueueStatus = () => {
     const { t } = useTypedTranslation();
-    const { redisQueueStatus, fetchQueueStatus, socketStatus, connectSocket, disconnectSocket } = useScrapper();
+    
+    // Try to get scrapper context, handle if not available
+    let scrapperContext;
+    try {
+        scrapperContext = useScrapper();
+    } catch (error) {
+        console.error('❌ RedisQueueStatus: ScrapperProvider not found!', error);
+        return (
+            <Alert color="red" title="Error">
+                RedisQueueStatus must be used inside ScrapperProvider
+            </Alert>
+        );
+    }
+    
+    const { redisQueueStatus, fetchQueueStatus, socketStatus, connectSocket, disconnectSocket } = scrapperContext;
     const { cleanQueueStuckedMessage } = scrapperServices;
     
     const {
@@ -15,6 +30,8 @@ export const RedisQueueStatus = () => {
         active_workers,
         total_active_messages,
     } = redisQueueStatus || ({} as IQueueStatus);
+
+    const activeMessages = redisQueueStatus?.active_messages || [];
 
     console.log('redisQueueStatus', redisQueueStatus);
     // Get connection status indicator
@@ -107,15 +124,57 @@ export const RedisQueueStatus = () => {
                 </Stack>
 
                 {/* TODO: implement window with max height 100px and scrolling, fontsize small but readdalle and coloring support understanf the. situation */}
-                <div style={{
-                    maxHeight: '100px',
-                    overflow: 'auto',
-                    fontSize: '12px',
-                    color: total_stuck_messages > 0 ? 'red' : 'black',
-                }}>
-                    <code>
-                        <pre>{JSON.stringify(redisQueueStatus, null, 2)}</pre>
-                    </code>
+                <div
+                    style={{
+                        maxHeight: '100px',
+                        overflow: 'auto',
+                        fontSize: '12px',
+                        padding: '4px 8px',
+                        borderRadius: 4,
+                        backgroundColor: '#f8f9fa',
+                    }}
+                >
+                    {activeMessages.length === 0 ? (
+                        <Text size="xs" c="dimmed">
+                            {t('scrapper.redis_queue_status.no_active_messages' as TranslationKey)}
+                        </Text>
+                    ) : (
+                        <Stack spacing={4}>
+                            {activeMessages.map((msg) => (
+                                <Group
+                                    key={msg.message_id}
+                                    position="apart"
+                                    spacing={4}
+                                    align="flex-start"
+                                >
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <Text size="xs" weight={500} lineClamp={1}>
+                                            {msg.actor}
+                                        </Text>
+                                        <Text size="xs" c="dimmed" lineClamp={1}>
+                                            id: {msg.message_id}
+                                        </Text>
+                                    </div>
+                                    <Stack spacing={2} align="flex-end">
+                                        <Badge
+                                            size="xs"
+                                            color={msg.is_stuck ? 'red' : 'green'}
+                                            variant="light"
+                                        >
+                                            {msg.is_stuck
+                                                ? t('scrapper.redis_queue_status.stuck' as TranslationKey)
+                                                : t('scrapper.redis_queue_status.processing' as TranslationKey)}
+                                        </Badge>
+                                        <Text size="xs" c="dimmed">
+                                            {msg.age_minutes}
+                                            {' '}
+                                            {t('scrapper.redis_queue_status.minutes' as TranslationKey)}
+                                        </Text>
+                                    </Stack>
+                                </Group>
+                            ))}
+                        </Stack>
+                    )}
                 </div>
             </Stack>
 

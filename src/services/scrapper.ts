@@ -6,6 +6,7 @@ import type { SocketService } from "./socketService";
 import { SCRAPPING_MARKETS_ENUM, type IParsedCarItem, type IQueueStatus, type ITaskProgress } from "../constants/scrapper";
 
 interface IRefreshScrapperItem {
+    taskId: string,
     user_id?: string,
     urls: string[],
     market?: SCRAPPING_MARKETS_ENUM | null
@@ -17,7 +18,7 @@ interface ITaskResponse {
     market: string;
     status: string;
     items_count: number;
-    items_without_phone: number;
+    itemsWithoutPhone: number;
     params: {
         year_from: number;
         year_to: number;
@@ -58,7 +59,11 @@ export const scrapperServices = {
             params: { user: userId }
         });
 
-        return res.data.tasks || [];
+        return res.data.tasks.map((task: any) => ({
+            ...task,
+            task_id: task.taskId,
+            market: task.market as SCRAPPING_MARKETS_ENUM
+        })) || [];
     },
     async getTaskDetails(taskId: string): Promise<any> {
         const res = await apiClientManager.getClient().get(`/progress/${taskId}`);
@@ -72,7 +77,8 @@ export const scrapperServices = {
         };
     },
     async refreshScrapperItemDetails(data: IRefreshScrapperItem): Promise<any> {
-        const res = await apiClientManager.getClient().post('/start/urls', { ...data });
+        console.log('Refreshing scrapper item details:', data);
+        const res = await apiClientManager.getClient().post('/tasks/' + data.taskId + '/reparse', { ...data });
 
         return res.data;
     },
@@ -147,10 +153,11 @@ export const scrapperServices = {
     },
 
     // Task Progress Socket methods
-    async connectToTaskProgress(baseUrl: string, taskId: string): Promise<boolean> {
+    async connectToTaskProgress(websocketUrl: string, taskId: string): Promise<boolean> {
         const socketService = getSocketService();
-        console.log('connectToTaskProgress', baseUrl, taskId);
-        return await socketService.connectToTaskProgress(baseUrl, taskId);
+        console.log('🔌 Connecting to task progress:', taskId);
+        console.log('   WebSocket URL:', websocketUrl);
+        return await socketService.connectToTaskProgress(websocketUrl, taskId);
     },
 
     disconnectTaskProgress(): void {

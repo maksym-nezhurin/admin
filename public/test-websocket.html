@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket Test</title>
+  <style>
+    body { 
+      font-family: monospace; 
+      padding: 20px; 
+      background: #1e1e1e; 
+      color: #d4d4d4;
+    }
+    .log { 
+      background: #2d2d2d; 
+      padding: 10px; 
+      margin: 5px 0; 
+      border-left: 3px solid #4CAF50;
+      border-radius: 4px;
+    }
+    .error { border-left-color: #f44336; }
+    .warning { border-left-color: #ff9800; }
+    button { 
+      padding: 10px 20px; 
+      margin: 5px; 
+      background: #4CAF50; 
+      color: white; 
+      border: none; 
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button:hover { background: #45a049; }
+    input { 
+      padding: 8px; 
+      width: 400px; 
+      margin: 5px;
+      background: #2d2d2d;
+      border: 1px solid #555;
+      color: #d4d4d4;
+      border-radius: 4px;
+    }
+    #logs { 
+      max-height: 500px; 
+      overflow-y: auto; 
+      margin-top: 20px;
+    }
+    .connected { color: #4CAF50; }
+    .disconnected { color: #f44336; }
+  </style>
+</head>
+<body>
+  <h2>🔌 Native WebSocket Test</h2>
+  
+  <div>
+    <label>Backend URL:</label><br>
+    <input type="text" id="backendUrl" value="http://localhost:8001" placeholder="http://localhost:8001">
+  </div>
+  
+  <div style="margin-top: 20px;">
+    <button onclick="testAPI()">1️⃣ Test API (Create Task)</button>
+    <button onclick="connectWS()">2️⃣ Connect WebSocket</button>
+    <button onclick="disconnect()">🔌 Disconnect</button>
+    <button onclick="clearLogs()">🗑️ Clear Logs</button>
+  </div>
+  
+  <div style="margin-top: 10px;">
+    <strong>Status: <span id="status" class="disconnected">Disconnected</span></strong>
+  </div>
+  
+  <div id="logs"></div>
+
+  <script>
+    let ws = null;
+    let taskId = null;
+    let websocketUrl = null;
+
+    function log(message, type = 'info') {
+      const logs = document.getElementById('logs');
+      const logDiv = document.createElement('div');
+      logDiv.className = 'log' + (type === 'error' ? ' error' : type === 'warning' ? ' warning' : '');
+      logDiv.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logs.appendChild(logDiv);
+      logs.scrollTop = logs.scrollHeight;
+      console.log(message);
+    }
+
+    function updateStatus(text, connected = false) {
+      const status = document.getElementById('status');
+      status.textContent = text;
+      status.className = connected ? 'connected' : 'disconnected';
+    }
+
+    async function testAPI() {
+      const backendUrl = document.getElementById('backendUrl').value;
+      log('📡 Testing API: POST /start/urls');
+      
+      try {
+        const response = await fetch(`${backendUrl}/start/urls`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: 'test-user',
+            urls: ['https://auto.ria.com/auto_kia_sportage_39453238.html'],
+            market: 'autoria'
+          })
+        });
+        
+        const data = await response.json();
+        log('✅ API Response:');
+        log(JSON.stringify(data, null, 2));
+        
+        taskId = data.task_id;
+        websocketUrl = data.websocket_url;
+        
+        if (websocketUrl) {
+          log(`✅ Got WebSocket URL: ${websocketUrl}`);
+          log('👉 Now click "2️⃣ Connect WebSocket"');
+        } else {
+          log('❌ No websocket_url in response!', 'error');
+        }
+      } catch (error) {
+        log(`❌ API Error: ${error.message}`, 'error');
+      }
+    }
+
+    function connectWS() {
+      if (!websocketUrl) {
+        log('❌ No WebSocket URL! Run step 1 first.', 'error');
+        return;
+      }
+
+      log(`🔌 Connecting to: ${websocketUrl}`);
+      updateStatus('Connecting...', false);
+
+      try {
+        ws = new WebSocket(websocketUrl);
+
+        ws.onopen = () => {
+          log('✅ WebSocket CONNECTED!');
+          updateStatus('Connected', true);
+        };
+
+        ws.onmessage = (event) => {
+          log('📨 Message received:');
+          const data = JSON.parse(event.data);
+          
+          switch (data.type) {
+            case 'connected':
+              log(`🟢 ${data.type}: ${data.message}`);
+              break;
+            case 'item:parsed':
+              log('🎯 ITEM PARSED!', 'warning');
+              log(`   📦 ${data.item.title || 'N/A'}`);
+              log(`   💰 Price: $${data.item.price || 'N/A'}`);
+              log(`   📞 Phone: ${data.item.phone || 'N/A'}`);
+              break;
+            case 'task:progress':
+              log(`📊 Progress: ${data.processed}/${data.total} (${data.percent}%)`, 'warning');
+              break;
+            case 'task:completed':
+              log(`✅ TASK COMPLETED! Items: ${data.itemsProcessed}`, 'warning');
+              break;
+            default:
+              log(JSON.stringify(data, null, 2));
+          }
+        };
+
+        ws.onerror = (error) => {
+          log(`❌ WebSocket ERROR: ${error}`, 'error');
+          updateStatus('Error', false);
+        };
+
+        ws.onclose = (event) => {
+          log(`🔌 WebSocket CLOSED: ${event.code} ${event.reason}`);
+          updateStatus('Disconnected', false);
+        };
+
+      } catch (error) {
+        log(`❌ Connection Error: ${error.message}`, 'error');
+        updateStatus('Error', false);
+      }
+    }
+
+    function disconnect() {
+      if (ws) {
+        ws.close();
+        log('🔌 Disconnecting...');
+      }
+    }
+
+    function clearLogs() {
+      document.getElementById('logs').innerHTML = '';
+    }
+
+    log('🚀 WebSocket Test Ready!');
+    log('👉 Step 1: Click "Test API" to create a task');
+    log('👉 Step 2: Click "Connect WebSocket" to connect');
+  </script>
+</body>
+</html>

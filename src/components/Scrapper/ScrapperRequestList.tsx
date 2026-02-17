@@ -45,14 +45,26 @@ export const ScrapperTaskList = () => {
             console.log('taskProgressEnabled', taskProgressEnabled); 
             // Try to connect to task progress socket first
             if (taskProgressEnabled) {
-                const currentClient = apiClientManager.getClient();
-                const baseUrl = currentClient.defaults.baseURL;
-                if (!baseUrl) {
-                    throw new Error('Base URL is not configured');
+                // First, fetch task details to get WebSocket URL
+                const taskDetails = await scrapperServices.getTaskDetails(taskId);
+                console.log('📦 Task details:', taskDetails);
+                
+                let websocket_url = taskDetails.websocket_url;
+                
+                if (!websocket_url) {
+                    console.warn('⚠️ No WebSocket URL in response, generating fallback');
+                    // Fallback: generate URL manually
+                    const currentClient = apiClientManager.getClient();
+                    let baseUrl = currentClient.defaults.baseURL || '';
+                    // Remove trailing slash from baseURL
+                    baseUrl = baseUrl.replace(/\/$/, '');
+                    websocket_url = baseUrl.replace(/^http/, 'ws') + `/progress/${taskId}/ws`;
+                    console.log('   Fallback URL:', websocket_url);
                 }
-                const socketConnected = await connectToTaskProgress(baseUrl, taskId);
+                
+                const socketConnected = await connectToTaskProgress(websocket_url, taskId);
                 if (socketConnected) {
-                    console.log('Connected to task progress socket for task:', taskId);
+                    console.log('✅ Connected to task progress socket for task:', taskId);
                     setRequests(requests.map(r => {
                         if (r.task_id === taskId) {
                             return { ...r, loading: false };
@@ -63,17 +75,17 @@ export const ScrapperTaskList = () => {
                 }
             } else {
                 const data = await scrapperServices.getTaskDetails(taskId);
-                const { processed, status, total, percent, actual_total, items_without_phone } = data;
+                const { processed, status, total, percent, actual_total, itemsWithoutPhone } = data;
 
                 setRequests(requests.map(r => {
                     if (r.task_id === taskId) {
-                        return { ...r, status, processed, total, percent, items_without_phone, actual_total, loading: false };
+                        return { ...r, status, processed, total, percent, itemsWithoutPhone, actual_total, loading: false };
                     }
                     return r;
                 }));
             }
         } catch (error) {
-            console.error('Failed to get task progress:', error);
+            console.error('❌ Failed to get task progress:', error);
             setRequests(requests.map(r => {
                 if (r.task_id === taskId) {
                     return { ...r, loading: false };
@@ -209,8 +221,9 @@ export const ScrapperTaskList = () => {
                 </thead>
                 <tbody>
                     {sortedRequests.map((request, index) => {
+                        console.log('request', request);
                         const isFinished = request.status === 'finished';
-                        const itemsWithoutPhone = request.items_without_phone && request.items_without_phone > 0;
+                        const itemsWithoutPhone = request.itemsWithoutPhone && request.itemsWithoutPhone > 0;
                         const taskStatus = getTaskProgressStatus(request.task_id);
 
                         return (
@@ -231,7 +244,7 @@ export const ScrapperTaskList = () => {
                                             {isFinished ? (!itemsWithoutPhone ? `🟢` : `🟠` ) : `🔴`}
                                         </span>
                                         <Text size="sm" weight={500}>
-                                            {isFinished && request.duration_seconds
+                                            {isFinished && request.duration_seconds != null
                                                 ? formatDuration(parseInt(String(request.duration_seconds), 10), (key: string) => t(key as any))
                                                 : request.status === 'enqueued' 
                                                     ? t('scrapper.in_queue') 
@@ -253,12 +266,12 @@ export const ScrapperTaskList = () => {
                                     <Text size="sm">{isFinished ? 100 : request.percent || 0}%</Text>
                                 </td>
                                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-                                    {request.items_count ? (
+                                    {request.items_count != null ? (
                                         <Text size="sm">
                                             {request.items_count} items
                                             {itemsWithoutPhone ? (
                                                 <Text c="orange" size="xs">
-                                                    ({request.items_without_phone} without phone)
+                                                    ({request.itemsWithoutPhone} without phone)
                                                 </Text>
                                             ) : null}
                                         </Text>
