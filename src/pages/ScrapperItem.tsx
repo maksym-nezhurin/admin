@@ -22,7 +22,6 @@ const ScrapperItemPage: React.FC = () => {
         market,
         taskProgressEnabled,
         connectToTaskProgress,
-        taskProgressSocketStatus,
         activeTaskProgressSubscriptions,
     } = useScrapper();
     const [scrapperItemDetails, setScrapperItemDetails] = useState<IParsedCarItem[]>([]);
@@ -35,7 +34,8 @@ const ScrapperItemPage: React.FC = () => {
         const refreshData = await scrapperServices.refreshScrapperItemDetails({
             user_id: userInfo?.id,
             urls: itemsWithoutPhone.map(item => item.url),
-            market: market || null, 
+            market: market || null,
+            taskId: id || '',
         });
 
         console.log('📦 Refresh response:', refreshData);

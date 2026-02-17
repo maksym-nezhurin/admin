@@ -38,7 +38,7 @@ interface TaskProgress {
  * ```
  */
 export function useTaskWebSocket(taskData: TaskData | null) {
-  const [items, setItems] = useState<ScrapedItem[]>([]);
+  const [items] = useState<ScrapedItem[]>([]);
   const [progress, setProgress] = useState<TaskProgress>({ processed: 0, total: 0, percent: 0 });
   const [status, setStatus] = useState<'idle' | 'running' | 'completed'>('idle');
 

@@ -713,7 +713,7 @@ export class SocketService {
     this.taskProgressWs.addEventListener('open', () => {
       console.log('✅ Task Progress WebSocket connected');
       console.log('   Task ID:', taskId);
-      console.log('   WebSocket URL:', websocketUrl);
+      console.log('   WebSocket URL:', this.lastWebsocketUrl);
       console.log('   Ready State:', this.taskProgressWs?.readyState);
       
       if (this.taskProgressConnectionTimeout) {
@@ -753,7 +753,7 @@ export class SocketService {
     this.taskProgressWs.addEventListener('error', (error) => {
       console.error('❌ Task Progress WebSocket error:', error);
       console.error('   Task ID:', taskId);
-      console.error('   WebSocket URL:', websocketUrl);
+      console.error('   WebSocket URL:', this.lastWebsocketUrl);
       
       if (this.taskProgressConnectionTimeout) {
         clearTimeout(this.taskProgressConnectionTimeout);

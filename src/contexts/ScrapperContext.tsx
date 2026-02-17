@@ -22,7 +22,7 @@ interface IRequest {
     total?: number;
     percent?: number;
     loading?: boolean;
-    items_without_phone?: number;
+    itemsWithoutPhone?: number;
     created_at?: string;
 }
 
@@ -315,7 +315,7 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
                       percent: taskDetails.percent, 
                       status: taskDetails.status,
                       actual_total: taskDetails.actual_total,
-                      items_without_phone: taskDetails.items_without_phone,
+                      itemsWithoutPhone: taskDetails.itemsWithoutPhone,
                       items_count: taskDetails.items_count,
                       duration_seconds: taskDetails.duration_seconds,
                       created_at: taskDetails.created_at || request.created_at

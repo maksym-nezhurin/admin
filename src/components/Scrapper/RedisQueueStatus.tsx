@@ -4,6 +4,7 @@ import { useScrapper } from "../../contexts/ScrapperContext";
 import { scrapperServices } from "../../services/scrapper";
 import type { IQueueStatus } from "../../constants/scrapper";
 import { useTypedTranslation } from "../../i18n";
+import type { TranslationKey } from "../../i18n";
 
 export const RedisQueueStatus = () => {
     const { t } = useTypedTranslation();
@@ -135,7 +136,7 @@ export const RedisQueueStatus = () => {
                 >
                     {activeMessages.length === 0 ? (
                         <Text size="xs" c="dimmed">
-                            {t('scrapper.redis_queue_status.no_active_messages')}
+                            {t('scrapper.redis_queue_status.no_active_messages' as TranslationKey)}
                         </Text>
                     ) : (
                         <Stack spacing={4}>
@@ -161,13 +162,13 @@ export const RedisQueueStatus = () => {
                                             variant="light"
                                         >
                                             {msg.is_stuck
-                                                ? t('scrapper.redis_queue_status.stuck')
-                                                : t('scrapper.redis_queue_status.processing')}
+                                                ? t('scrapper.redis_queue_status.stuck' as TranslationKey)
+                                                : t('scrapper.redis_queue_status.processing' as TranslationKey)}
                                         </Badge>
                                         <Text size="xs" c="dimmed">
                                             {msg.age_minutes}
                                             {' '}
-                                            {t('scrapper.redis_queue_status.minutes')}
+                                            {t('scrapper.redis_queue_status.minutes' as TranslationKey)}
                                         </Text>
                                     </Stack>
                                 </Group>

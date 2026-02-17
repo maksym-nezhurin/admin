@@ -6,6 +6,7 @@ import type { SocketService } from "./socketService";
 import { SCRAPPING_MARKETS_ENUM, type IParsedCarItem, type IQueueStatus, type ITaskProgress } from "../constants/scrapper";
 
 interface IRefreshScrapperItem {
+    taskId: string,
     user_id?: string,
     urls: string[],
     market?: SCRAPPING_MARKETS_ENUM | null
@@ -17,7 +18,7 @@ interface ITaskResponse {
     market: string;
     status: string;
     items_count: number;
-    items_without_phone: number;
+    itemsWithoutPhone: number;
     params: {
         year_from: number;
         year_to: number;
@@ -76,7 +77,8 @@ export const scrapperServices = {
         };
     },
     async refreshScrapperItemDetails(data: IRefreshScrapperItem): Promise<any> {
-        const res = await apiClientManager.getClient().post('/start/urls', { ...data });
+        console.log('Refreshing scrapper item details:', data);
+        const res = await apiClientManager.getClient().post('/tasks/' + data.taskId + '/reparse', { ...data });
 
         return res.data;
     },

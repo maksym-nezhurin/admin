@@ -4,7 +4,6 @@ import { useTypedTranslation } from '../i18n';
 
 import { ApiClientSwitcher } from '../components/ApiClient/ApiClientSwitcher';
 // import { ActiveUserSwitcher } from '../components/Scrapper/ActiveUserSwitcher';
-import { RedisQueueStatus } from '../components/Scrapper/RedisQueueStatus';
 import { ScrapperProvider } from "../contexts/ScrapperContext";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -22,7 +21,7 @@ const Layout: React.FC = () => {
 
                 {/* <ActiveUserSwitcher /> */}
 
-                <RedisQueueStatus />
+                {/* <RedisQueueStatus /> */}
             </Group>
 
             <Outlet />
