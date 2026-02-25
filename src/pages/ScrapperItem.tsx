@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTypedTranslation } from '../i18n';
+import type { TranslationKey } from '../i18n';
 
 import { Button, Group, Stack, Paper, Text, Title, Divider } from "@mantine/core";
 import { scrapperServices } from '../services/scrapper';
@@ -41,13 +42,13 @@ const ScrapperItemPage: React.FC = () => {
         return acc;
     }, { itemsWithoutPhone: [] as IParsedCarItem[], withActiveStatus: [] as IParsedCarItem[] });
     const activeAndWithoutPhone = scrapperItemDetails.length - (withActiveStatus.length + itemsWithoutPhone.length);
-
+console.log('activeAndWithoutPhone', scrapperItemDetails.length, withActiveStatus.length, itemsWithoutPhone.length);
     const onHanldeClick = async () => {
         const refreshData = await scrapperServices.refreshScrapperItemDetails({
-            user_id: userInfo?.id,
-            urls: itemsWithoutPhone.map(item => item.url),
+            userId: userInfo?.id,
+            urls: itemsWithoutPhone.map(item => item.status === 'active' ? item.url : null).filter(Boolean),
             market: market || null,
-            task_id: id || '',
+            taskId: id || '',
         });
 
         const { taskId: newTaskId, websocket_url: wsUrlFromApi } = refreshData;
@@ -61,10 +62,8 @@ const ScrapperItemPage: React.FC = () => {
             return baseUrl.replace(/^http/, 'ws') + `/progress/${newTaskId}/ws`;
         })();
 
-        console.log('websocketUrl', taskProgressEnabled && !activeTaskProgressSubscriptions.has(newTaskId));
         if (taskProgressEnabled && !activeTaskProgressSubscriptions.has(newTaskId)) {
             try {
-                console.log('attempt to connect to websocket', websocketUrl);
                 await connectToTaskProgress(websocketUrl, newTaskId);
             } catch {
                 setLoading(false);
@@ -99,14 +98,14 @@ const ScrapperItemPage: React.FC = () => {
                 </Group>
             </Stack>
 
-            <Paper p="md" shadow="xs" radius="md" withBorder>
+            <Paper p="md" shadow="xs" radius="md" withBorder style={{ marginBottom: '20px' }}>
                 <Title order={4} mb="sm">{t('scrapper.scrapper_items')}</Title>
                 <Stack spacing={6}>
                     <Text size="sm" c="dimmed">
                         {t('scrapper.total_items_count')} {loading ? t('scrapper.loading') : `${totalAmount} / ${totalEstimated}`}
                     </Text>
                     <Text size="sm" c="dimmed">
-                        {t('scrapper.items_without_phones', { count: itemsWithoutPhone.length })}
+                        {t('scrapper.items_without_phones' as TranslationKey, { count: itemsWithoutPhone.length })}
                     </Text>
                 </Stack>
                 <Divider my="md" />

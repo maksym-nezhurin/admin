@@ -1,6 +1,7 @@
 import { Button, Group, Paper, Switch, Badge, Alert, Text, Table } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { useTypedTranslation } from '../../i18n';
+import type { TranslationKey } from '../../i18n';
 import { scrapperServices } from "../../services/scrapper";
 import apiClientManager from "../../api/apiClientManager";
 import { formatDuration } from "../../utils/timeUtils";
@@ -9,8 +10,6 @@ import { useState, useMemo } from "react";
 import { useApiClient } from "../../contexts/ApiClientContext";
 import { useScrapper } from "../../contexts/ScrapperContext";
 import { Loader } from "../Loader";
-
-import type { IRequest } from "../../types/scrapper";
 
 export const ScrapperTaskList = () => {
     const { t } = useTypedTranslation();
@@ -103,10 +102,10 @@ export const ScrapperTaskList = () => {
     const sortedRequests = useMemo(() => {
         const sorted = [...requests];
         return sorted.sort((a, b) => {
-            let aValue: IRequest, bValue: IRequest;
-            
+            let aValue: Date | string | number;
+            let bValue: Date | string | number;
             switch (sortBy) {
-                case 'createdAt':
+                case 'created_at':
                     aValue = new Date(a.createdAt || 0);
                     bValue = new Date(b.createdAt || 0);
                     break;
@@ -121,14 +120,13 @@ export const ScrapperTaskList = () => {
                 default:
                     return 0;
             }
-            
             if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
             if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
             return 0;
         });
     }, [requests, sortBy, sortOrder]);
 
-    const handleSort = (field: 'createdAt' | 'status' | 'progress') => {
+    const handleSort = (field: 'created_at' | 'status' | 'progress') => {
         if (sortBy === field) {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {
@@ -178,7 +176,7 @@ export const ScrapperTaskList = () => {
                 <thead>
                     <tr>
                         <th 
-                            onClick={() => handleSort('createdAt')}
+                            onClick={() => handleSort('created_at')}
                             style={{ cursor: 'pointer', backgroundColor: '#f8f9fa', padding: '12px', fontWeight: 600 }}
                         >
                             {t('scrapper.created_at')} {sortBy === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
@@ -231,7 +229,7 @@ export const ScrapperTaskList = () => {
                                         </span>
                                         <Text size="sm" weight={500}>
                                             {isFinished && request.durationSec != null
-                                                ? formatDuration(request.durationSec, (key: string) => t(key))
+                                                ? formatDuration(request.durationSec, (key: string) => t(key as TranslationKey))
                                                 : request.status === 'enqueued' 
                                                     ? t('scrapper.in_queue') 
                                                     : request.status

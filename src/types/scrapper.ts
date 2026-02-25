@@ -17,10 +17,12 @@ export interface IRequest {
   completedAt?: string;
 }
 export interface IParsedCarItem {
-    title: string;
+    id?: string | number;
+    title?: string;
     price: string;
     phone: string;
     url: string;
+    status?: string;
 }
 
 export interface IResponse<T> {

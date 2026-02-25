@@ -34,12 +34,12 @@ const CustomFooter = (props: { total?: number; displayedCount?: number }) => {
   )
 }
 
-const renderStatus = (status: 'active' | 'archived' | 'sold') => {
+const renderStatus = (status: string) => {
   switch (status) {
     case 'active': return <Badge color="green">Active</Badge>;
     case 'archived': return <Badge color="red">Archived</Badge>;
     case 'sold': return <Badge color="blue">Sold</Badge>;
-    default: return <div>{status}</div>;
+    default: return <div>{status || '-'}</div>;
   }
 }
 
@@ -63,7 +63,7 @@ export const ScrapperTable = ({
             lockPinned: true,
             cellRenderer: (params: { data: IParsedCarItem; value: string }) => (
                 <Link to={params.data.url} target="_blank" rel="noopener noreferrer">
-                    {params.data.id.toString()}
+                    {(params.data.id ?? params.data.url).toString()}
                 </Link>
             ),
         },
@@ -85,7 +85,7 @@ export const ScrapperTable = ({
             field: 'title',
             cellRenderer: (params: { data: IParsedCarItem; value: string }) => (
                 <Link to={params.data.url} target="_blank" rel="noopener noreferrer">
-                    <span>{renderStatus(params.data.status)}</span>
+                    <span>{renderStatus(params.data.status ?? '')}</span>
                     <span style={{ marginLeft: '8px' }}>{params.value}</span>
                 </Link>
             ),

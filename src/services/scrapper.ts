@@ -4,13 +4,12 @@ import type { SocketService } from "./socketService";
 // import type { ICreateScrapperRequest, IRequestStatus } from "../types/scrapper";
 // import type { IEstimateResponse } from "../types/scrapper";
 import { SCRAPPING_MARKETS_ENUM, type IParsedCarItem, type IQueueStatus, type ITaskProgress } from "../constants/scrapper";
-
-interface IRefreshScrapperItem {
-    taskId: string,
-    userId?: string,
-    urls: string[],
-    market?: SCRAPPING_MARKETS_ENUM | null
-};
+export interface IRefreshScrapperItem {
+    taskId: string;
+    userId?: string;
+    urls: string[];
+    market?: SCRAPPING_MARKETS_ENUM | null;
+}
 
 interface ITaskResponse {
     taskId: string;
@@ -59,9 +58,13 @@ export const scrapperServices = {
             params: { user: userId }
         });
 
-        return res.data.tasks.map((task: IRequest) => ({
+        return res.data.tasks.map((task: Record<string, unknown>) => ({
             ...task,
-            taskId: task.taskId,
+            id: task.id ?? task.task_id ?? task.taskId,
+            taskId: task.task_id ?? task.taskId,
+            createdAt: task.created_at ?? task.createdAt,
+            itemsCount: task.items_count ?? task.itemsCount,
+            durationSec: task.duration_seconds ?? task.durationSec,
             market: task.market as SCRAPPING_MARKETS_ENUM
         })) || [];
     },
@@ -69,7 +72,7 @@ export const scrapperServices = {
         const res = await apiClientManager.getClient().get(`/progress/${taskId}`);
         return res.data;
     },
-    async getTaskDataItems(taskId: string): Promise<{items: IParsedCarItem[], total_estimate: number}> {
+    async getTaskDataItems(taskId: string): Promise<{items: IParsedCarItem[], total: number}> {
         const res = await apiClientManager.getClient().get(`/items/task/${taskId}`);
         return res.data || {
             items: [] as IParsedCarItem[],
@@ -77,8 +80,8 @@ export const scrapperServices = {
         };
     },
     async refreshScrapperItemDetails(data: IRefreshScrapperItem): Promise<any> {
-        const { task_id, ...rest } = data;
-        const res = await apiClientManager.getClient().post('/tasks/' + task_id + '/reparse', { ...rest });
+        const { taskId, ...rest } = data;
+        const res = await apiClientManager.getClient().post('/tasks/' + taskId + '/reparse', { ...rest });
 
         return res.data;
     },
