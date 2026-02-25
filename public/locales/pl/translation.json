@@ -169,6 +169,8 @@
     "please_wait": "Proszę czekać...",
     "scrapper_items": "Elementy skrapera",
     "total_items_count": "Łącznie elementów:",
+    "items_without_phones": "Elementów bez telefonów: {{count}}",
+    "active_and_without_phone_count": "Kłącznie elementów z aktywnym statusem i bez telefonu: {{count}}",
     "loading": "ładowanie...",
     "redis_queue_status": {
       "title": "Status kolejki Redis",
@@ -182,7 +184,6 @@
       "connect_socket": "Połącz Socket",
       "disconnect_socket": "Rozłącz Socket"
     },
-    "items_without_phones": "Elementy bez telefonów:",
     "refresh_items": "Odśwież elementy",
     "no_items_available": "Brak dostępnych elementów",
     "items_without_phone": "elementów bez telefonów",

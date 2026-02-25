@@ -17,6 +17,7 @@ interface ScrapedItem {
   url?: string;
   vin?: string;
   activeAds?: string;
+  status: 'active' | 'archived' | 'sold';
   totalAds?: string;
 }
 

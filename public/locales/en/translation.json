@@ -230,6 +230,8 @@
     "please_wait": "Please wait...",
     "scrapper_items": "Scrapper Items",
     "total_items_count": "Total Items:",
+    "items_without_phones": "Total items without phones: {{count}}",
+    "active_and_without_phone_count": "Total items with active status and without phone: {{count}}",
     "loading": "loading...",
     "redis_queue_status": {
       "title": "Redis Queue Status",

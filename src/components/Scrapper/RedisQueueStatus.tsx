@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Stack, Title, Text, Button, Group, Badge, Alert } from "@mantine/core";
 import { useScrapper } from "../../contexts/ScrapperContext";
 import { scrapperServices } from "../../services/scrapper";
@@ -33,7 +32,6 @@ export const RedisQueueStatus = () => {
 
     const activeMessages = redisQueueStatus?.active_messages || [];
 
-    console.log('redisQueueStatus', redisQueueStatus);
     // Get connection status indicator
     const getConnectionStatus = () => {
         switch (socketStatus) {
@@ -54,22 +52,12 @@ export const RedisQueueStatus = () => {
 
     // Handle manual socket connection
     const handleConnectSocket = async () => {
-        const connected = await connectSocket();
-        if (connected) {
-            console.log('✅ Socket connected manually');
-        } else {
-            console.log('❌ Manual socket connection failed');
-        }
+        await connectSocket();
     };
 
     const handleDisconnectSocket = () => {
         disconnectSocket();
-        console.log('🔌 Socket disconnected manually');
     };
-
-    useEffect(() => {
-        console.log('redisQueueStatus', redisQueueStatus);
-    }, [redisQueueStatus]);
 
     return (
         <Stack>

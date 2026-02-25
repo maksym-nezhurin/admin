@@ -7,30 +7,30 @@ import { SCRAPPING_MARKETS_ENUM, type IParsedCarItem, type IQueueStatus, type IT
 
 interface IRefreshScrapperItem {
     taskId: string,
-    user_id?: string,
+    userId?: string,
     urls: string[],
     market?: SCRAPPING_MARKETS_ENUM | null
 };
 
 interface ITaskResponse {
-    task_id: string;
-    user_id: string;
+    taskId: string;
+    userId: string;
     market: string;
     status: string;
-    items_count: number;
+    itemsCount: number;
     itemsWithoutPhone: number;
     params: {
-        year_from: number;
-        year_to: number;
-        price_from: number;
-        price_to: number;
-        mileage_from: number;
-        mileage_to: number;
+        yearFrom: number;
+        yearTo: number;
+        priceFrom: number;
+        priceTo: number;
+        mileageFrom: number;
+        mileageTo: number;
     },
-    created_at: string;
-    updated_at: string;
-    completed_at: string;
-    duration_seconds: number;
+    createdAt: string;
+    updatedAt: string;
+    completedAt: string;
+    durationSec: number;
 }
 
 interface IAdminTaskResponse {
@@ -39,7 +39,7 @@ interface IAdminTaskResponse {
     offset: number;
     limit: number;
     filters: {
-        user_id: string | null;
+        userId: string | null;
         status: string | null;
     },
     tasks: ITaskResponse[]
@@ -59,9 +59,9 @@ export const scrapperServices = {
             params: { user: userId }
         });
 
-        return res.data.tasks.map((task: any) => ({
+        return res.data.tasks.map((task: IRequest) => ({
             ...task,
-            task_id: task.taskId,
+            taskId: task.taskId,
             market: task.market as SCRAPPING_MARKETS_ENUM
         })) || [];
     },
@@ -73,12 +73,12 @@ export const scrapperServices = {
         const res = await apiClientManager.getClient().get(`/items/task/${taskId}`);
         return res.data || {
             items: [] as IParsedCarItem[],
-            total_estimate: 0,
+            total: 0,
         };
     },
     async refreshScrapperItemDetails(data: IRefreshScrapperItem): Promise<any> {
-        console.log('Refreshing scrapper item details:', data);
-        const res = await apiClientManager.getClient().post('/tasks/' + data.taskId + '/reparse', { ...data });
+        const { task_id, ...rest } = data;
+        const res = await apiClientManager.getClient().post('/tasks/' + task_id + '/reparse', { ...rest });
 
         return res.data;
     },
@@ -110,7 +110,7 @@ export const scrapperServices = {
     async restartScrappingTask(taskId: string, userId?: string): Promise<any> {
         const params: any = {};
         if (userId) {
-            params.user_id = userId;
+            params.userId = userId;
         }
         const res = await apiClientManager.getClient().post(`/admin/tasks/${taskId}/restart`, params);
         return res.data;
@@ -155,8 +155,6 @@ export const scrapperServices = {
     // Task Progress Socket methods
     async connectToTaskProgress(websocketUrl: string, taskId: string): Promise<boolean> {
         const socketService = getSocketService();
-        console.log('🔌 Connecting to task progress:', taskId);
-        console.log('   WebSocket URL:', websocketUrl);
         return await socketService.connectToTaskProgress(websocketUrl, taskId);
     },
 

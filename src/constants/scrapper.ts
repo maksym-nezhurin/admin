@@ -256,7 +256,7 @@ export interface IQueueStatus {
 }
 
 export interface ITaskProgress {
-  task_id: string;
+  taskId: string;
   total: number;
   processed: number;
   new: number;

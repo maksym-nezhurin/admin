@@ -168,6 +168,7 @@
     "please_wait": "Будь ласка, зачекайте...",
     "scrapper_items": "Елементи скреппера",
     "total_items_count": "Всього елементів:",
+    "active_and_without_phone_count": "Кількість елементів з активним статусом та без телефону: {{count}}",
     "loading": "завантаження...",
     "redis_queue_status": {
       "title": "Стан черги Redis",
@@ -181,7 +182,7 @@
       "connect_socket": "Підключити сокет",
       "disconnect_socket": "Відключити сокет"
     },
-    "items_without_phones": "Елементи без телефонів:",
+    "items_without_phones": "Елементів без телефонів: {{count}}",
     "refresh_items": "Оновити елементи",
     "no_items_available": "Немає доступних елементів",
     "items_without_phone": "елементів без телефонів",
