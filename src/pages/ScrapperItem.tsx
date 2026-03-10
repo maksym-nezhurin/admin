@@ -42,11 +42,12 @@ const ScrapperItemPage: React.FC = () => {
         return acc;
     }, { itemsWithoutPhone: [] as IParsedCarItem[], withActiveStatus: [] as IParsedCarItem[] });
     const activeAndWithoutPhone = scrapperItemDetails.length - (withActiveStatus.length + itemsWithoutPhone.length);
-console.log('activeAndWithoutPhone', scrapperItemDetails.length, withActiveStatus.length, itemsWithoutPhone.length);
     const onHanldeClick = async () => {
         const refreshData = await scrapperServices.refreshScrapperItemDetails({
             userId: userInfo?.id,
-            urls: itemsWithoutPhone.map(item => item.status === 'active' ? item.url : null).filter(Boolean),
+            urls: itemsWithoutPhone
+                .filter(item => item.status === 'active')
+                .map(item => item.url),
             market: market || null,
             taskId: id || '',
         });
@@ -111,7 +112,7 @@ console.log('activeAndWithoutPhone', scrapperItemDetails.length, withActiveStatu
                 <Divider my="md" />
                 <Group position="apart" align="center">
                     <Text size="sm">
-                        {t('scrapper.active_and_without_phone_count', { count: activeAndWithoutPhone })}
+                        {t('scrapper.active_and_without_phone_count' as TranslationKey)} {activeAndWithoutPhone}
                     </Text>
 
                     <Group spacing="xs">

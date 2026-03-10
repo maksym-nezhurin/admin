@@ -14,7 +14,7 @@ import { Loader } from "../Loader";
 export const ScrapperTaskList = () => {
     const { t } = useTypedTranslation();
     const { getXLSUrl } = useApiClient();
-    const [sortBy, setSortBy] = useState<'created_at' | 'status' | 'progress'>('created_at');
+    const [sortBy, setSortBy] = useState<'created_at' | 'status' | 'progress' | 'blocked'>('created_at');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const { 
         requests, 
@@ -117,6 +117,10 @@ export const ScrapperTaskList = () => {
                     aValue = a.percent || 0;
                     bValue = b.percent || 0;
                     break;
+                case 'blocked':
+                    aValue = a.status === 'blocked' ? 1 : 0;
+                    bValue = b.status === 'blocked' ? 1 : 0;
+                    break;
                 default:
                     return 0;
             }
@@ -125,8 +129,8 @@ export const ScrapperTaskList = () => {
             return 0;
         });
     }, [requests, sortBy, sortOrder]);
-
-    const handleSort = (field: 'created_at' | 'status' | 'progress') => {
+    console.log(sortedRequests, requests);
+    const handleSort = (field: 'created_at' | 'status' | 'progress' | 'blocked') => {
         if (sortBy === field) {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {
@@ -298,6 +302,14 @@ export const ScrapperTaskList = () => {
                                                 {t('scrapper.generate_xls')}
                                             </Button>
                                         </Link>
+
+                                        {
+                                            request.status === 'blocked' && (
+                                                <Button variant="outline" size="sm" onClick={() => scrapperServices.resumeScrappingTask(request.taskId).then(() => onCheckProgress(request.taskId))}>
+                                                    {t('scrapper.resume' as TranslationKey)}
+                                                </Button>
+                                            )
+                                        }
                                     </Group>
                                 </td>
                             </tr>

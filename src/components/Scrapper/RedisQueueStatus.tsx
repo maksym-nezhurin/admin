@@ -1,87 +1,103 @@
-import { Stack, Title, Text, Button, Group, Badge, Alert } from "@mantine/core";
+import { useState } from "react";
+import { Stack, Title, Text, Button, Group, Divider, Select } from "@mantine/core";
 import { useScrapper } from "../../contexts/ScrapperContext";
 import { scrapperServices } from "../../services/scrapper";
-import type { IQueueStatus } from "../../constants/scrapper";
+import type {
+    IQueueStatus,
+    IQueueSimpleStatus,
+    IWebsocketConnectionsStatus,
+    IQueueJob,
+    QueueJobStatus,
+} from "../../constants/scrapper";
 import { useTypedTranslation } from "../../i18n";
-import type { TranslationKey } from "../../i18n";
 
 export const RedisQueueStatus = () => {
     const { t } = useTypedTranslation();
-    
-    // Try to get scrapper context, handle if not available
-    let scrapperContext;
-    try {
-        scrapperContext = useScrapper();
-    } catch (error) {
-        console.error('❌ RedisQueueStatus: ScrapperProvider not found!', error);
-        return (
-            <Alert color="red" title="Error">
-                RedisQueueStatus must be used inside ScrapperProvider
-            </Alert>
-        );
-    }
-    
-    const { redisQueueStatus, fetchQueueStatus, socketStatus, connectSocket, disconnectSocket } = scrapperContext;
-    const { cleanQueueStuckedMessage } = scrapperServices;
-    
+    const [isActionLoading, setIsActionLoading] = useState(false);
+    const [queueSimpleStatus, setQueueSimpleStatus] = useState<IQueueSimpleStatus | null>(null);
+    const [websocketStatus, setWebsocketStatus] = useState<IWebsocketConnectionsStatus | null>(null);
+    const [queueJobs, setQueueJobs] = useState<IQueueJob[] | null>(null);
+    const [queueJobsStatus, setQueueJobsStatus] = useState<QueueJobStatus>('waiting');
+    // Hook must be called unconditionally
+    const scrapperContext = useScrapper();
+
+    // WebSocket-based Redis socket status (socketStatus/connectSocket/disconnectSocket)
+    // is not used in this UI section anymore; we rely on HTTP status instead.
+    const { redisQueueStatus, fetchQueueStatus } = scrapperContext;
     const {
-        total_stuck_messages,
-        active_workers,
-        total_active_messages,
-    } = redisQueueStatus || ({} as IQueueStatus);
+        pauseQueue,
+        resumeQueue,
+        cleanQueue,
+        getQueueSimpleStatus,
+        getWebsocketStatus,
+        getQueueJobs,
+    } = scrapperServices;
+    
+    const { total_stuck_messages } = redisQueueStatus || ({} as IQueueStatus);
 
-    const activeMessages = redisQueueStatus?.active_messages || [];
+    // Previous WebSocket-based connection status helpers are intentionally disabled:
+    // const connectionStatus = getConnectionStatus();
+    // const handleConnectSocket = async () => { await connectSocket(); };
+    // const handleDisconnectSocket = () => { disconnectSocket(); };
 
-    // Get connection status indicator
-    const getConnectionStatus = () => {
-        switch (socketStatus) {
-            case 'connected':
-                return { color: 'green', text: '🟢 Live', variant: 'light' as const };
-            case 'connecting':
-                return { color: 'yellow', text: '🟡 Connecting...', variant: 'light' as const };
-            case 'disconnected':
-                return { color: 'red', text: '🔴 Offline', variant: 'light' as const };
-            case 'fallback':
-                return { color: 'orange', text: '🟡 Polling', variant: 'light' as const };
-            default:
-                return { color: 'gray', text: '⚪ Unknown', variant: 'light' as const };
+    const handlePauseQueue = async () => {
+        setIsActionLoading(true);
+        try {
+            await pauseQueue();
+            await fetchQueueStatus();
+        } finally {
+            setIsActionLoading(false);
         }
     };
 
-    const connectionStatus = getConnectionStatus();
+    const handleResumeQueue = async () => {
+        setIsActionLoading(true);
 
-    // Handle manual socket connection
-    const handleConnectSocket = async () => {
-        await connectSocket();
+        try {
+            await resumeQueue();
+            await fetchQueueStatus();
+        } finally {
+            setIsActionLoading(false);
+        }
     };
 
-    const handleDisconnectSocket = () => {
-        disconnectSocket();
+    const handleCleanFailed = async () => {
+        setIsActionLoading(true);
+
+        try {
+            await cleanQueue({ status: 'failed', grace: 0, limit: 1000 });
+            await fetchQueueStatus();
+        } finally {
+            setIsActionLoading(false);
+        }
+    };
+
+    const handleLoadDetails = async () => {
+        setIsActionLoading(true);
+    
+        try {
+            const [queueData, wsData, jobsData] = await Promise.all([
+                getQueueSimpleStatus(),
+                getWebsocketStatus(),
+                getQueueJobs({ status: queueJobsStatus, limit: 20 }),
+            ]);
+            setQueueSimpleStatus(queueData);
+            setWebsocketStatus(wsData);
+            setQueueJobs(jobsData.jobs);
+        } finally {
+            setIsActionLoading(false);
+        }
     };
 
     return (
         <Stack>
             <Group position="apart" align="center">
                 <Title order={4}>{t('scrapper.redis_queue_status.title')}</Title>
-                <Badge 
-                    color={connectionStatus.color} 
-                    variant={connectionStatus.variant}
-                    size="sm"
-                >
-                    {connectionStatus.text}
-                </Badge>
             </Group>
 
-            {socketStatus === 'disconnected' && (
-                <Alert color="yellow" title="Socket Disconnected">
-                    <Text size="sm">
-                        Real-time updates are unavailable. Using HTTP polling for updates.
-                        You can try to reconnect manually or continue with polling mode.
-                    </Text>
-                </Alert>
-            )}
+            {/* WebSocket connection status badge + alert are disabled; HTTP-based metrics are shown below */}
 
-            <Stack spacing="xs"
+            {/* <Stack spacing="xs"
                 style={{
                     flexDirection: 'row',
                     justifyContent: 'space-between'
@@ -108,10 +124,9 @@ export const RedisQueueStatus = () => {
                         </Text>
                     )
                 }
-            </Text>
+                    </Text>
                 </Stack>
 
-                {/* TODO: implement window with max height 100px and scrolling, fontsize small but readdalle and coloring support understanf the. situation */}
                 <div
                     style={{
                         maxHeight: '100px',
@@ -164,26 +179,131 @@ export const RedisQueueStatus = () => {
                         </Stack>
                     )}
                 </div>
-            </Stack>
+            </Stack> */}
+
+            {(queueSimpleStatus || websocketStatus || queueJobs) && (
+                <>
+                    <Divider my="sm" />
+                    <Group align="flex-start" spacing="xl">
+                        {queueSimpleStatus && (
+                            <Stack spacing={4}>
+                                <Title order={6}>Queue counters</Title>
+                                <Text size="xs">Waiting: {queueSimpleStatus.waiting}</Text>
+                                <Text size="xs">Active: {queueSimpleStatus.active}</Text>
+                                <Text size="xs">Completed: {queueSimpleStatus.completed}</Text>
+                                <Text size="xs">Failed: {queueSimpleStatus.failed}</Text>
+                                <Text size="xs">Delayed: {queueSimpleStatus.delayed}</Text>
+                                <Text size="xs" c={queueSimpleStatus.paused > 0 ? 'red' : 'dimmed'}>
+                                    Paused: {queueSimpleStatus.paused}
+                                </Text>
+                            </Stack>
+                        )}
+
+                        {websocketStatus && (
+                            <Stack spacing={4}>
+                                <Title order={6}>WebSocket connections</Title>
+                                <Text size="xs">
+                                    Total connections: {websocketStatus.totalConnections}
+                                </Text>
+                                <Text size="xs">
+                                    Tasks with subscribers: {websocketStatus.tasks.length}
+                                </Text>
+                            </Stack>
+                        )}
+
+                        {(
+                            <Stack spacing={4} maw={360}>
+                                <Group spacing="xs" align="center">
+                                    <Title order={6}>Queue jobs</Title>
+                                    <Select
+                                        size="xs"
+                                        data={[
+                                            { value: 'waiting', label: 'waiting' },
+                                            { value: 'active', label: 'active' },
+                                            { value: 'completed', label: 'completed' },
+                                            { value: 'failed', label: 'failed' },
+                                            { value: 'delayed', label: 'delayed' },
+                                            { value: 'paused', label: 'paused' },
+                                        ]}
+                                        value={queueJobsStatus}
+                                        onChange={(value) => {
+                                            if (value) {
+                                                setQueueJobsStatus(value as QueueJobStatus);
+                                            }
+                                        }}
+                                    />
+                                </Group>
+                                {queueJobs && queueJobs.length > 0 && queueJobs.slice(0, 10).map((job) => (
+                                    <Stack key={job.id} spacing={2}>
+                                        <Text size="xs" fw={500}>
+                                            {job.name} · {job.state} · {job.id}
+                                        </Text>
+                                        <Text size="xs">
+                                            taskId: {job.data.taskId ?? '-'}
+                                        </Text>
+                                        {job.data.url && (
+                                            <Text size="xs" c="dimmed">
+                                                url: {job.data.url}
+                                            </Text>
+                                        )}
+                                        <Text size="xs" c="dimmed">
+                                            total: {job.data.total ?? '-'} / chunks: {job.data.totalChunks ?? '-'}
+                                        </Text>
+                                        <Text size="xs" c="dimmed">
+                                            created: {new Date(job.timestamp).toLocaleString()}
+                                        </Text>
+                                    </Stack>
+                                ))}
+                            </Stack>
+                        )}
+                    </Group>
+                </>
+            )}
 
             <Group variant="subtle">
-                <Button onClick={() => fetchQueueStatus()} disabled={socketStatus === 'connected'}>
+                {/* <Button onClick={() => fetchQueueStatus()} disabled={websocketStatus === 'connected'}>
                     {t('scrapper.redis_queue_status.refresh')}
                 </Button>
                 
-                {socketStatus === 'disconnected' || socketStatus === 'fallback' ? (
-                    <Button onClick={handleConnectSocket} color="green">
-                        Connect Socket
+                {websocketStatus === 'disconnected' || websocketStatus === 'fallback' ? (
+                    <Button onClick={handleConnectSocket} color="green" disabled={isActionLoading}>
+                        {t('scrapper.redis_queue_status.connect_socket')}
                     </Button>
                 ) : (
-                    <Button onClick={handleDisconnectSocket} color="red" variant="outline">
-                        Disconnect Socket
+                    <Button onClick={handleDisconnectSocket} color="red" variant="outline" disabled={isActionLoading}>
+                        {t('scrapper.redis_queue_status.disconnect_socket')}
                     </Button>
-                )}
-                
-                <Button 
-                    disabled={total_stuck_messages === 0} 
-                    onClick={() => cleanQueueStuckedMessage('test')}
+                )} */}
+
+                <Button
+                    variant="outline"
+                    color="yellow"
+                    disabled={isActionLoading}
+                    onClick={handlePauseQueue}
+                >
+                    Pause queue
+                </Button>
+
+                <Button
+                    variant="outline"
+                    color="green"
+                    disabled={isActionLoading}
+                    onClick={handleResumeQueue}
+                >
+                    Resume queue
+                </Button>
+
+                <Button
+                    variant="outline"
+                    disabled={isActionLoading}
+                    onClick={handleLoadDetails}
+                >
+                    Load details
+                </Button>
+
+                <Button
+                    disabled={total_stuck_messages === 0 || isActionLoading}
+                    onClick={handleCleanFailed}
                 >
                     {t('scrapper.redis_queue_status.clean_stucked')}
                 </Button>
