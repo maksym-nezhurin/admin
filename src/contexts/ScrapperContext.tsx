@@ -11,11 +11,11 @@ export interface IFilters {
   [key: string]: string | number | Array<string | number> | undefined;
 }
 
-interface IRequest {
+export interface IRequest {
     id: string;
-    task_id: string;
-    items_count?: number;
-    duration_seconds?: number;
+    taskId: string;
+    itemsCount?: number;
+    durationSec?: number;
     market?: SCRAPPING_MARKETS_ENUM | null;
     status: string;
     processed?: number;
@@ -23,7 +23,9 @@ interface IRequest {
     percent?: number;
     loading?: boolean;
     itemsWithoutPhone?: number;
-    created_at?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    completedAt?: string;
 }
 
 interface ScrapperContextType {
@@ -83,13 +85,6 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
   const [error, setError] = useState<string | undefined>();
   const [taskProgressEnabled, setTaskProgressEnabled] = useState(true);
   
-  // Debug: Log when component mounts
-  useEffect(() => {
-    console.log('🚀 ScrapperProvider mounted');
-    console.log('   taskProgressEnabled:', taskProgressEnabled);
-    console.log('   userId:', userId);
-  }, []);
-
   // Debounce refs to prevent rapid API calls
   const fetchRequestsRef = useRef<NodeJS.Timeout | null>(null);
   const fetchQueueStatusRef = useRef<NodeJS.Timeout | null>(null);
@@ -129,7 +124,6 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
   }, []);
 
   const fetchRequests = useCallback(async (userId: string) => {
-    console.log('fetchRequests', userId);
     if (!userId) return;
     
     // Clear existing timeout
@@ -153,8 +147,6 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
   }, [getMyRequests]);
 
   const fetchQueueStatus = useCallback(async () => {
-    console.log('fetchQueueStatus');
-    
     // Clear existing timeout
     if (fetchQueueStatusRef.current) {
       clearTimeout(fetchQueueStatusRef.current);
@@ -162,18 +154,10 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
     
     // Debounce the API call
     fetchQueueStatusRef.current = setTimeout(async () => {
-      // If socket is healthy, no need to fetch via HTTP
-      if (isSocketHealthy()) {
-        console.log('Socket is healthy, skipping HTTP fetch');
-        return;
-      }
-      
       try {
         const status = await getQueueStatus();
-        console.log('Queue status (HTTP fallback):', status);
         setRedisQueueStatus(status);
       } catch (err: Error | any) {
-        console.error('Failed to fetch queue status:', err);
         setError(err?.message ?? 'unknown');
       }
     }, 300); // 300ms debounce
@@ -186,14 +170,10 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
       const baseUrl = currentClient.defaults.baseURL;
       
       const connected = await connectSocket(baseUrl);
-      console.log('Socket connection result:', connected);
-      
       if (connected) {
         setSocketStatus('connected');
-        console.log('✅ Socket connected successfully');
       } else {
         setSocketStatus('disconnected');
-        console.log('❌ Socket connection failed');
       }
       return connected;
     } catch (error) {
@@ -206,13 +186,11 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
   const handleDisconnectSocket = useCallback(() => {
     disconnectSocket();
     setSocketStatus('disconnected');
-    console.log('🔌 Socket disconnected');
   }, []);
 
   // Task progress connection management
   const handleConnectTaskProgress = useCallback(async (taskId: string, websocketUrl?: string): Promise<boolean> => {
     if (!taskProgressEnabled) {
-      console.log('Task progress is disabled');
       return false;
     }
 
@@ -223,15 +201,11 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
 
     try {
       const connected = await connectToTaskProgress(websocketUrl, taskId);
-      console.log('Task progress socket connection result:', connected);
-      
       if (connected) {
         setTaskProgressSocketStatus('connected');
         setActiveTaskProgressSubscriptions(prev => new Set(prev).add(taskId));
-        console.log('✅ Task progress socket connected successfully');
       } else {
         setTaskProgressSocketStatus('disconnected');
-        console.log('❌ Task progress socket connection failed');
       }
       return connected;
     } catch (error) {
@@ -245,15 +219,10 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
     disconnectTaskProgress();
     setTaskProgressSocketStatus('disconnected');
     setActiveTaskProgressSubscriptions(new Set());
-    console.log('🔌 Task progress socket disconnected');
   }, []);
 
   // Initialize socket subscriptions
   useEffect(() => {
-    console.log('🔌 Socket subscriptions useEffect triggered');
-    console.log('   taskProgressEnabled:', taskProgressEnabled);
-    console.log('   userId:', userId);
-    
     let unsubscribeQueueStatus: (() => void) | null = null;
     let unsubscribeSocketStatus: (() => void) | null = null;
     let unsubscribeTaskProgress: (() => void) | null = null;
@@ -268,15 +237,15 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
       setRedisQueueStatus(data);
     });
 
+    // Initial fetch of queue status so workers/queue data is visible even before WebSocket
+    fetchQueueStatus();
+
     // Subscribe to task progress socket status changes
     const socketService = getSocketService();
     const unsubscribeTaskProgressStatus = socketService.subscribeToTaskProgressStatus((status) => {
-      console.log('📊 Task progress socket status changed:', status);
       if (status.connected) {
         setTaskProgressSocketStatus('connected');
-        // Refresh queue status and requests when WebSocket connects
         if (userId) {
-          console.log('🔄 Refreshing queue status and requests after WebSocket connection');
           fetchQueueStatus();
           fetchRequests(userId);
         }
@@ -289,25 +258,17 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
 
     // Subscribe to task progress updates ONLY if enabled
     if (taskProgressEnabled) {
-      console.log('✅ Task progress is ENABLED, subscribing to updates...');
-
       unsubscribeTaskProgress = subscribeToTaskProgress(async (data: ITaskProgress) => {
-        console.log('📈 Real-time task progress update:', data);
-        
-        // Check if task is finished or failed, and fetch final data
         if (data.status === 'finished' || data.status === 'failed') {
-          console.log('🔌 Task finished/failed, fetching final data for:', data.task_id);
-          
           // Remove from connected tasks tracking so it can be retried if needed
-          connectedTasksRef.current.delete(data.task_id);
+          connectedTasksRef.current.delete(data.taskId);
           
           // Fetch fresh task details to get accurate execution time and other final data
           try {
-            console.log('🔄 Fetching final task details for:', data.task_id);
-            const taskDetails = await scrapperServices.getTaskDetails(data.task_id);
+            const taskDetails = await scrapperServices.getTaskDetails(data.taskId);
             setRequests(prevRequests => 
               prevRequests.map(request => 
-                request.task_id === data.task_id 
+                request.taskId === data.taskId 
                   ? { 
                       ...request, 
                       processed: taskDetails.processed, 
@@ -318,22 +279,20 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
                       itemsWithoutPhone: taskDetails.itemsWithoutPhone,
                       items_count: taskDetails.items_count,
                       duration_seconds: taskDetails.duration_seconds,
-                      created_at: taskDetails.created_at || request.created_at
+                      createdAt: taskDetails.createdAt || request.createdAt
                     }
                   : request
               )
             );
-            console.log('✅ Updated final task details for:', data.task_id);
-          } catch (error) {
-            console.error('❌ Failed to fetch final task details:', error);
+          } catch {
+            // ignore
           }
         }
-        
+
         // Update the corresponding request in the requests array
         setRequests(prevRequests => {
           const updatedRequests = prevRequests.map(request => {
-            if (request.task_id === data.task_id) {
-              console.log('✅ Found matching request, updating...');
+            if (request.taskId === data.taskId) {
               return { 
                 ...request, 
                 processed: data.processed, 
@@ -356,13 +315,9 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
         //   }, 1000);
         // }
       });
-    } else {
-      console.log('❌ Task progress is DISABLED - not subscribing');
     }
 
-    // Cleanup
     return () => {
-      console.log('Cleaning up subscriptions...');
       if (unsubscribeQueueStatus) unsubscribeQueueStatus();
       if (unsubscribeSocketStatus) unsubscribeSocketStatus();
       if (unsubscribeTaskProgress) unsubscribeTaskProgress();
@@ -377,7 +332,6 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
   }, [handleDisconnectTaskProgress, taskProgressEnabled, userId]);
 
   useEffect(() => {
-    console.log('Fetching scrapper permissions and sources...');
     fetchPermissions();
   }, [fetchPermissions]);
 
@@ -417,30 +371,10 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
   }, []);
 
   // Auto-connect to task progress sockets for tasks that are in progress
-  // IMPORTANT: Only run when requests change, not on every activeSubscriptions change
   useEffect(() => {
-    console.log('🔧 Auto-connect effect triggered');
-    console.log('   taskProgressEnabled:', taskProgressEnabled);
-    console.log('   requests.length:', requests.length);
-    console.log('   activeSubscriptions.size:', activeTaskProgressSubscriptions.size);
-    
     if (!taskProgressEnabled) {
-      console.log('❌ Task progress disabled, skipping auto-connect');
       return;
     }
-    
-    console.log('✅ Task progress enabled, checking for in-progress tasks...');
-
-    // Log all requests and their statuses for debugging
-    const allStatuses = requests.map(r => ({ id: r.task_id, status: r.status }));
-    console.log('📋 All requests with statuses:', allStatuses);
-    
-    // Count tasks by status
-    const statusCounts = allStatuses.reduce<Record<string, number>>((acc, task) => {
-      acc[task.status] = (acc[task.status] || 0) + 1;
-      return acc;
-    }, {});
-    console.log('📊 Status counts:', statusCounts);
 
     // Use functional update to get current activeTaskProgressSubscriptions
     // This avoids needing it in dependencies
@@ -453,58 +387,32 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
     const inProgressTasks = requests.filter(request => 
       request.status !== 'finished' && 
       request.status !== 'failed' &&
-      !currentSubscriptions.has(request.task_id)
+      !currentSubscriptions.has(request.taskId)
     );
 
-    console.log('📊 Found in-progress tasks to connect:', inProgressTasks.length);
-    console.log('   Task IDs:', inProgressTasks.map(t => t.task_id));
-    console.log('   Task statuses:', inProgressTasks.map(t => ({ id: t.task_id, status: t.status })));
-    
     if (inProgressTasks.length === 0) {
-      console.log('ℹ️ No in-progress tasks found, nothing to connect');
       return;
     }
 
     inProgressTasks.forEach(async (request) => {
-      // Skip if already tried to connect to this task
-      if (connectedTasksRef.current.has(request.task_id)) {
-        console.log('⏭️ Already attempted connection for task:', request.task_id);
+      if (connectedTasksRef.current.has(request.taskId)) {
         return;
       }
-      
-      // Mark as attempted
-      connectedTasksRef.current.add(request.task_id);
-      
-      console.log('🔄 Auto-connecting to task progress for task:', request.task_id);
+      connectedTasksRef.current.add(request.taskId);
       try {
-        // Fetch task details to get WebSocket URL
-        const taskDetails = await scrapperServices.getTaskDetails(request.task_id);
-        console.log('📦 Task details:', taskDetails);
-        
+        const taskDetails = await scrapperServices.getTaskDetails(request.taskId);
         let websocket_url = taskDetails.websocket_url;
-        
         if (!websocket_url) {
-          console.warn('⚠️ No WebSocket URL in response, generating fallback');
-          // Fallback: generate URL manually
           const currentClient = apiClientManager.getClient();
-          let baseUrl = currentClient.defaults.baseURL || '';
-          // Remove trailing slash from baseURL
-          baseUrl = baseUrl.replace(/\/$/, '');
-          websocket_url = baseUrl.replace(/^http/, 'ws') + `/progress/${request.task_id}/ws`;
-          console.log('   Fallback URL:', websocket_url);
-        } else {
-          console.log('   WebSocket URL:', websocket_url);
+          const baseUrl = (currentClient.defaults.baseURL || '').replace(/\/$/, '');
+          websocket_url = baseUrl.replace(/^http/, 'ws') + `/progress/${request.taskId}/ws`;
         }
-        
-        const connected = await connectToTaskProgress(websocket_url, request.task_id);
-        
-        // Add to active subscriptions if connection was successful OR already connected
+        const connected = await connectToTaskProgress(websocket_url, request.taskId);
         if (connected) {
-          setActiveTaskProgressSubscriptions(prev => new Set(prev).add(request.task_id));
-          console.log('✅ Added task to active subscriptions:', request.task_id);
+          setActiveTaskProgressSubscriptions(prev => new Set(prev).add(request.taskId));
         }
-      } catch (error) {
-        console.error('❌ Failed to auto-connect to task progress:', error);
+      } catch {
+        // ignore
       }
     });
     
@@ -513,12 +421,6 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskProgressEnabled, connectToTaskProgress, requests]);
 
-  // Separate effect to handle requests changes without triggering connections
-  useEffect(() => {
-    // This effect runs when requests change but doesn't trigger new connections
-    // It only updates the active subscriptions tracking
-    console.log('📋 Requests updated, current count:', requests.length);
-  }, [requests]);
 
   const refresh = useCallback(async () => {
     await fetchPermissions();

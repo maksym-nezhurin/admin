@@ -234,6 +234,8 @@ export interface IParsedCarItem {
     updated_at: string,
 }
 
+export type QueueJobStatus = 'waiting' | 'active' | 'completed' | 'failed' | 'delayed' | 'paused' | 'blocked';
+
 export interface IQueueStatus {
   queue_size: number;
   active_workers: number;
@@ -255,8 +257,48 @@ export interface IQueueStatus {
   };
 }
 
+export interface IQueueSimpleStatus {
+  waiting: number;
+  active: number;
+  completed: number;
+  failed: number;
+  delayed: number;
+  paused: number;
+}
+
+export interface IWebsocketConnectionsStatus {
+  totalConnections: number;
+  tasks: {
+    taskId: string;
+    connections: number;
+  }[];
+}
+export interface IQueueJob {
+  id: string;
+  name: string;
+  state: QueueJobStatus;
+  attemptsMade: number;
+  timestamp: number;
+  processedOn: number | null;
+  finishedOn: number | null;
+  data: {
+    type?: string;
+    url?: string;
+    taskId?: string;
+    total?: number;
+    totalChunks?: number | null;
+    // Allow additional arbitrary fields
+    [key: string]: unknown;
+  };
+}
+
+export interface IQueueJobsResponse {
+  status: QueueJobStatus;
+  jobs: IQueueJob[];
+}
+
 export interface ITaskProgress {
-  task_id: string;
+  taskId: string;
   total: number;
   processed: number;
   new: number;

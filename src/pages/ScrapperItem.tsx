@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTypedTranslation } from '../i18n';
+import type { TranslationKey } from '../i18n';
 
-import { Button, Group, Stack } from "@mantine/core";
+import { Button, Group, Stack, Paper, Text, Title, Divider } from "@mantine/core";
 import { scrapperServices } from '../services/scrapper';
 import { useScrapper } from '../contexts/ScrapperContext';
 import type { IParsedCarItem } from '../types/scrapper';
@@ -28,53 +29,54 @@ const ScrapperItemPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [totalEstimated, setTotalEstimated] = useState<number>(0);
     const totalAmount = scrapperItemDetails.length;
-    const itemsWithoutPhone = scrapperItemDetails.filter((item: IParsedCarItem) => !item.phone);
-
+    const {
+        itemsWithoutPhone,
+        withActiveStatus,
+    } = scrapperItemDetails.reduce((acc, item) => {
+        if (!item.phone) {
+            acc.itemsWithoutPhone = [...acc.itemsWithoutPhone, item];
+        }
+        if (item.status === 'active') {
+            acc.withActiveStatus = [...acc.withActiveStatus, item];
+        }
+        return acc;
+    }, { itemsWithoutPhone: [] as IParsedCarItem[], withActiveStatus: [] as IParsedCarItem[] });
+    const activeAndWithoutPhone = scrapperItemDetails.length - (withActiveStatus.length + itemsWithoutPhone.length);
     const onHanldeClick = async () => {
         const refreshData = await scrapperServices.refreshScrapperItemDetails({
-            user_id: userInfo?.id,
-            urls: itemsWithoutPhone.map(item => item.url),
+            userId: userInfo?.id,
+            urls: itemsWithoutPhone
+                .filter(item => item.status === 'active')
+                .map(item => item.url),
             market: market || null,
             taskId: id || '',
         });
 
-        console.log('📦 Refresh response:', refreshData);
-        
-        let { task_id: newTaskId, websocket_url } = refreshData;
+        const { taskId: newTaskId, websocket_url: wsUrlFromApi } = refreshData;
 
         if (!newTaskId) {
             return;
         }
 
-        console.log('🔄 Refreshing items for task:', newTaskId);
+        const websocketUrl = wsUrlFromApi || (() => {
+            const baseUrl = (apiClientManager.getClient().defaults.baseURL || '').replace(/\/$/, '');
+            return baseUrl.replace(/^http/, 'ws') + `/progress/${newTaskId}/ws`;
+        })();
 
-        // Generate fallback URL if not provided
-        if (!websocket_url) {
-            console.warn('⚠️ No WebSocket URL in refresh response, generating fallback');
-            const currentClient = apiClientManager.getClient();
-            let baseUrl = currentClient.defaults.baseURL || '';
-            // Remove trailing slash from baseURL
-            baseUrl = baseUrl.replace(/\/$/, '');
-            websocket_url = baseUrl.replace(/^http/, 'ws') + `/progress/${newTaskId}/ws`;
-            console.log('   Fallback URL:', websocket_url);
-        }
-
-        // Якщо реальний час увімкнено і підписки ще немає, спробувати підключитися до прогресу задачі через WebSocket
         if (taskProgressEnabled && !activeTaskProgressSubscriptions.has(newTaskId)) {
             try {
-                console.log('🚀 Connecting to WebSocket for refresh task:', newTaskId);
-                console.log('   WebSocket URL:', websocket_url);
-                await connectToTaskProgress(websocket_url, newTaskId);
-            } catch (error) {
-                console.error('❌ Failed to connect to task progress socket from ScrapperItemPage:', error);
+                await connectToTaskProgress(websocketUrl, newTaskId);
+            } catch {
+                setLoading(false);
             }
         }
     }
     const getScrapperItemDetails = async (itemId: string) => {
-        const { total_estimate, items } = await scrapperServices.getTaskDataItems(itemId);
+        const { total, items } = await scrapperServices.getTaskDataItems(itemId);
 
         setScrapperItemDetails(items);
-        setTotalEstimated(total_estimate);
+
+        setTotalEstimated(total);
         setLoading(false);
     };
 
@@ -82,8 +84,7 @@ const ScrapperItemPage: React.FC = () => {
         setLoading(true);
         try {
             getScrapperItemDetails(id || '');
-        } catch(error) {
-            console.log(error);
+        } catch {
             setLoading(false);
         }
     }, [id]);
@@ -96,30 +97,42 @@ const ScrapperItemPage: React.FC = () => {
 
                     <Button onClick={() => navigate('/dashboard/scrapper')}>{t('scrapper.back_to_scrapper')}</Button>
                 </Group>
-                
-
-                <Group spacing="xs" mt={8}>
-                    {
-                        loading ? t('scrapper.please_wait') : (
-                            <Link to={getXLSUrl(id || '')} download={true}>{t('scrapper.generate_xls')}</Link>
-                        )
-                    }
-                </Group>
             </Stack>
 
-            <div>
-                <h4>{t('scrapper.scrapper_items')}</h4>
-                <p>{t('scrapper.total_items_count')} {loading ? t('scrapper.loading') : totalAmount + '/' + totalEstimated}</p>
+            <Paper p="md" shadow="xs" radius="md" withBorder style={{ marginBottom: '20px' }}>
+                <Title order={4} mb="sm">{t('scrapper.scrapper_items')}</Title>
+                <Stack spacing={6}>
+                    <Text size="sm" c="dimmed">
+                        {t('scrapper.total_items_count')} {loading ? t('scrapper.loading') : `${totalAmount} / ${totalEstimated}`}
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                        {t('scrapper.items_without_phones' as TranslationKey, { count: itemsWithoutPhone.length })}
+                    </Text>
+                </Stack>
+                <Divider my="md" />
+                <Group position="apart" align="center">
+                    <Text size="sm">
+                        {t('scrapper.active_and_without_phone_count' as TranslationKey)} {activeAndWithoutPhone}
+                    </Text>
 
-                <Group spacing="xl" mt={8}>
-                    <div>
-                        <p>{t('scrapper.items_without_phone')} {loading ? t('scrapper.loading') : itemsWithoutPhone.length}</p>
-                    </div>
-                    <div>
-                        <Button onClick={onHanldeClick} disabled={itemsWithoutPhone.length === 0}>{t('scrapper.refresh_items')}</Button>
-                    </div>
+                    <Group spacing="xs">
+                        <Button
+                            size="sm"
+                            onClick={onHanldeClick}
+                            disabled={itemsWithoutPhone.length === 0 || activeAndWithoutPhone === 0}
+                        >
+                            {t('scrapper.refresh_items')}
+                        </Button>
+
+                        {
+                            loading ? t('scrapper.please_wait') : (
+                                <Link to={getXLSUrl(id || '')} download={true}>{t('scrapper.generate_xls')}</Link>
+                            )
+                        }
+                    </Group>
+                    
                 </Group>
-            </div>
+            </Paper>
 
             <div>
                 {

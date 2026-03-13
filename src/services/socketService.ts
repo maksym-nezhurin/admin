@@ -811,7 +811,7 @@ export class SocketService {
             
             // Convert new API format to old format for compatibility
             const progressData: ITaskProgress = {
-              task_id: data.taskId,
+              taskId: data.taskId,
               total: data.total || 0,
               processed: data.processed || 0,
               new: 0,
@@ -828,7 +828,7 @@ export class SocketService {
             console.log(`📊 Progress: ${data.processed}/${data.total} (${data.percent}%)`);
             
             const taskProgress: ITaskProgress = {
-              task_id: data.taskId,
+              taskId: data.taskId,
               total: data.total,
               processed: data.processed,
               new: 0,
@@ -847,7 +847,7 @@ export class SocketService {
             console.log(`   Items processed: ${data.itemsProcessed}`);
             
             const completedProgress: ITaskProgress = {
-              task_id: data.taskId,
+              taskId: data.taskId,
               total: data.itemsProcessed,
               processed: data.itemsProcessed,
               new: 0,

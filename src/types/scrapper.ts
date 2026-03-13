@@ -1,18 +1,28 @@
+import { SCRAPPING_MARKETS_ENUM } from "../constants/scrapper";
+
 export interface IRequest {
   id: string;
+  taskId: string;
+  itemsCount?: number;
+  durationSec?: number;
+  market?: SCRAPPING_MARKETS_ENUM | null;
   status: string;
-  task_id: string;
-  duration_seconds?: number;
-  market?: string;
-  items_count?: number;
+  processed?: number;
+  total?: number;
+  percent?: number;
   loading?: boolean;
+  itemsWithoutPhone?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  completedAt?: string;
 }
-
 export interface IParsedCarItem {
-    title: string;
+    id?: string | number;
+    title?: string;
     price: string;
     phone: string;
     url: string;
+    status?: string;
 }
 
 export interface IResponse<T> {
@@ -31,16 +41,3 @@ export interface IRequestStatus {
     percent?: number;
     loading?: boolean;
 }
-
-export const SCRAPPING_SOURCES_ENUM = {
-  AUTOBazar: 'autobazar',
-  AUTORIA: 'autoria',
-} as const;
-
-export const SCRAPPING_MARKETS_ENUM = {
-  SLOVAKIA: 'SK',
-  UKRAINE: 'UA',
-} as const;
-
-export type SCRAPPING_MARKETS_ENUM = (typeof SCRAPPING_MARKETS_ENUM)[keyof typeof SCRAPPING_MARKETS_ENUM];
-

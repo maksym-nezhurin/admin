@@ -1,6 +1,7 @@
 import { Button, Group, Paper, Switch, Badge, Alert, Text, Table } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { useTypedTranslation } from '../../i18n';
+import type { TranslationKey } from '../../i18n';
 import { scrapperServices } from "../../services/scrapper";
 import apiClientManager from "../../api/apiClientManager";
 import { formatDuration } from "../../utils/timeUtils";
@@ -13,16 +14,16 @@ import { Loader } from "../Loader";
 export const ScrapperTaskList = () => {
     const { t } = useTypedTranslation();
     const { getXLSUrl } = useApiClient();
-    const [sortBy, setSortBy] = useState<'created_at' | 'status' | 'progress'>('created_at');
+    const [sortBy, setSortBy] = useState<'created_at' | 'status' | 'progress' | 'blocked'>('created_at');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const { 
         requests, 
         setRequests, 
         loading, 
         taskProgressEnabled,
-        setTaskProgressEnabled,
+        // setTaskProgressEnabled,
         connectToTaskProgress,
-        disconnectTaskProgress,
+        // disconnectTaskProgress,
         taskProgressSocketStatus,
         activeTaskProgressSubscriptions
     } = useScrapper();
@@ -30,7 +31,6 @@ export const ScrapperTaskList = () => {
     const onCheckProgress = async (taskId: string) => {
         // If task progress is enabled and socket is connected, don't make HTTP request
         if (taskProgressEnabled && taskProgressSocketStatus === 'connected' && activeTaskProgressSubscriptions.has(taskId)) {
-            console.log('Task progress is already being tracked via socket for task:', taskId);
             return;
         }
 
@@ -42,31 +42,18 @@ export const ScrapperTaskList = () => {
         }));
 
         try {
-            console.log('taskProgressEnabled', taskProgressEnabled); 
-            // Try to connect to task progress socket first
             if (taskProgressEnabled) {
-                // First, fetch task details to get WebSocket URL
                 const taskDetails = await scrapperServices.getTaskDetails(taskId);
-                console.log('📦 Task details:', taskDetails);
-                
                 let websocket_url = taskDetails.websocket_url;
-                
                 if (!websocket_url) {
-                    console.warn('⚠️ No WebSocket URL in response, generating fallback');
-                    // Fallback: generate URL manually
                     const currentClient = apiClientManager.getClient();
-                    let baseUrl = currentClient.defaults.baseURL || '';
-                    // Remove trailing slash from baseURL
-                    baseUrl = baseUrl.replace(/\/$/, '');
+                    const baseUrl = (currentClient.defaults.baseURL || '').replace(/\/$/, '');
                     websocket_url = baseUrl.replace(/^http/, 'ws') + `/progress/${taskId}/ws`;
-                    console.log('   Fallback URL:', websocket_url);
                 }
-                
                 const socketConnected = await connectToTaskProgress(websocket_url, taskId);
                 if (socketConnected) {
-                    console.log('✅ Connected to task progress socket for task:', taskId);
                     setRequests(requests.map(r => {
-                        if (r.task_id === taskId) {
+                        if (r.taskId === taskId) {
                             return { ...r, loading: false };
                         }
                         return r;
@@ -78,16 +65,15 @@ export const ScrapperTaskList = () => {
                 const { processed, status, total, percent, actual_total, itemsWithoutPhone } = data;
 
                 setRequests(requests.map(r => {
-                    if (r.task_id === taskId) {
+                    if (r.taskId === taskId) {
                         return { ...r, status, processed, total, percent, itemsWithoutPhone, actual_total, loading: false };
                     }
                     return r;
                 }));
             }
-        } catch (error) {
-            console.error('❌ Failed to get task progress:', error);
+        } catch {
             setRequests(requests.map(r => {
-                if (r.task_id === taskId) {
+                if (r.taskId === taskId) {
                     return { ...r, loading: false };
                 }
                 return r;
@@ -116,12 +102,12 @@ export const ScrapperTaskList = () => {
     const sortedRequests = useMemo(() => {
         const sorted = [...requests];
         return sorted.sort((a, b) => {
-            let aValue: any, bValue: any;
-            
+            let aValue: Date | string | number;
+            let bValue: Date | string | number;
             switch (sortBy) {
                 case 'created_at':
-                    aValue = new Date(a.created_at || 0);
-                    bValue = new Date(b.created_at || 0);
+                    aValue = new Date(a.createdAt || 0);
+                    bValue = new Date(b.createdAt || 0);
                     break;
                 case 'status':
                     aValue = a.status || '';
@@ -131,17 +117,20 @@ export const ScrapperTaskList = () => {
                     aValue = a.percent || 0;
                     bValue = b.percent || 0;
                     break;
+                case 'blocked':
+                    aValue = a.status === 'blocked' ? 1 : 0;
+                    bValue = b.status === 'blocked' ? 1 : 0;
+                    break;
                 default:
                     return 0;
             }
-            
             if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
             if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
             return 0;
         });
     }, [requests, sortBy, sortOrder]);
-
-    const handleSort = (field: 'created_at' | 'status' | 'progress') => {
+    console.log(sortedRequests, requests);
+    const handleSort = (field: 'created_at' | 'status' | 'progress' | 'blocked') => {
         if (sortBy === field) {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {
@@ -157,13 +146,13 @@ export const ScrapperTaskList = () => {
                 <Switch
                     label={t('scrapper.real_time_progress')}
                     checked={taskProgressEnabled}
-                    onChange={(event) => {
-                        const enabled = event.currentTarget.checked;
-                        setTaskProgressEnabled(enabled);
-                        if (!enabled) {
-                            disconnectTaskProgress();
-                        }
-                    }}
+                    // onChange={(event) => {
+                    //     const enabled = event.currentTarget.checked;
+                    //     setTaskProgressEnabled(enabled);
+                    //     if (!enabled) {
+                    //         disconnectTaskProgress();
+                    //     }
+                    // }}
                     size="sm"
                 />
                 <Badge 
@@ -221,17 +210,16 @@ export const ScrapperTaskList = () => {
                 </thead>
                 <tbody>
                     {sortedRequests.map((request, index) => {
-                        console.log('request', request);
                         const isFinished = request.status === 'finished';
                         const itemsWithoutPhone = request.itemsWithoutPhone && request.itemsWithoutPhone > 0;
-                        const taskStatus = getTaskProgressStatus(request.task_id);
+                        const taskStatus = getTaskProgressStatus(request.taskId);
 
                         return (
                             <tr key={index}>
                                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
                                     <Text size="sm">
                                         {(() => {
-                                            const date = new Date(request.created_at || '');
+                                            const date = new Date(request.createdAt || '');
                                             return isNaN(date.getTime()) 
                                                 ? new Date().toLocaleString() 
                                                 : date.toLocaleString();
@@ -244,8 +232,8 @@ export const ScrapperTaskList = () => {
                                             {isFinished ? (!itemsWithoutPhone ? `🟢` : `🟠` ) : `🔴`}
                                         </span>
                                         <Text size="sm" weight={500}>
-                                            {isFinished && request.duration_seconds != null
-                                                ? formatDuration(parseInt(String(request.duration_seconds), 10), (key: string) => t(key as any))
+                                            {isFinished && request.durationSec != null
+                                                ? formatDuration(request.durationSec, (key: string) => t(key as TranslationKey))
                                                 : request.status === 'enqueued' 
                                                     ? t('scrapper.in_queue') 
                                                     : request.status
@@ -266,9 +254,9 @@ export const ScrapperTaskList = () => {
                                     <Text size="sm">{isFinished ? 100 : request.percent || 0}%</Text>
                                 </td>
                                 <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
-                                    {request.items_count != null ? (
+                                    {request.itemsCount != null ? (
                                         <Text size="sm">
-                                            {request.items_count} items
+                                            {request.itemsCount} items
                                             {itemsWithoutPhone ? (
                                                 <Text c="orange" size="xs">
                                                     ({request.itemsWithoutPhone} without phone)
@@ -283,16 +271,16 @@ export const ScrapperTaskList = () => {
                                     <Group spacing="xs">
                                          {!isFinished ? (
                                             <Button 
-                                                onClick={() => onCheckProgress(request.task_id)} 
+                                                onClick={() => onCheckProgress(request.taskId)} 
                                                 loading={request.loading} 
                                                 disabled={
                                                     isFinished || 
                                                     request.loading || 
-                                                    (taskProgressEnabled && activeTaskProgressSubscriptions.has(request.task_id))
+                                                    (taskProgressEnabled && activeTaskProgressSubscriptions.has(request.taskId))
                                                 }
                                                 size="sm"
                                             >
-                                                {taskProgressEnabled && activeTaskProgressSubscriptions.has(request.task_id) ? <>
+                                                {taskProgressEnabled && activeTaskProgressSubscriptions.has(request.taskId) ? <>
                                                     {t('scrapper.tracking_live')} {' '}
                                                     <Badge 
                                                         color={taskStatus.color} 
@@ -304,16 +292,24 @@ export const ScrapperTaskList = () => {
                                                 </> : t('scrapper.view_progress')}
                                             </Button>
                                         ) : null}
-                                        <Link to={`task/${request.task_id}`} download={true}>
+                                        <Link to={`task/${request.taskId}`} download={true}>
                                             <Button variant="outline" size="sm">
                                                 {t('scrapper.details')}
                                             </Button>
                                         </Link>
-                                        <Link to={getXLSUrl(request.task_id)} download={true}>
+                                        <Link to={getXLSUrl(request.taskId)} download={true}>
                                             <Button variant="outline" size="sm">
                                                 {t('scrapper.generate_xls')}
                                             </Button>
                                         </Link>
+
+                                        {
+                                            request.status === 'blocked' && (
+                                                <Button variant="outline" size="sm" onClick={() => scrapperServices.resumeScrappingTask(request.taskId).then(() => onCheckProgress(request.taskId))}>
+                                                    {t('scrapper.resume' as TranslationKey)}
+                                                </Button>
+                                            )
+                                        }
                                     </Group>
                                 </td>
                             </tr>

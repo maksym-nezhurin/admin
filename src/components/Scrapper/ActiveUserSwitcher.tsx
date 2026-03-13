@@ -26,10 +26,10 @@ export const ActiveUserSwitcher = () => {
             // Create a map of user IDs to their task IDs
             const usersMap: Record<string, string[]> = {};
             tasks.forEach((task: any) => {
-                if (!usersMap[task.user_id]) {
-                    usersMap[task.user_id] = [];
+                if (!usersMap[task.userId]) {
+                    usersMap[task.userId] = [];
                 }
-                usersMap[task.user_id].push(task.task_id);
+                usersMap[task.userId].push(task.taskId);
             });
             
             setUsersTasksMap(usersMap);

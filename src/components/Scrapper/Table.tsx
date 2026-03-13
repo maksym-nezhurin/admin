@@ -10,6 +10,8 @@ import type {
 //   ModelUpdatedEvent,
 //   FirstDataRenderedEvent
 } from 'ag-grid-community';
+import { format } from 'date-fns';
+import { Badge } from '@mantine/core';
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
@@ -32,6 +34,15 @@ const CustomFooter = (props: { total?: number; displayedCount?: number }) => {
   )
 }
 
+const renderStatus = (status: string) => {
+  switch (status) {
+    case 'active': return <Badge color="green">Active</Badge>;
+    case 'archived': return <Badge color="red">Archived</Badge>;
+    case 'sold': return <Badge color="blue">Sold</Badge>;
+    default: return <div>{status || '-'}</div>;
+  }
+}
+
 export const ScrapperTable = ({
     rowData = [],
 }: ScrapperTableProps) => {
@@ -41,34 +52,53 @@ export const ScrapperTable = ({
 
     const columnDefs: ColDef[] = [
         {
+            field: 'id',
+            filter: 'agNumberColumnFilter',
+            headerName: 'ID',
+            width: 100,
+            sortable: true,
+            // filter: true,
+            // resizable: true,
+            pinned: 'left',
+            lockPinned: true,
+            cellRenderer: (params: { data: IParsedCarItem; value: string }) => (
+                <Link to={params.data.url} target="_blank" rel="noopener noreferrer">
+                    {(params.data.id ?? params.data.url).toString()}
+                </Link>
+            ),
+        },
+        { 
+            field: 'phone',
+            filter: 'agTextColumnFilter',
+            headerName: 'Phone',
+            width: 170,
+            sortable: true,
+            // filter: true,
+            // resizable: true,
+            pinned: 'left',
+            lockPinned: true,
+            cellRenderer: (params: { data: IParsedCarItem; value: string }) => (
+                <span>{params.value}</span>
+            ),
+        },
+        {
             field: 'title',
             cellRenderer: (params: { data: IParsedCarItem; value: string }) => (
                 <Link to={params.data.url} target="_blank" rel="noopener noreferrer">
-                {params.value}
+                    <span>{renderStatus(params.data.status ?? '')}</span>
+                    <span style={{ marginLeft: '8px' }}>{params.value}</span>
                 </Link>
             ),
-            checkboxSelection: true
-        },
-        { 
-            field: 'price',
-            filter: 'agNumberColumnFilter'
-        },
-        { 
-            field: 'mileage',
-            filter: 'agNumberColumnFilter'
-        },
-        { 
-            field: 'phone' 
-        },
-        { 
-            field: 'year',
-            filter: 'agNumberColumnFilter'
-        },
-        { 
-            field: 'registrationNumber' 
         },
         {
             field: 'vin',
+        },
+        {
+            field: 'createdAt',
+            cellRenderer: (params: { data: IParsedCarItem; value: string }) => (
+                <span>{format(new Date(params.value), 'dd.MM.yyyy HH:mm')}</span>
+            ),
+            filter: 'agDateColumnFilter'
         },
         {
             field: 'sellerName',
