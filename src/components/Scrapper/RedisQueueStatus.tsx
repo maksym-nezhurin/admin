@@ -191,7 +191,7 @@ export const RedisQueueStatus = () => {
                         }}
                     >
                         {hasLoadedDetails ? (
-                            <Group align="flex-start" spacing="xl" wrap="wrap">
+                            <Group align="flex-start" spacing="xl" sx={{ flexWrap: "wrap" }}>
                                 {queueSimpleStatus && (
                                     <Stack spacing={4}>
                                         <Title order={6}>

@@ -8,7 +8,7 @@ import { useApiClient } from '../contexts/ApiClientContext';
 import apiClientManager from '../api/apiClientManager';
 
 export interface IFilters {
-  [key: string]: string | number | Array<string | number> | undefined;
+  [key: string]: string | number | boolean | Array<string | number> | undefined;
 }
 
 export interface IRequest {
