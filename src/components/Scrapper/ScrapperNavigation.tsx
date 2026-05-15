@@ -64,6 +64,12 @@ export const ScrapperNavigation = () => {
         const data = await scrapperServices.createScrapperRequest(params);
         const { taskId, status, websocket_url } = data;
 
+        if (!taskId) {
+            console.error('Start scrapper: missing task_id in API response', data);
+            setLoadingRequests(false);
+            return;
+        }
+
         setRequests([...requests, { taskId, status, id: taskId, market, itemsCount: 0, durationSec: 0 }]);
 
         if (taskProgressEnabled) {

@@ -53,10 +53,34 @@ interface IAdminTaskResponse {
     tasks: ITaskResponse[]
 }
 
+export interface IStartTaskResponse {
+    status: string;
+    taskId: string;
+    userId?: string;
+    websocket_url?: string;
+}
+
+/** API returns snake_case (`task_id`); UI expects camelCase (`taskId`). */
+function normalizeTaskStartResponse(raw: Record<string, unknown>): IStartTaskResponse {
+    const taskId = String(raw.task_id ?? raw.taskId ?? "");
+    return {
+        status: String(raw.status ?? ""),
+        taskId,
+        userId:
+            raw.user_id != null
+                ? String(raw.user_id)
+                : raw.userId != null
+                  ? String(raw.userId)
+                  : undefined,
+        websocket_url:
+            raw.websocket_url != null ? String(raw.websocket_url) : undefined,
+    };
+}
+
 export const scrapperServices = {
-    async createScrapperRequest(data: any): Promise<any> {
+    async createScrapperRequest(data: any): Promise<IStartTaskResponse> {
         const res = await apiClientManager.getClient().post('/start', data);
-        return res.data;
+        return normalizeTaskStartResponse((res.data ?? {}) as Record<string, unknown>);
     },
     async getRequestEstimate(data: any): Promise<any> {
         const res = await apiClientManager.getClient().post('/estimate', data);
@@ -82,17 +106,20 @@ export const scrapperServices = {
         return res.data;
     },
     async getTaskDataItems(taskId: string): Promise<{items: IParsedCarItem[], total: number}> {
+        if (!taskId) {
+            return { items: [], total: 0 };
+        }
         const res = await apiClientManager.getClient().get(`/items/task/${taskId}`);
         return res.data || {
             items: [] as IParsedCarItem[],
             total: 0,
         };
     },
-    async refreshScrapperItemDetails(data: IRefreshScrapperItem): Promise<any> {
+    async refreshScrapperItemDetails(data: IRefreshScrapperItem): Promise<IStartTaskResponse> {
         const { taskId, ...rest } = data;
         const res = await apiClientManager.getClient().post('/tasks/' + taskId + '/reparse', { ...rest });
 
-        return res.data;
+        return normalizeTaskStartResponse((res.data ?? {}) as Record<string, unknown>);
     },
     async exportTask(taskId: string): Promise<Blob> {
         const res = await apiClientManager.getClient().get(`/export/task/${taskId}.xlsx`, {
