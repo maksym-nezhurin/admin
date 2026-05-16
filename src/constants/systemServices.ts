@@ -44,7 +44,7 @@ export const INITIAL_SYSTEM_SERVICES: SystemServiceConfig[] = [
   {
     name: 'gateway',
     url: gatewayUrl,
-    healthPath: '/health',
+    healthPath: STANDARD_HEALTH_PATH,
   },
   {
     name: 'auth',
