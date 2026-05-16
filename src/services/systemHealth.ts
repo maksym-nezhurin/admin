@@ -1,15 +1,23 @@
 import {
-  STANDARD_HEALTH_PATH,
+  GATEWAY_AGGREGATED_HEALTH_PATH,
+  SCRAPPER_HEALTH_PATH,
+  gatewayUrl,
+  scrapperUrl,
+  type SystemServiceConfig,
   type SystemServiceInfo,
   type SystemServiceStatus,
 } from '../constants/systemServices';
 
-export const DEFAULT_HEALTH_CHECK_TIMEOUT_MS = 5000;
+export const DEFAULT_HEALTH_CHECK_TIMEOUT_MS = 10000;
 
 const HEALTHY_STATUS_VALUES = new Set(['ok', 'healthy', 'up', 'pass', 'ready']);
 
-export interface HealthCheckResult {
-  status: SystemServiceStatus;
+type DownstreamStatus = 'ok' | 'unhealthy' | 'unknown';
+
+interface GatewayDownstreamHealth {
+  name: string;
+  status: DownstreamStatus;
+  url: string;
   healthUrl: string;
   httpStatus?: number;
   responseTimeMs: number;
@@ -18,15 +26,15 @@ export interface HealthCheckResult {
   message?: string;
 }
 
-export type HealthCheckTarget = Pick<
-  SystemServiceInfo,
-  'name' | 'url' | 'healthPath' | 'healthCheck'
->;
+interface GatewayAggregatedHealthResponse {
+  status: string;
+  version?: string;
+  buildAt?: string;
+  aggregateStatus?: 'ok' | 'degraded' | 'unhealthy';
+  services: GatewayDownstreamHealth[];
+}
 
-export function buildHealthCheckUrl(
-  baseUrl: string,
-  healthPath: string = STANDARD_HEALTH_PATH,
-): string {
+function buildHealthCheckUrl(baseUrl: string, healthPath: string): string {
   const normalizedBase = baseUrl.trim().replace(/\/+$/, '');
   const normalizedPath = healthPath.startsWith('/') ? healthPath : `/${healthPath}`;
   return `${normalizedBase}${normalizedPath}`;
@@ -34,211 +42,263 @@ export function buildHealthCheckUrl(
 
 function unwrapHealthPayload(payload: unknown): unknown {
   if (!payload || typeof payload !== 'object') return payload;
-
   const record = payload as Record<string, unknown>;
-  const data = record.data;
-
-  if (data && typeof data === 'object') {
-    return data;
-  }
-
+  if (record.data && typeof record.data === 'object') return record.data;
   return payload;
 }
 
-function extractVersion(payload: unknown): string | undefined {
-  if (!payload || typeof payload !== 'object') return undefined;
-  const record = payload as Record<string, unknown>;
-  const version = record.version ?? record.appVersion ?? record.build;
-  return typeof version === 'string' ? version : undefined;
-}
-
-function extractBuildAt(payload: unknown): string | undefined {
-  if (!payload || typeof payload !== 'object') return undefined;
-  const record = payload as Record<string, unknown>;
-  const buildAt = record.buildAt ?? record.build_at ?? record.timestamp;
-  return typeof buildAt === 'string' ? buildAt : undefined;
-}
-
-function isHealthyPayload(payload: unknown): boolean {
-  if (payload === null || payload === undefined) return true;
-
-  if (typeof payload === 'boolean') return payload;
-
-  if (typeof payload === 'string') {
-    return HEALTHY_STATUS_VALUES.has(payload.trim().toLowerCase());
-  }
-
-  if (typeof payload !== 'object') return false;
-
-  const record = payload as Record<string, unknown>;
-
-  if (record.ok === true) return true;
-
-  const statusValue = record.status ?? record.health ?? record.state;
-  if (typeof statusValue === 'string') {
-    return HEALTHY_STATUS_VALUES.has(statusValue.toLowerCase());
-  }
-
-  if (typeof statusValue === 'number') {
-    return statusValue >= 200 && statusValue < 300;
-  }
-
-  return false;
-}
-
-function parseHealthBody(body: string, contentType: string | null): {
+function parseHealthBody(body: string): {
   healthy: boolean;
   version?: string;
   buildAt?: string;
 } {
   const trimmed = body.trim();
+  if (!trimmed) return { healthy: true };
+  if (HEALTHY_STATUS_VALUES.has(trimmed.toLowerCase())) return { healthy: true };
 
-  if (!trimmed) {
-    return { healthy: true };
-  }
-
-  if (isHealthyPayload(trimmed)) {
-    return { healthy: true };
-  }
-
-  const isJson =
-    contentType?.includes('application/json') ||
-    trimmed.startsWith('{') ||
-    trimmed.startsWith('[');
-
-  if (isJson) {
-    try {
-      const payload = unwrapHealthPayload(JSON.parse(trimmed) as unknown);
+  try {
+    const payload = unwrapHealthPayload(JSON.parse(trimmed) as unknown);
+    if (!payload || typeof payload !== 'object') return { healthy: false };
+    const record = payload as Record<string, unknown>;
+    const status = record.status ?? record.health ?? record.state;
+    if (typeof status === 'string' && HEALTHY_STATUS_VALUES.has(status.toLowerCase())) {
       return {
-        healthy: isHealthyPayload(payload),
-        version: extractVersion(payload),
-        buildAt: extractBuildAt(payload),
+        healthy: true,
+        version: typeof record.version === 'string' ? record.version : undefined,
+        buildAt:
+          typeof record.buildAt === 'string'
+            ? record.buildAt
+            : typeof record.timestamp === 'string'
+              ? record.timestamp
+              : undefined,
       };
-    } catch {
-      return { healthy: false };
     }
+    return { healthy: record.ok === true };
+  } catch {
+    return { healthy: false };
   }
-
-  return { healthy: false };
 }
 
-function getHealthCheckErrorMessage(error: unknown): string {
-  if (error instanceof DOMException && error.name === 'AbortError') {
-    return 'Timeout: no response within 5s';
+function mapDownstreamStatus(status: DownstreamStatus): SystemServiceStatus {
+  switch (status) {
+    case 'ok':
+      return 'healthy';
+    case 'unhealthy':
+      return 'unhealthy';
+    default:
+      return 'unknown';
   }
-
-  if (error instanceof TypeError) {
-    return 'Network error (service unreachable or CORS blocked)';
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return 'Unknown error';
 }
 
-export async function checkServiceHealth(
-  service: HealthCheckTarget,
-  options?: { timeoutMs?: number; healthPath?: string },
-): Promise<HealthCheckResult> {
-  const isEnabled = service.healthCheck !== false;
+function mapGatewaySelfStatus(payload: GatewayAggregatedHealthResponse): SystemServiceStatus {
+  if (payload.status?.toLowerCase() === 'ok') return 'healthy';
+  return 'unhealthy';
+}
 
-  if (!isEnabled) {
-    return {
-      status: 'not_monitored',
-      healthUrl: '',
-      responseTimeMs: 0,
-      message: 'No HTTP health endpoint (service is not HTTP-based)',
-    };
-  }
-
-  const healthPath = options?.healthPath ?? service.healthPath ?? STANDARD_HEALTH_PATH;
-  const healthUrl = buildHealthCheckUrl(service.url, healthPath);
-  const timeoutMs = options?.timeoutMs ?? DEFAULT_HEALTH_CHECK_TIMEOUT_MS;
+/** Scrapper — окремий сервіс, напряму з браузера (VITE_SCRAPPER_URL), не через gateway */
+async function checkScrapperHealthDirect(
+  timeoutMs: number,
+  checkedAt: Date,
+): Promise<SystemServiceInfo> {
+  const healthUrl = buildHealthCheckUrl(scrapperUrl, SCRAPPER_HEALTH_PATH);
   const startedAt = performance.now();
 
   try {
     const response = await fetch(healthUrl, {
       method: 'GET',
-      headers: {
-        Accept: 'application/json, text/plain;q=0.9, */*;q=0.8',
-      },
+      headers: { Accept: 'application/json' },
       cache: 'no-store',
       signal: AbortSignal.timeout(timeoutMs),
     });
 
     const responseTimeMs = Math.round(performance.now() - startedAt);
-    const body = await response.text();
-    const { healthy, version, buildAt } = parseHealthBody(
-      body,
-      response.headers.get('content-type'),
-    );
+    const { healthy, version, buildAt } = parseHealthBody(await response.text());
 
     if (!response.ok) {
       return {
+        name: 'scrapper',
+        url: scrapperUrl,
         status: 'unhealthy',
         healthUrl,
         httpStatus: response.status,
         responseTimeMs,
-        message: `HTTP ${response.status}`,
+        statusMessage: `HTTP ${response.status}`,
+        lastChecked: checkedAt,
       };
     }
 
     if (!healthy) {
       return {
+        name: 'scrapper',
+        url: scrapperUrl,
         status: 'unhealthy',
         healthUrl,
         httpStatus: response.status,
         responseTimeMs,
         version,
         buildAt,
-        message: 'Endpoint responded but body is not a standard health payload',
+        statusMessage: 'Invalid health response body',
+        lastChecked: checkedAt,
       };
     }
 
     return {
+      name: 'scrapper',
+      url: scrapperUrl,
       status: 'healthy',
       healthUrl,
       httpStatus: response.status,
       responseTimeMs,
       version,
       buildAt,
+      lastChecked: checkedAt,
     };
   } catch (error) {
+    const message =
+      error instanceof DOMException && error.name === 'AbortError'
+        ? 'Timeout'
+        : error instanceof TypeError
+          ? 'Network error (CORS or unreachable)'
+          : error instanceof Error
+            ? error.message
+            : 'Unknown error';
+
     return {
+      name: 'scrapper',
+      url: scrapperUrl,
       status: 'unknown',
       healthUrl,
       responseTimeMs: Math.round(performance.now() - startedAt),
-      message: getHealthCheckErrorMessage(error),
+      statusMessage: message,
+      lastChecked: checkedAt,
     };
   }
 }
 
-export async function checkAllServicesHealth(
-  services: readonly HealthCheckTarget[],
-  options?: { timeoutMs?: number },
+/**
+ * Gateway/auth/user — через GET /api/health/services.
+ * Scrapper — напряму (VITE_SCRAPPER_URL), окрема логіка.
+ */
+export async function checkAllServicesHealthViaGateway(
+  displayServices: readonly SystemServiceConfig[] = [],
+  options?: { gatewayBaseUrl?: string; timeoutMs?: number },
 ): Promise<SystemServiceInfo[]> {
+  const baseUrl = options?.gatewayBaseUrl ?? gatewayUrl;
+  const healthUrl = buildHealthCheckUrl(baseUrl, GATEWAY_AGGREGATED_HEALTH_PATH);
+  const timeoutMs = options?.timeoutMs ?? DEFAULT_HEALTH_CHECK_TIMEOUT_MS;
   const checkedAt = new Date();
 
-  return Promise.all(
-    services.map(async (service) => {
-      const result = await checkServiceHealth(service, options);
+  const gatewayServices = displayServices.filter((s) => s.name !== 'scrapper');
+  const scrapperConfig = displayServices.find((s) => s.name === 'scrapper');
+
+  const [gatewayResults, scrapperResult] = await Promise.all([
+    fetchGatewayServicesHealth(gatewayServices, healthUrl, timeoutMs, checkedAt),
+    scrapperConfig ? checkScrapperHealthDirect(timeoutMs, checkedAt) : null,
+  ]);
+
+  if (!scrapperResult) {
+    return gatewayResults;
+  }
+
+  return [...gatewayResults, scrapperResult];
+}
+
+async function fetchGatewayServicesHealth(
+  displayServices: readonly SystemServiceConfig[],
+  healthUrl: string,
+  timeoutMs: number,
+  checkedAt: Date,
+): Promise<SystemServiceInfo[]> {
+  try {
+    const response = await fetch(healthUrl, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+
+    if (!response.ok) {
+      return displayServices.map((service) => ({
+        ...service,
+        status: 'unknown' as const,
+        healthUrl,
+        httpStatus: response.status,
+        statusMessage: `Gateway health failed: HTTP ${response.status}`,
+        lastChecked: checkedAt,
+      }));
+    }
+
+    const payload = (await response.json()) as GatewayAggregatedHealthResponse;
+    const downstreamByName = new Map(
+      (payload.services ?? []).map((service) => [service.name, service]),
+    );
+
+    return displayServices.map((service) => {
+      if (service.name === 'gateway') {
+        const aggregateNote =
+          payload.aggregateStatus && payload.aggregateStatus !== 'ok'
+            ? `Aggregate: ${payload.aggregateStatus}`
+            : undefined;
+
+        return {
+          ...service,
+          status: mapGatewaySelfStatus(payload),
+          healthUrl,
+          version: payload.version,
+          buildAt: payload.buildAt,
+          statusMessage: aggregateNote,
+          lastChecked: checkedAt,
+        };
+      }
+
+      const downstream = downstreamByName.get(service.name);
+
+      if (!downstream) {
+        return {
+          ...service,
+          status: 'not_monitored',
+          healthUrl,
+          statusMessage: 'Not configured on gateway',
+          lastChecked: checkedAt,
+        };
+      }
 
       return {
-        name: service.name,
-        url: service.url,
-        healthPath: service.healthPath,
-        healthCheck: service.healthCheck,
-        status: result.status,
-        healthUrl: result.healthUrl,
-        httpStatus: result.httpStatus,
-        responseTimeMs: result.responseTimeMs,
-        statusMessage: result.message,
-        version: result.version,
-        buildAt: result.buildAt,
+        ...service,
+        status: mapDownstreamStatus(downstream.status),
+        healthUrl: downstream.healthUrl,
+        httpStatus: downstream.httpStatus,
+        responseTimeMs: downstream.responseTimeMs,
+        version: downstream.version,
+        buildAt: downstream.buildAt,
+        statusMessage: downstream.message,
         lastChecked: checkedAt,
       };
-    }),
-  );
+    });
+  } catch (error) {
+    const message =
+      error instanceof DOMException && error.name === 'AbortError'
+        ? 'Timeout waiting for gateway'
+        : error instanceof TypeError
+          ? 'Network error (gateway unreachable or CORS blocked)'
+          : error instanceof Error
+            ? error.message
+            : 'Unknown error';
+
+    return displayServices.map((service) => ({
+      ...service,
+      status: 'unknown' as const,
+      healthUrl,
+      statusMessage: message,
+      lastChecked: checkedAt,
+    }));
+  }
+}
+
+/** @deprecated Use checkAllServicesHealthViaGateway */
+export async function checkAllServicesHealth(
+  services: readonly Pick<SystemServiceInfo, 'name' | 'url' | 'healthCheck'>[],
+  options?: { timeoutMs?: number },
+): Promise<SystemServiceInfo[]> {
+  return checkAllServicesHealthViaGateway(services, options);
 }
