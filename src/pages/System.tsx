@@ -33,7 +33,7 @@ import {
   createInitialSystemServiceState,
   type SystemServiceInfo,
 } from '../constants/systemServices';
-import { checkAllServicesHealth } from '../services/systemHealth';
+import { checkAllServicesHealthViaGateway } from '../services/systemHealth';
 
 const SystemPage: React.FC = () => {
   const { t, i18n } = useTypedTranslation();
@@ -57,7 +57,9 @@ const SystemPage: React.FC = () => {
     setChecking(true);
 
     try {
-      const updatedServices = await checkAllServicesHealth(INITIAL_SYSTEM_SERVICES);
+      const updatedServices = await checkAllServicesHealthViaGateway(
+        INITIAL_SYSTEM_SERVICES,
+      );
       setServices(updatedServices);
       setLastChecked(new Date());
     } finally {
