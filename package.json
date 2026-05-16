@@ -7,8 +7,10 @@
     "dev": "vite",
     "postinstall": "node scripts/copy-locales.js",
     "build": "echo '📦 Step 1: Copying translation files...' && node scripts/copy-locales.js && echo '🔨 Step 2: TypeScript compilation...' && tsc -b && echo '⚡ Step 3: Vite build...' && vite build && echo '✅ Build completed successfully!'",
+    "build:check": "pnpm run build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ag-grid-enterprise/menu": "^32.3.9",
@@ -42,9 +44,10 @@
     "react-i18next": "^16.5.0",
     "react-router-dom": "^7.6.0",
     "zustand": "^4.4.0",
-    "@reelo/i18n": "git+https://github.com/maksym-nezhurin/reelo-i18n.git"
+    "@reelo/i18n": "git+https://github.com/maksym-nezhurin/reelo-i18n.git#58aae5b"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "@eslint/js": "^9.25.0",
     "@types/loadable__component": "^5.13.10",
     "@types/node": "^22.15.21",

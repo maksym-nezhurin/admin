@@ -1,6 +1,8 @@
 node_modules
 .env
 dist
+# Generated from @reelo/i18n via scripts/copy-locales.js (postinstall / build)
+public/locales
 package-lock.json
 pnpm-lock.yaml
 .turbo

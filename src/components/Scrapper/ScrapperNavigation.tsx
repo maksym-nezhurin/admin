@@ -37,8 +37,12 @@ export const ScrapperNavigation = () => {
             year_from: filters.year_from ?? DEFAULT_FILTERS_VALUES.year_from,
             year_to: filters.year_to ?? DEFAULT_FILTERS_VALUES.year_to,
             gearbox: 31393,
-            // filters store fuel under AVAILABLE_FILTERS.FUEL_TYPE (e.g. 'fuel_type_ids'), map it to API param 'fuel_type'
-            fuel_type: (filters as Record<string, any>)[AVAILABLE_FILTERS.FUEL_TYPE] ?? DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.FUEL_TYPE],
+            state_ids:
+                (filters as Record<string, unknown>)[AVAILABLE_FILTERS.STATE_IDS] ??
+                DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.STATE_IDS],
+            fuel_type:
+                (filters as Record<string, unknown>)[AVAILABLE_FILTERS.FUEL_TYPE] ??
+                DEFAULT_FILTERS_VALUES[AVAILABLE_FILTERS.FUEL_TYPE],
             // "location": 100000000,
             user_type: 2,
         };
@@ -59,6 +63,12 @@ export const ScrapperNavigation = () => {
         const params = getParams();
         const data = await scrapperServices.createScrapperRequest(params);
         const { taskId, status, websocket_url } = data;
+
+        if (!taskId) {
+            console.error('Start scrapper: missing task_id in API response', data);
+            setLoadingRequests(false);
+            return;
+        }
 
         setRequests([...requests, { taskId, status, id: taskId, market, itemsCount: 0, durationSec: 0 }]);
 

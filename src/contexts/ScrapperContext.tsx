@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { DEFAULT_FILTERS_CONFIG, ADDITIONAL_FILTERS_CONFIG, GET_SCRAPPING_SOURCES_BY_MARKET, SCRAPPING_MARKETS_ENUM, type ITaskProgress, type IQueueStatus } from '../constants/scrapper';
+import { DEFAULT_FILTERS_CONFIG, ADDITIONAL_FILTERS_CONFIG, DEFAULT_FILTERS_VALUES, GET_SCRAPPING_SOURCES_BY_MARKET, SCRAPPING_MARKETS_ENUM, type ITaskProgress, type IQueueStatus } from '../constants/scrapper';
 import type { FilterConfig } from '../constants/scrapper';
 import type { TSelectOption } from '../types/common';
 import { scrapperServices } from '../services/scrapper';
@@ -8,7 +8,7 @@ import { useApiClient } from '../contexts/ApiClientContext';
 import apiClientManager from '../api/apiClientManager';
 
 export interface IFilters {
-  [key: string]: string | number | Array<string | number> | undefined;
+  [key: string]: string | number | boolean | Array<string | number> | undefined;
 }
 
 export interface IRequest {
@@ -78,6 +78,7 @@ export const ScrapperProvider: React.FC<ScrapperProviderProps> = ({ userId, chil
   const [activeTaskProgressSubscriptions, setActiveTaskProgressSubscriptions] = useState<Set<string>>(new Set());
   const [filtersConfig, setFiltersConfig] = useState<FilterConfig[]>([]);
   const [filters, setFilters] = useState<IFilters>({
+    ...DEFAULT_FILTERS_VALUES,
     user_id: userId ?? undefined,
   });
   const [allowedMarkets, setAllowedMarkets] = useState<TSelectOption[]>([]);

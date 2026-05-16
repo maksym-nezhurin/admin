@@ -1,5 +1,18 @@
-import { useState } from "react";
-import { Stack, Title, Text, Button, Group, Divider, Select } from "@mantine/core";
+import { useCallback, useState } from "react";
+import {
+    Stack,
+    Title,
+    Text,
+    Button,
+    Group,
+    Divider,
+    Select,
+    Collapse,
+    ActionIcon,
+    Paper,
+    Box,
+} from "@mantine/core";
+import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import { useScrapper } from "../../contexts/ScrapperContext";
 import { scrapperServices } from "../../services/scrapper";
 import type {
@@ -11,18 +24,18 @@ import type {
 } from "../../constants/scrapper";
 import { useTypedTranslation } from "../../i18n";
 
+const DETAILS_MAX_HEIGHT = 220;
+
 export const RedisQueueStatus = () => {
     const { t } = useTypedTranslation();
     const [isActionLoading, setIsActionLoading] = useState(false);
+    const [detailsOpen, setDetailsOpen] = useState(false);
     const [queueSimpleStatus, setQueueSimpleStatus] = useState<IQueueSimpleStatus | null>(null);
     const [websocketStatus, setWebsocketStatus] = useState<IWebsocketConnectionsStatus | null>(null);
     const [queueJobs, setQueueJobs] = useState<IQueueJob[] | null>(null);
-    const [queueJobsStatus, setQueueJobsStatus] = useState<QueueJobStatus>('waiting');
-    // Hook must be called unconditionally
-    const scrapperContext = useScrapper();
+    const [queueJobsStatus, setQueueJobsStatus] = useState<QueueJobStatus>("waiting");
 
-    // WebSocket-based Redis socket status (socketStatus/connectSocket/disconnectSocket)
-    // is not used in this UI section anymore; we rely on HTTP status instead.
+    const scrapperContext = useScrapper();
     const { redisQueueStatus, fetchQueueStatus } = scrapperContext;
     const {
         pauseQueue,
@@ -32,13 +45,22 @@ export const RedisQueueStatus = () => {
         getWebsocketStatus,
         getQueueJobs,
     } = scrapperServices;
-    
-    const { total_stuck_messages } = redisQueueStatus || ({} as IQueueStatus);
 
-    // Previous WebSocket-based connection status helpers are intentionally disabled:
-    // const connectionStatus = getConnectionStatus();
-    // const handleConnectSocket = async () => { await connectSocket(); };
-    // const handleDisconnectSocket = () => { disconnectSocket(); };
+    const { total_stuck_messages, total_active_messages, active_workers } =
+        redisQueueStatus || ({} as IQueueStatus);
+
+    const hasLoadedDetails = Boolean(queueSimpleStatus || websocketStatus || queueJobs);
+
+    const loadDetails = useCallback(async () => {
+        const [queueData, wsData, jobsData] = await Promise.all([
+            getQueueSimpleStatus(),
+            getWebsocketStatus(),
+            getQueueJobs({ status: queueJobsStatus, limit: 20 }),
+        ]);
+        setQueueSimpleStatus(queueData);
+        setWebsocketStatus(wsData);
+        setQueueJobs(jobsData.jobs);
+    }, [getQueueSimpleStatus, getWebsocketStatus, getQueueJobs, queueJobsStatus]);
 
     const handlePauseQueue = async () => {
         setIsActionLoading(true);
@@ -52,7 +74,6 @@ export const RedisQueueStatus = () => {
 
     const handleResumeQueue = async () => {
         setIsActionLoading(true);
-
         try {
             await resumeQueue();
             await fetchQueueStatus();
@@ -63,10 +84,12 @@ export const RedisQueueStatus = () => {
 
     const handleCleanFailed = async () => {
         setIsActionLoading(true);
-
         try {
-            await cleanQueue({ status: 'failed', grace: 0, limit: 1000 });
+            await cleanQueue({ status: "failed", grace: 0, limit: 1000 });
             await fetchQueueStatus();
+            if (detailsOpen) {
+                await loadDetails();
+            }
         } finally {
             setIsActionLoading(false);
         }
@@ -74,15 +97,44 @@ export const RedisQueueStatus = () => {
 
     const handleLoadDetails = async () => {
         setIsActionLoading(true);
-    
         try {
-            const [queueData, wsData, jobsData] = await Promise.all([
-                getQueueSimpleStatus(),
-                getWebsocketStatus(),
-                getQueueJobs({ status: queueJobsStatus, limit: 20 }),
-            ]);
-            setQueueSimpleStatus(queueData);
-            setWebsocketStatus(wsData);
+            await loadDetails();
+            setDetailsOpen(true);
+        } finally {
+            setIsActionLoading(false);
+        }
+    };
+
+    const handleRefreshDetails = async () => {
+        if (!detailsOpen) return;
+        setIsActionLoading(true);
+        try {
+            await loadDetails();
+        } finally {
+            setIsActionLoading(false);
+        }
+    };
+
+    const handleToggleDetails = async () => {
+        if (detailsOpen) {
+            setDetailsOpen(false);
+            return;
+        }
+        if (!hasLoadedDetails) {
+            await handleLoadDetails();
+            return;
+        }
+        setDetailsOpen(true);
+    };
+
+    const handleQueueJobsStatusChange = async (value: string | null) => {
+        if (!value) return;
+        const nextStatus = value as QueueJobStatus;
+        setQueueJobsStatus(nextStatus);
+        if (!detailsOpen) return;
+        setIsActionLoading(true);
+        try {
+            const jobsData = await getQueueJobs({ status: nextStatus, limit: 20 });
             setQueueJobs(jobsData.jobs);
         } finally {
             setIsActionLoading(false);
@@ -90,224 +142,208 @@ export const RedisQueueStatus = () => {
     };
 
     return (
-        <Stack>
-            <Group position="apart" align="center">
-                <Title order={4}>{t('scrapper.redis_queue_status.title')}</Title>
-            </Group>
+        <Paper withBorder p="sm" radius="md" w="100%">
+            <Stack spacing="xs">
+                <Group position="apart" align="center" spacing="xs">
+                    <Title order={4}>{t("scrapper.redis_queue_status.title")}</Title>
+                    <ActionIcon
+                        variant="subtle"
+                        size="lg"
+                        aria-label={
+                            detailsOpen
+                                ? t("scrapper.redis_queue_status.hide_details")
+                                : t("scrapper.redis_queue_status.show_details")
+                        }
+                        onClick={() => void handleToggleDetails()}
+                        disabled={isActionLoading}
+                    >
+                        {detailsOpen ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
+                    </ActionIcon>
+                </Group>
 
-            {/* WebSocket connection status badge + alert are disabled; HTTP-based metrics are shown below */}
-
-            {/* <Stack spacing="xs"
-                style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between'
-                }}
-            >
-                <Stack>
-                    <Text size="xs">
-                        {t('scrapper.redis_queue_status.amount_of_active_workers', { count: active_workers })}
-                    </Text>
-
-                    <Text size="xs">
-                        {t('scrapper.redis_queue_status.total_active_messages', { count: total_active_messages })}
-                    </Text>
-
-                    <Text size="xs">
-                        {
-                            total_stuck_messages ? (
-                                <Text c="red">
-                            {t('scrapper.redis_queue_status.total_stuck_messages', { count: total_stuck_messages })}
-                        </Text>
-                    ) : (
-                        <Text c="green">
-                            {t('scrapper.redis_queue_status.total_stuck_messages', { count: total_stuck_messages })}
-                        </Text>
-                    )
-                }
-                    </Text>
-                </Stack>
-
-                <div
-                    style={{
-                        maxHeight: '100px',
-                        overflow: 'auto',
-                        fontSize: '12px',
-                        padding: '4px 8px',
-                        borderRadius: 4,
-                        backgroundColor: '#f8f9fa',
-                    }}
-                >
-                    {activeMessages.length === 0 ? (
+                {redisQueueStatus && (
+                    <Group spacing="md">
                         <Text size="xs" c="dimmed">
-                            {t('scrapper.redis_queue_status.no_active_messages' as TranslationKey)}
+                            {t("scrapper.redis_queue_status.amount_of_active_workers", {
+                                count: active_workers ?? 0,
+                            })}
                         </Text>
-                    ) : (
-                        <Stack spacing={4}>
-                            {activeMessages.map((msg) => (
-                                <Group
-                                    key={msg.message_id}
-                                    position="apart"
-                                    spacing={4}
-                                    align="flex-start"
-                                >
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <Text size="xs" weight={500} lineClamp={1}>
-                                            {msg.actor}
-                                        </Text>
-                                        <Text size="xs" c="dimmed" lineClamp={1}>
-                                            id: {msg.message_id}
-                                        </Text>
-                                    </div>
-                                    <Stack spacing={2} align="flex-end">
-                                        <Badge
+                        <Text size="xs" c="dimmed">
+                            {t("scrapper.redis_queue_status.total_active_messages", {
+                                count: total_active_messages ?? 0,
+                            })}
+                        </Text>
+                        <Text size="xs" c={total_stuck_messages ? "red" : "green"}>
+                            {t("scrapper.redis_queue_status.total_stuck_messages", {
+                                count: total_stuck_messages ?? 0,
+                            })}
+                        </Text>
+                    </Group>
+                )}
+
+                <Collapse in={detailsOpen}>
+                    <Box
+                        mt="xs"
+                        sx={{
+                            maxHeight: DETAILS_MAX_HEIGHT,
+                            overflowY: "auto",
+                            overflowX: "hidden",
+                        }}
+                    >
+                        {hasLoadedDetails ? (
+                            <Group align="flex-start" spacing="xl" sx={{ flexWrap: "wrap" }}>
+                                {queueSimpleStatus && (
+                                    <Stack spacing={4}>
+                                        <Title order={6}>
+                                            {t("scrapper.redis_queue_status.queue_counters")}
+                                        </Title>
+                                        <Text size="xs">Waiting: {queueSimpleStatus.waiting}</Text>
+                                        <Text size="xs">Active: {queueSimpleStatus.active}</Text>
+                                        <Text size="xs">Completed: {queueSimpleStatus.completed}</Text>
+                                        <Text size="xs">Failed: {queueSimpleStatus.failed}</Text>
+                                        <Text size="xs">Delayed: {queueSimpleStatus.delayed}</Text>
+                                        <Text
                                             size="xs"
-                                            color={msg.is_stuck ? 'red' : 'green'}
-                                            variant="light"
+                                            c={queueSimpleStatus.paused > 0 ? "red" : "dimmed"}
                                         >
-                                            {msg.is_stuck
-                                                ? t('scrapper.redis_queue_status.stuck' as TranslationKey)
-                                                : t('scrapper.redis_queue_status.processing' as TranslationKey)}
-                                        </Badge>
-                                        <Text size="xs" c="dimmed">
-                                            {msg.age_minutes}
-                                            {' '}
-                                            {t('scrapper.redis_queue_status.minutes' as TranslationKey)}
+                                            Paused: {queueSimpleStatus.paused}
                                         </Text>
                                     </Stack>
-                                </Group>
-                            ))}
-                        </Stack>
-                    )}
-                </div>
-            </Stack> */}
+                                )}
 
-            {(queueSimpleStatus || websocketStatus || queueJobs) && (
-                <>
-                    <Divider my="sm" />
-                    <Group align="flex-start" spacing="xl">
-                        {queueSimpleStatus && (
-                            <Stack spacing={4}>
-                                <Title order={6}>Queue counters</Title>
-                                <Text size="xs">Waiting: {queueSimpleStatus.waiting}</Text>
-                                <Text size="xs">Active: {queueSimpleStatus.active}</Text>
-                                <Text size="xs">Completed: {queueSimpleStatus.completed}</Text>
-                                <Text size="xs">Failed: {queueSimpleStatus.failed}</Text>
-                                <Text size="xs">Delayed: {queueSimpleStatus.delayed}</Text>
-                                <Text size="xs" c={queueSimpleStatus.paused > 0 ? 'red' : 'dimmed'}>
-                                    Paused: {queueSimpleStatus.paused}
-                                </Text>
-                            </Stack>
-                        )}
-
-                        {websocketStatus && (
-                            <Stack spacing={4}>
-                                <Title order={6}>WebSocket connections</Title>
-                                <Text size="xs">
-                                    Total connections: {websocketStatus.totalConnections}
-                                </Text>
-                                <Text size="xs">
-                                    Tasks with subscribers: {websocketStatus.tasks.length}
-                                </Text>
-                            </Stack>
-                        )}
-
-                        {(
-                            <Stack spacing={4} maw={360}>
-                                <Group spacing="xs" align="center">
-                                    <Title order={6}>Queue jobs</Title>
-                                    <Select
-                                        size="xs"
-                                        data={[
-                                            { value: 'waiting', label: 'waiting' },
-                                            { value: 'active', label: 'active' },
-                                            { value: 'completed', label: 'completed' },
-                                            { value: 'failed', label: 'failed' },
-                                            { value: 'delayed', label: 'delayed' },
-                                            { value: 'paused', label: 'paused' },
-                                        ]}
-                                        value={queueJobsStatus}
-                                        onChange={(value) => {
-                                            if (value) {
-                                                setQueueJobsStatus(value as QueueJobStatus);
-                                            }
-                                        }}
-                                    />
-                                </Group>
-                                {queueJobs && queueJobs.length > 0 && queueJobs.slice(0, 10).map((job) => (
-                                    <Stack key={job.id} spacing={2}>
-                                        <Text size="xs" fw={500}>
-                                            {job.name} · {job.state} · {job.id}
+                                {websocketStatus && (
+                                    <Stack spacing={4}>
+                                        <Title order={6}>
+                                            {t("scrapper.redis_queue_status.websocket_connections")}
+                                        </Title>
+                                        <Text size="xs">
+                                            Total connections: {websocketStatus.totalConnections}
                                         </Text>
                                         <Text size="xs">
-                                            taskId: {job.data.taskId ?? '-'}
-                                        </Text>
-                                        {job.data.url && (
-                                            <Text size="xs" c="dimmed">
-                                                url: {job.data.url}
-                                            </Text>
-                                        )}
-                                        <Text size="xs" c="dimmed">
-                                            total: {job.data.total ?? '-'} / chunks: {job.data.totalChunks ?? '-'}
-                                        </Text>
-                                        <Text size="xs" c="dimmed">
-                                            created: {new Date(job.timestamp).toLocaleString()}
+                                            Tasks with subscribers: {websocketStatus.tasks.length}
                                         </Text>
                                     </Stack>
-                                ))}
-                            </Stack>
+                                )}
+
+                                <Stack spacing={4} maw={360}>
+                                    <Group spacing="xs" align="center">
+                                        <Title order={6}>
+                                            {t("scrapper.redis_queue_status.queue_jobs")}
+                                        </Title>
+                                        <Select
+                                            size="xs"
+                                            data={[
+                                                { value: "waiting", label: "waiting" },
+                                                { value: "active", label: "active" },
+                                                { value: "completed", label: "completed" },
+                                                { value: "failed", label: "failed" },
+                                                { value: "delayed", label: "delayed" },
+                                                { value: "paused", label: "paused" },
+                                            ]}
+                                            value={queueJobsStatus}
+                                            onChange={(value) => void handleQueueJobsStatusChange(value)}
+                                        />
+                                    </Group>
+                                    {queueJobs && queueJobs.length > 0 ? (
+                                        queueJobs.slice(0, 10).map((job) => (
+                                            <Stack key={job.id} spacing={2}>
+                                                <Text size="xs" fw={500}>
+                                                    {job.name} · {job.state} · {job.id}
+                                                </Text>
+                                                <Text size="xs">taskId: {job.data.taskId ?? "-"}</Text>
+                                                {job.data.url && (
+                                                    <Text size="xs" c="dimmed" lineClamp={1}>
+                                                        url: {job.data.url}
+                                                    </Text>
+                                                )}
+                                                <Text size="xs" c="dimmed">
+                                                    total: {job.data.total ?? "-"} / chunks:{" "}
+                                                    {job.data.totalChunks ?? "-"}
+                                                </Text>
+                                                <Text size="xs" c="dimmed">
+                                                    created: {new Date(job.timestamp).toLocaleString()}
+                                                </Text>
+                                            </Stack>
+                                        ))
+                                    ) : (
+                                        <Text size="xs" c="dimmed">
+                                            {t("scrapper.redis_queue_status.no_jobs")}
+                                        </Text>
+                                    )}
+                                </Stack>
+                            </Group>
+                        ) : (
+                            <Text size="sm" c="dimmed">
+                                {t("scrapper.redis_queue_status.details_hint")}
+                            </Text>
                         )}
-                    </Group>
-                </>
-            )}
+                    </Box>
+                    <Divider my="xs" />
+                </Collapse>
 
-            <Group variant="subtle">
-                {/* <Button onClick={() => fetchQueueStatus()} disabled={websocketStatus === 'connected'}>
-                    {t('scrapper.redis_queue_status.refresh')}
-                </Button>
-                
-                {websocketStatus === 'disconnected' || websocketStatus === 'fallback' ? (
-                    <Button onClick={handleConnectSocket} color="green" disabled={isActionLoading}>
-                        {t('scrapper.redis_queue_status.connect_socket')}
+                <Group spacing="xs">
+                    <Button
+                        variant="outline"
+                        color="yellow"
+                        size="xs"
+                        disabled={isActionLoading}
+                        onClick={handlePauseQueue}
+                    >
+                        {t("scrapper.redis_queue_status.pause_queue")}
                     </Button>
-                ) : (
-                    <Button onClick={handleDisconnectSocket} color="red" variant="outline" disabled={isActionLoading}>
-                        {t('scrapper.redis_queue_status.disconnect_socket')}
+
+                    <Button
+                        variant="outline"
+                        color="green"
+                        size="xs"
+                        disabled={isActionLoading}
+                        onClick={handleResumeQueue}
+                    >
+                        {t("scrapper.redis_queue_status.resume_queue")}
                     </Button>
-                )} */}
 
-                <Button
-                    variant="outline"
-                    color="yellow"
-                    disabled={isActionLoading}
-                    onClick={handlePauseQueue}
-                >
-                    Pause queue
-                </Button>
+                    {!detailsOpen && (
+                        <Button
+                            variant="outline"
+                            size="xs"
+                            disabled={isActionLoading}
+                            onClick={handleLoadDetails}
+                        >
+                            {t("scrapper.redis_queue_status.load_details")}
+                        </Button>
+                    )}
 
-                <Button
-                    variant="outline"
-                    color="green"
-                    disabled={isActionLoading}
-                    onClick={handleResumeQueue}
-                >
-                    Resume queue
-                </Button>
+                    {detailsOpen && hasLoadedDetails && (
+                        <Button
+                            variant="subtle"
+                            size="xs"
+                            disabled={isActionLoading}
+                            onClick={handleRefreshDetails}
+                        >
+                            {t("scrapper.redis_queue_status.refresh_details")}
+                        </Button>
+                    )}
 
-                <Button
-                    variant="outline"
-                    disabled={isActionLoading}
-                    onClick={handleLoadDetails}
-                >
-                    Load details
-                </Button>
+                    {detailsOpen && (
+                        <Button
+                            variant="subtle"
+                            size="xs"
+                            disabled={isActionLoading}
+                            onClick={() => setDetailsOpen(false)}
+                        >
+                            {t("scrapper.redis_queue_status.hide_details")}
+                        </Button>
+                    )}
 
-                <Button
-                    disabled={total_stuck_messages === 0 || isActionLoading}
-                    onClick={handleCleanFailed}
-                >
-                    {t('scrapper.redis_queue_status.clean_stucked')}
-                </Button>
-            </Group>
-        </Stack>
+                    <Button
+                        size="xs"
+                        disabled={total_stuck_messages === 0 || isActionLoading}
+                        onClick={handleCleanFailed}
+                    >
+                        {t("scrapper.redis_queue_status.clean_stucked")}
+                    </Button>
+                </Group>
+            </Stack>
+        </Paper>
     );
 };

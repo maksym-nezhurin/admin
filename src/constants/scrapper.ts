@@ -86,6 +86,12 @@ const REGION_UA: TSelectOption[] = [
     { value: 23, label: "Херсонська область" }
 ];
 
+/** AutoRia region id — Івано-Франківська область */
+export const DEFAULT_REGION_ID = 15;
+
+/** AutoRia fuel type ids — бензин, дизель */
+export const DEFAULT_FUEL_TYPE_IDS = [1, 2] as const;
+
 const HAS_REGISTRATION_NUMBER_OPTIONS: TSelectOption[] = [
     { value: 'true', label: "Так" },
     { value: 'false', label: "Ні" }
@@ -118,13 +124,15 @@ export type Filters = {
 }
 
 export const DEFAULT_FILTERS_VALUES: Filters = {
-  [AVAILABLE_FILTERS.PRICE_FROM]: 12000,
-  [AVAILABLE_FILTERS.PRICE_TO]: 14000,
-  [AVAILABLE_FILTERS.MILEAGE_FROM]: 50000,
-  [AVAILABLE_FILTERS.MILEAGE_TO]: 70000,
-  [AVAILABLE_FILTERS.YEAR_FROM]: 2019,
-  [AVAILABLE_FILTERS.YEAR_TO]: 2020,
-  [AVAILABLE_FILTERS.FUEL_TYPE]: [String(FUEL_TYPES[0].value)],
+  [AVAILABLE_FILTERS.PRICE_FROM]: 5000,
+  [AVAILABLE_FILTERS.PRICE_TO]: 35000,
+  [AVAILABLE_FILTERS.MILEAGE_FROM]: 2000,
+  [AVAILABLE_FILTERS.MILEAGE_TO]: 222000,
+  [AVAILABLE_FILTERS.YEAR_FROM]: 2012,
+  [AVAILABLE_FILTERS.YEAR_TO]: 2025,
+  [AVAILABLE_FILTERS.STATE_IDS]: [DEFAULT_REGION_ID],
+  [AVAILABLE_FILTERS.FUEL_TYPE]: DEFAULT_FUEL_TYPE_IDS.map(String),
+  [AVAILABLE_FILTERS.HAS_REGISTRATION_NUMBER]: true,
 };
 
 export interface FilterConfig {
