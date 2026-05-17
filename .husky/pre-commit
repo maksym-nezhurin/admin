@@ -1,4 +1,0 @@
-#!/usr/bin/env sh
-
-echo "🔨 pre-commit: перевірка збірки admin..."
-pnpm run build:check

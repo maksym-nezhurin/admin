@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+echo "🔨 pre-push: admin build check..."
+pnpm run build:check
