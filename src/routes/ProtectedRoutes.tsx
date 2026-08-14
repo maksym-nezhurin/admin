@@ -147,13 +147,22 @@ export const ProtectedCoreRoutes = (
       } 
     />
 
-    <Route 
-      path={ROUTES.ADMIN} 
+    <Route
+      path={ROUTES.ADMIN}
       element={
         <LevelProtectedRoute level={80}>
           <PAGES.Admin />
         </LevelProtectedRoute>
-      } 
+      }
+    />
+
+    <Route
+      path={ROUTES.CATALOG_MODERATION}
+      element={
+        <LevelProtectedRoute level={80}>
+          <PAGES.CatalogModeration />
+        </LevelProtectedRoute>
+      }
     />
 
     <Route 

@@ -7,7 +7,9 @@ const getAvailablePages = (roleLevel: number) => {
     const pages = [
         { label: 'menu.dashboard', path: '/', roleLevel: 10 },
         { label: 'menu.scrapper', path: 'scrapper', roleLevel: 60 },
-        { label: 'menu.users', path: 'users', roleLevel: 100 },
+        { label: 'menu.users', path: 'users', roleLevel: 80 },
+        { label: 'B2B / Firmy', path: 'admin', roleLevel: 80 },
+        { label: 'Katalog / moderacja', path: 'catalog-moderation', roleLevel: 80 },
         { label: 'menu.profile', path: 'profile', roleLevel: 10 },
         { label: 'menu.settings', path: 'settings', roleLevel: 10 },
         { label: 'menu.announcements', path: 'announcements', roleLevel: 20 },
@@ -32,7 +34,7 @@ export const DashboardNav = () => {
                 {pages.map((page) => (
                     <NavLink
                         key={page.path}
-                        label={t(page.label)}
+                        label={page.label.startsWith('menu.') ? t(page.label) : page.label}
                         component={Link}
                         to={page.path}
                         active={isActive(page.path)}
