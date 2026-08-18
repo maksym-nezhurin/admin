@@ -18,6 +18,8 @@ import { IconRefresh } from '@tabler/icons-react';
 import { b2bAdminService } from '../services/b2bAdmin';
 import type { AdminCompanyRow, AdminOverview, AdminUserRow } from '../types/b2bAdmin';
 import { RoleGuard } from '../components/RoleGuard';
+import { useTypedTranslation, type TranslationKey } from '../i18n';
+import { formatLocalizedDate } from '../utils/timeUtils';
 
 const VERIFICATION_OPTIONS = [
   { value: 'UNVERIFIED', label: 'UNVERIFIED' },
@@ -40,14 +42,6 @@ const COMPANY_STATUS_OPTIONS = [
   { value: 'SUSPENDED', label: 'SUSPENDED' },
 ];
 
-function formatDate(value: string) {
-  try {
-    return new Date(value).toLocaleDateString('pl-PL');
-  } catch {
-    return value;
-  }
-}
-
 function StatCard({ label, value, hint }: { label: string; value: number | string; hint?: string }) {
   return (
     <Paper withBorder p="md" radius="md">
@@ -67,6 +61,7 @@ function StatCard({ label, value, hint }: { label: string; value: number | strin
 }
 
 const AdminPage = () => {
+  const { t, i18n } = useTypedTranslation();
   const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [companies, setCompanies] = useState<AdminCompanyRow[]>([]);
@@ -89,11 +84,11 @@ const AdminPage = () => {
       setCompanies(c);
     } catch (e) {
       console.error(e);
-      setError('Nie udało się załadować panelu B2B (wymagana rola ADMIN).');
+      setError(t('admin.page.loadError' as TranslationKey));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -128,7 +123,7 @@ const AdminPage = () => {
       await load();
     } catch (e) {
       console.error(e);
-      setError('Aktualizacja weryfikacji nie powiodła się.');
+      setError(t('admin.page.verificationError' as TranslationKey));
     } finally {
       setBusyKey(null);
     }
@@ -142,7 +137,7 @@ const AdminPage = () => {
       await load();
     } catch (e) {
       console.error(e);
-      setError('Aktualizacja statusu katalogu nie powiodła się.');
+      setError(t('admin.page.listingError' as TranslationKey));
     } finally {
       setBusyKey(null);
     }
@@ -156,20 +151,23 @@ const AdminPage = () => {
       await load();
     } catch (e) {
       console.error(e);
-      setError('Aktualizacja statusu firmy nie powiodła się.');
+      setError(t('admin.page.companyError' as TranslationKey));
     } finally {
       setBusyKey(null);
     }
   };
 
   return (
-    <RoleGuard roles={['ADMIN', 'SUPER_ADMIN']} fallback={<Alert color="red">Brak dostępu</Alert>}>
+    <RoleGuard
+      roles={['ADMIN', 'SUPER_ADMIN']}
+      fallback={<Alert color="red">{t('admin.page.noAccess' as TranslationKey)}</Alert>}
+    >
       <Stack>
         <Group position="apart">
           <div>
-            <Title order={2}>B2B — użytkownicy i firmy</Title>
+            <Title order={2}>{t('admin.page.title' as TranslationKey)}</Title>
             <Text size="sm" c="dimmed">
-              Statystyki rejestracji, weryfikacja osób, status firmy, publikacja w katalogu /partners
+              {t('admin.page.description' as TranslationKey)}
             </Text>
           </div>
           <Button
@@ -178,7 +176,7 @@ const AdminPage = () => {
             onClick={() => void load()}
             loading={loading}
           >
-            Odśwież
+            {t('admin.page.refresh' as TranslationKey)}
           </Button>
         </Group>
 
@@ -190,35 +188,46 @@ const AdminPage = () => {
 
         {overview ? (
           <SimpleGrid cols={4} breakpoints={[{ maxWidth: 'md', cols: 2 }, { maxWidth: 'xs', cols: 1 }]}>
-            <StatCard label="Użytkownicy" value={overview.users.total} />
+            <StatCard label={t('admin.page.stats.users' as TranslationKey)} value={overview.users.total} />
             <StatCard
-              label="Nowi (7 dni)"
+              label={t('admin.page.stats.newUsers' as TranslationKey)}
               value={overview.users.last7Days}
-              hint={`30 dni: ${overview.users.last30Days}`}
+              hint={t('admin.page.stats.newUsersHint' as TranslationKey, {
+                last30: overview.users.last30Days,
+              })}
             />
             <StatCard
-              label="Firmy"
+              label={t('admin.page.stats.companies' as TranslationKey)}
               value={overview.companies.total}
-              hint={`+${overview.companies.last7Days} (7 dni) · +${overview.companies.last30Days} (30 dni)`}
+              hint={t('admin.page.stats.companiesHint' as TranslationKey, {
+                last7: overview.companies.last7Days,
+                last30: overview.companies.last30Days,
+              })}
             />
             <StatCard
-              label="Partnerzy (published)"
+              label={t('admin.page.stats.partners' as TranslationKey)}
               value={overview.partnerListings.published}
-              hint={`Oczekują: ${overview.partnerListings.byStatus.PENDING_REVIEW ?? 0}`}
+              hint={t('admin.page.stats.partnersHint' as TranslationKey, {
+                pending: overview.partnerListings.byStatus.PENDING_REVIEW ?? 0,
+              })}
             />
           </SimpleGrid>
         ) : null}
 
         <TextInput
-          placeholder="Szukaj email, użytkownik, firma…"
+          placeholder={t('admin.page.searchPlaceholder' as TranslationKey)}
           value={search}
           onChange={(e) => setSearch(e.currentTarget.value)}
         />
 
         <Tabs defaultValue="users">
           <Tabs.List>
-            <Tabs.Tab value="users">Użytkownicy ({users.length})</Tabs.Tab>
-            <Tabs.Tab value="companies">Firmy ({companies.length})</Tabs.Tab>
+            <Tabs.Tab value="users">
+              {t('admin.page.tabs.users' as TranslationKey, { count: users.length })}
+            </Tabs.Tab>
+            <Tabs.Tab value="companies">
+              {t('admin.page.tabs.companies' as TranslationKey, { count: companies.length })}
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="users" pt="md">
@@ -226,11 +235,11 @@ const AdminPage = () => {
               <Table striped highlightOnHover>
                 <thead>
                   <tr>
-                    <th>Użytkownik</th>
-                    <th>Rejestracja</th>
-                    <th>Role</th>
-                    <th>Weryfikacja</th>
-                    <th>Firmy / listing</th>
+                    <th>{t('admin.page.usersTable.user' as TranslationKey)}</th>
+                    <th>{t('admin.page.usersTable.registered' as TranslationKey)}</th>
+                    <th>{t('admin.page.usersTable.roles' as TranslationKey)}</th>
+                    <th>{t('admin.page.usersTable.verification' as TranslationKey)}</th>
+                    <th>{t('admin.page.usersTable.companies' as TranslationKey)}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -245,7 +254,7 @@ const AdminPage = () => {
                         </Text>
                       </td>
                       <td>
-                        <Text size="xs">{formatDate(u.createdAt)}</Text>
+                        <Text size="xs">{formatLocalizedDate(u.createdAt, i18n.language)}</Text>
                       </td>
                       <td>
                         <Group spacing={4}>
@@ -298,7 +307,7 @@ const AdminPage = () => {
                                   />
                                 ) : (
                                   <Text size="xs" c="dimmed">
-                                    brak wpisu w katalogu
+                                    {t('admin.page.usersTable.noListing' as TranslationKey)}
                                   </Text>
                                 )}
                               </div>
@@ -318,11 +327,11 @@ const AdminPage = () => {
               <Table striped highlightOnHover>
                 <thead>
                   <tr>
-                    <th>Firma</th>
-                    <th>Właściciel</th>
-                    <th>Status firmy</th>
-                    <th>Katalog</th>
-                    <th>Publikacja</th>
+                    <th>{t('admin.page.companiesTable.company' as TranslationKey)}</th>
+                    <th>{t('admin.page.companiesTable.owner' as TranslationKey)}</th>
+                    <th>{t('admin.page.companiesTable.companyStatus' as TranslationKey)}</th>
+                    <th>{t('admin.page.companiesTable.catalog' as TranslationKey)}</th>
+                    <th>{t('admin.page.companiesTable.publication' as TranslationKey)}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -367,7 +376,7 @@ const AdminPage = () => {
                           </>
                         ) : (
                           <Text size="xs" c="dimmed">
-                            Brak
+                            {t('admin.page.companiesTable.none' as TranslationKey)}
                           </Text>
                         )}
                       </td>

@@ -1,3 +1,28 @@
+const DATE_LOCALE_BY_LANGUAGE: Record<string, string> = {
+  en: 'en-GB',
+  uk: 'uk-UA',
+  pl: 'pl-PL',
+};
+
+/**
+ * Format a date string using the active i18n language rather than a hardcoded locale.
+ * @param value ISO date string
+ * @param language Active i18n language (e.g. i18n.language from useTypedTranslation)
+ * @param options Intl.DateTimeFormat options
+ */
+export const formatLocalizedDate = (
+  value: string,
+  language: string,
+  options?: Intl.DateTimeFormatOptions,
+): string => {
+  try {
+    const locale = DATE_LOCALE_BY_LANGUAGE[language] ?? DATE_LOCALE_BY_LANGUAGE.en;
+    return new Date(value).toLocaleDateString(locale, options);
+  } catch {
+    return value;
+  }
+};
+
 /**
  * Convert seconds to human-readable format (hours, minutes, seconds)
  * @param totalSeconds Total seconds to convert

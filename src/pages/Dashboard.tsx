@@ -23,18 +23,8 @@ import { RoleGuard } from '../components/RoleGuard';
 import { b2bAdminService } from '../services/b2bAdmin';
 import type { AdminOverview } from '../types/b2bAdmin';
 import { ROUTES } from '../routes/constants';
-
-function formatDate(value: string) {
-  try {
-    return new Date(value).toLocaleDateString('pl-PL', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  } catch {
-    return value;
-  }
-}
+import { useTypedTranslation, type TranslationKey } from '../i18n';
+import { formatLocalizedDate } from '../utils/timeUtils';
 
 function StatCard({
   label,
@@ -67,7 +57,14 @@ function StatCard({
   );
 }
 
+const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+};
+
 const AdminDashboardStats: React.FC = () => {
+  const { t, i18n } = useTypedTranslation();
   const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,11 +77,11 @@ const AdminDashboardStats: React.FC = () => {
       setOverview(ov);
     } catch (e) {
       console.error(e);
-      setError('Nie udało się załadować statystyk (wymagana rola ADMIN).');
+      setError(t('admin.dashboard.error' as TranslationKey));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -97,9 +94,9 @@ const AdminDashboardStats: React.FC = () => {
     <Stack>
       <Group position="apart">
         <div>
-          <Title order={2}>Panel administracyjny</Title>
+          <Title order={2}>{t('admin.dashboard.title' as TranslationKey)}</Title>
           <Text size="sm" c="dimmed">
-            Rejestracje użytkowników, firm B2B oraz pojazdy w garażu
+            {t('admin.dashboard.description' as TranslationKey)}
           </Text>
         </div>
         <Button
@@ -108,7 +105,7 @@ const AdminDashboardStats: React.FC = () => {
           onClick={() => void load()}
           loading={loading}
         >
-          Odśwież
+          {t('admin.dashboard.refresh' as TranslationKey)}
         </Button>
       </Group>
 
@@ -119,7 +116,7 @@ const AdminDashboardStats: React.FC = () => {
       ) : null}
 
       {!overview && loading ? (
-        <Text c="dimmed">Ładowanie statystyk…</Text>
+        <Text c="dimmed">{t('admin.dashboard.loading' as TranslationKey)}</Text>
       ) : null}
 
       {overview ? (
@@ -132,27 +129,38 @@ const AdminDashboardStats: React.FC = () => {
             ]}
           >
             <StatCard
-              label="Użytkownicy"
+              label={t('admin.dashboard.stats.users' as TranslationKey)}
               value={overview.users.total}
-              hint={`+${overview.users.last7Days} (7 dni) · +${overview.users.last30Days} (30 dni) · zweryfikowani: ${verified}`}
+              hint={t('admin.dashboard.stats.usersHint' as TranslationKey, {
+                last7: overview.users.last7Days,
+                last30: overview.users.last30Days,
+                verified,
+              })}
               icon={<IconUsers size={18} stroke={1.5} />}
             />
             <StatCard
-              label="Nowi użytkownicy"
+              label={t('admin.dashboard.stats.newUsers' as TranslationKey)}
               value={overview.users.last7Days}
-              hint={`Ostatnie 30 dni: ${overview.users.last30Days}`}
+              hint={t('admin.dashboard.stats.newUsersHint' as TranslationKey, {
+                last30: overview.users.last30Days,
+              })}
               icon={<IconUsers size={18} stroke={1.5} />}
             />
             <StatCard
-              label="Firmy"
+              label={t('admin.dashboard.stats.companies' as TranslationKey)}
               value={overview.companies.total}
-              hint={`+${overview.companies.last7Days} (7 dni) · +${overview.companies.last30Days} (30 dni)`}
+              hint={t('admin.dashboard.stats.companiesHint' as TranslationKey, {
+                last7: overview.companies.last7Days,
+                last30: overview.companies.last30Days,
+              })}
               icon={<IconBuilding size={18} stroke={1.5} />}
             />
             <StatCard
-              label="Partnerzy w katalogu"
+              label={t('admin.dashboard.stats.partners' as TranslationKey)}
               value={overview.partnerListings.published}
-              hint={`Oczekują na publikację: ${pendingReview}`}
+              hint={t('admin.dashboard.stats.partnersHint' as TranslationKey, {
+                pending: pendingReview,
+              })}
             />
           </SimpleGrid>
 
@@ -166,32 +174,34 @@ const AdminDashboardStats: React.FC = () => {
             {overview.garageAvailable && overview.garage ? (
               <>
                 <StatCard
-                  label="Pojazdy (rekordy)"
+                  label={t('admin.dashboard.stats.vehicles' as TranslationKey)}
                   value={overview.garage.vehicles.total}
-                  hint={`+${overview.garage.vehicles.last7Days} (7 dni) · +${overview.garage.vehicles.last30Days} (30 dni)`}
+                  hint={t('admin.dashboard.stats.vehiclesHint' as TranslationKey, {
+                    last7: overview.garage.vehicles.last7Days,
+                    last30: overview.garage.vehicles.last30Days,
+                  })}
                   icon={<IconCar size={18} stroke={1.5} />}
                 />
                 <StatCard
-                  label="Garaż (aktywne)"
+                  label={t('admin.dashboard.stats.garage' as TranslationKey)}
                   value={overview.garage.garage.entriesTotal}
-                  hint={`+${overview.garage.garage.last7Days} (7 dni) · +${overview.garage.garage.last30Days} (30 dni)`}
+                  hint={t('admin.dashboard.stats.garageHint' as TranslationKey, {
+                    last7: overview.garage.garage.last7Days,
+                    last30: overview.garage.garage.last30Days,
+                  })}
                   icon={<IconCar size={18} stroke={1.5} />}
                 />
                 <StatCard
-                  label="Ogłoszenia sprzedaży"
+                  label={t('admin.dashboard.stats.saleListings' as TranslationKey)}
                   value={overview.garage.saleListings.active}
-                  hint="Status ACTIVE"
+                  hint={t('admin.dashboard.stats.saleListingsHint' as TranslationKey)}
                   icon={<IconCar size={18} stroke={1.5} />}
                 />
               </>
             ) : (
               <Paper withBorder p="md" radius="md" style={{ gridColumn: '1 / -1' }}>
                 <Text size="sm" c="dimmed">
-                  Statystyki garażu niedostępne — uruchom car-service i ustaw{' '}
-                  <Text span ff="monospace" size="xs">
-                    CAR_SERVICE_URL
-                  </Text>{' '}
-                  w user-service.
+                  {t('admin.dashboard.garageUnavailable' as TranslationKey)}
                 </Text>
               </Paper>
             )}
@@ -199,25 +209,25 @@ const AdminDashboardStats: React.FC = () => {
 
           <Group spacing="md">
             <Anchor component={Link} to={`${ROUTES.DASHBOARD}/${ROUTES.USERS}`} size="sm">
-              Wszyscy użytkownicy →
+              {t('admin.dashboard.links.allUsers' as TranslationKey)}
             </Anchor>
             <Anchor component={Link} to={`${ROUTES.DASHBOARD}/${ROUTES.ADMIN}`} size="sm">
-              B2B — firmy i weryfikacja →
+              {t('admin.dashboard.links.b2b' as TranslationKey)}
             </Anchor>
           </Group>
 
           <Paper withBorder p="md" radius="md">
             <Title order={4} mb="md">
-              Ostatnia aktywność
+              {t('admin.dashboard.recentActivity' as TranslationKey)}
             </Title>
             <SimpleGrid cols={2} breakpoints={[{ maxWidth: 'md', cols: 1 }]}>
               <Stack spacing="xs">
                 <Text size="sm" fw={600}>
-                  Nowi użytkownicy
+                  {t('admin.dashboard.newUsersSection' as TranslationKey)}
                 </Text>
                 {overview.recent.users.length === 0 ? (
                   <Text size="sm" c="dimmed">
-                    Brak danych
+                    {t('admin.dashboard.noData' as TranslationKey)}
                   </Text>
                 ) : (
                   <Table fontSize="xs" verticalSpacing="xs">
@@ -230,7 +240,7 @@ const AdminDashboardStats: React.FC = () => {
                               @{u.username}
                             </Text>
                           </td>
-                          <td>{formatDate(String(u.createdAt))}</td>
+                          <td>{formatLocalizedDate(String(u.createdAt), i18n.language, DATE_FORMAT_OPTIONS)}</td>
                           <td>
                             <Badge size="xs" variant="light">
                               {u.personVerificationStatus}
@@ -244,11 +254,11 @@ const AdminDashboardStats: React.FC = () => {
               </Stack>
               <Stack spacing="xs">
                 <Text size="sm" fw={600}>
-                  Nowe firmy
+                  {t('admin.dashboard.newCompaniesSection' as TranslationKey)}
                 </Text>
                 {overview.recent.companies.length === 0 ? (
                   <Text size="sm" c="dimmed">
-                    Brak danych
+                    {t('admin.dashboard.noData' as TranslationKey)}
                   </Text>
                 ) : (
                   <Table fontSize="xs" verticalSpacing="xs">
@@ -265,7 +275,7 @@ const AdminDashboardStats: React.FC = () => {
                               </Text>
                             ) : null}
                           </td>
-                          <td>{formatDate(String(c.createdAt))}</td>
+                          <td>{formatLocalizedDate(String(c.createdAt), i18n.language, DATE_FORMAT_OPTIONS)}</td>
                           <td>
                             <Badge size="xs" variant="outline">
                               {c.status}
@@ -285,22 +295,21 @@ const AdminDashboardStats: React.FC = () => {
   );
 };
 
+const DashboardNoAccess: React.FC = () => {
+  const { t } = useTypedTranslation();
+  return (
+    <Paper withBorder p="lg" radius="md">
+      <Title order={3} mb="sm">
+        {t('admin.dashboard.noAccessTitle' as TranslationKey)}
+      </Title>
+      <Text c="dimmed">{t('admin.dashboard.noAccessDescription' as TranslationKey)}</Text>
+    </Paper>
+  );
+};
+
 const DashboardPage: React.FC = () => {
   return (
-    <RoleGuard
-      roles={['ADMIN', 'SUPER_ADMIN']}
-      fallback={
-        <Paper withBorder p="lg" radius="md">
-          <Title order={3} mb="sm">
-            Witaj w panelu
-          </Title>
-          <Text c="dimmed">
-            Statystyki platformy są dostępne dla administratorów. Skontaktuj się z
-            administratorem, jeśli potrzebujesz dostępu.
-          </Text>
-        </Paper>
-      }
-    >
+    <RoleGuard roles={['ADMIN', 'SUPER_ADMIN']} fallback={<DashboardNoAccess />}>
       <AdminDashboardStats />
     </RoleGuard>
   );
