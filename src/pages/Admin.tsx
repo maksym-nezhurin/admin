@@ -197,6 +197,14 @@ const AdminPage = () => {
               })}
             />
             <StatCard
+              label={t('admin.page.stats.activeUsers' as TranslationKey)}
+              value={overview.users.activeLast7Days}
+              hint={t('admin.page.stats.activeUsersHint' as TranslationKey, {
+                last30: overview.users.activeLast30Days,
+                neverLoggedIn: overview.users.neverLoggedIn,
+              })}
+            />
+            <StatCard
               label={t('admin.page.stats.companies' as TranslationKey)}
               value={overview.companies.total}
               hint={t('admin.page.stats.companiesHint' as TranslationKey, {

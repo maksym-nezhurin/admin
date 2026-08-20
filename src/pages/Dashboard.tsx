@@ -147,6 +147,15 @@ const AdminDashboardStats: React.FC = () => {
               icon={<IconUsers size={18} stroke={1.5} />}
             />
             <StatCard
+              label={t('admin.dashboard.stats.activeUsers' as TranslationKey)}
+              value={overview.users.activeLast7Days}
+              hint={t('admin.dashboard.stats.activeUsersHint' as TranslationKey, {
+                last30: overview.users.activeLast30Days,
+                neverLoggedIn: overview.users.neverLoggedIn,
+              })}
+              icon={<IconUsers size={18} stroke={1.5} />}
+            />
+            <StatCard
               label={t('admin.dashboard.stats.companies' as TranslationKey)}
               value={overview.companies.total}
               hint={t('admin.dashboard.stats.companiesHint' as TranslationKey, {
