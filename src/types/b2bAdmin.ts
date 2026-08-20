@@ -4,6 +4,9 @@ export type AdminOverview = {
     last7Days: number;
     last30Days: number;
     byPersonVerification: Record<string, number>;
+    activeLast7Days: number;
+    activeLast30Days: number;
+    neverLoggedIn: number;
   };
   companies: {
     total: number;
