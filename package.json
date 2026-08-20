@@ -44,7 +44,7 @@
     "react-i18next": "^16.5.0",
     "react-router-dom": "^7.6.0",
     "zustand": "^4.4.0",
-    "@reelo/i18n": "git+https://github.com/maksym-nezhurin/reelo-i18n.git#16c61e3"
+    "@reelo/i18n": "git+https://github.com/maksym-nezhurin/reelo-i18n.git#c348a49"
   },
   "devDependencies": {
     "husky": "^9.1.7",
