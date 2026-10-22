@@ -18,7 +18,8 @@ import {
   IconBell,
   IconUsers,
   IconClipboard,
-  IconChartBar
+  IconChartBar,
+  IconHistory
 } from '@tabler/icons-react';
 
 import { useMediaQuery } from '@mantine/hooks';
@@ -150,6 +151,14 @@ const MENU_SECTIONS: MenuSection[] = [
         requiredLevel: 80,
         description: 'menu.sections.admin.items.audit.tooltip',
         icon: <IconChartBar size={14} />
+      },
+      { 
+        label: 'menu.sections.admin.items.history_moderation.label', 
+        path: 'service-history-moderation', 
+        requiredLevel: 80,
+        description: 'menu.sections.admin.items.history_moderation.tooltip',
+        icon: <IconHistory size={14} />,
+        isNew: true
       },
       { 
         label: 'menu.sections.admin.items.role_examples.label', 
