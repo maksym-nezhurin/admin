@@ -348,12 +348,7 @@ export function ChangeRequestDrawer({ requestId, onClose, onDecided }: Props) {
       size="xl"
       padding="md"
       title={tk('detail.title')}
-      styles={{
-        title: { fontWeight: 600, fontSize: 18 },
-        // body is display:flex (src/index.css), so the portal lands after #root and a
-        // fixed container without `left` renders off-screen. Pin it to the viewport.
-        inner: { left: 0, right: 0 },
-      }}
+      styles={{ title: { fontWeight: 600, fontSize: 18 } }}
     >
       {loading ? <Loader /> : null}
       {error ? <Alert color="red">{error}</Alert> : null}
