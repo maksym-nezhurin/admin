@@ -211,7 +211,7 @@ const AdvancedMenuItemComponent: React.FC<{
   
   return (
     <Tooltip 
-      label={item.description} 
+      label={item.description ? t(item.description) : ''}
       position={isMobile ? 'bottom' : 'right'}
       withArrow 
       disabled={!item.description}
