@@ -51,6 +51,8 @@ export interface AuthContextType {
   roleLevel: { level: number; name: string } | null;
   roles: IRoleLevel[];
   loading: boolean;
+  /** True until the saved session has been restored (or found missing) on startup. */
+  initializing: boolean;
   error: string | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
