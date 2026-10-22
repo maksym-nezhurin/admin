@@ -278,6 +278,7 @@ export function ChangeRequestDrawer({ requestId, onClose, onDecided }: Props) {
           <Stack>
             <Textarea
               label={tk('detail.noteLabel')}
+              description={tk('detail.noteVisibleToOwner')}
               placeholder={tk('detail.notePlaceholder')}
               value={note}
               error={noteError}
