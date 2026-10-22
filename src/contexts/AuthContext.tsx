@@ -9,6 +9,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthResponse | null>(null);
   const [userInfo, setUserInfo] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(false);
+  // Starts true so routes don't treat "session not restored yet" as "logged out".
+  const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [roles, setRoles] = useState<any[]>([]);
   const [roleLevel, setRoleLevel] = useState<{ level: number; name: string } | null>(null);
@@ -53,6 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Auth initialization failed:', error);
       } finally {
         setLoading(false);
+        setInitializing(false);
       }
     };
 
@@ -173,6 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     userInfo,
     loading,
+    initializing,
     error,
     login,
     register,
@@ -182,7 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: !!user,
     refreshToken,
     setUserInfo,
-  }), [user, userInfo, loading, error, roleLevel, roles, login, logout, register, refreshToken]);
+  }), [user, userInfo, loading, initializing, error, roleLevel, roles, login, logout, register, refreshToken]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import type { LoginRedirectState } from '../routes/PrivateRoute';
 import { 
   Flex,
   TextInput, 
@@ -28,7 +29,11 @@ interface LoginForm {
 const Login: React.FC = () => {
   const { login, user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTypedTranslation();
+  // Only same-app paths: never follow an absolute URL or a protocol-relative one.
+  const from = (location.state as LoginRedirectState | null)?.from;
+  const redirectTo = from && from.startsWith('/') && !from.startsWith('//') ? from : '/dashboard';
 
   const form = useForm<LoginForm>({
     initialValues: {
@@ -95,9 +100,9 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      navigate(redirectTo, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirectTo]);
   
   return (
     <Flex justify="center" align="center" style={{ height: '100vh', width: '100vw' }}>
