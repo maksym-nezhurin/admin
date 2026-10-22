@@ -165,6 +165,15 @@ export const ProtectedCoreRoutes = (
       }
     />
 
+    <Route
+      path={ROUTES.SERVICE_HISTORY_MODERATION}
+      element={
+        <LevelProtectedRoute level={80}>
+          <PAGES.ServiceHistoryModeration />
+        </LevelProtectedRoute>
+      }
+    />
+
     <Route 
       path={ROUTES.ROLE_EXAMPLES} 
       element={
